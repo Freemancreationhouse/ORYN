@@ -1,0 +1,28 @@
+name: ORYN Pi Release Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required files
+        run: |
+          test -f setup-pi.sh
+          test -f install-oryn-from-github.sh
+          test -f main.py
+          test -f static/dist/index.html
+
+      - name: Shell syntax
+        run: |
+          bash -n setup-pi.sh
+          bash -n install-oryn-from-github.sh
+
+      - name: Python syntax
+        run: python -m compileall -q main.py modules
