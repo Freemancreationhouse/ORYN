@@ -32,15 +32,3 @@ Use the included Pi setup scripts and `oryn` CLI. Service names and installation
 ## Licensing
 
 See `LICENSE` and `LICENSE-GPL-3.0`. Required original licensing notices are intentionally preserved. Pattern/third-party attribution is retained in the accompanying attribution files.
-
-
-## Windows Installation
-
-Download the repository ZIP, extract it, then run:
-
-1. `install-oryn-windows.bat`
-2. `run-oryn-windows.bat`
-
-For a one-click first setup, use `ORYN-Windows-Setup-and-Run.bat`.
-
-See `WINDOWS_INSTALL.md` for details.

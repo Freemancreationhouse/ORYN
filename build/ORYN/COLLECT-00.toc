@@ -1,0 +1,2845 @@
+([('LICENSE',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\LICENSE',
+   'DATA'),
+  ('LICENSE-GPL-3.0',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\LICENSE-GPL-3.0',
+   'DATA'),
+  ('ORYN.exe',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\build\\ORYN\\ORYN.exe',
+   'EXECUTABLE'),
+  ('PATTERN_CREDITS.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\PATTERN_CREDITS.md',
+   'DATA'),
+  ('PIL\\_avif.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PIL\\_avif.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('PIL\\_imaging.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PIL\\_imaging.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('PIL\\_imagingcms.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PIL\\_imagingcms.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('PIL\\_imagingft.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PIL\\_imagingft.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('PIL\\_imagingmath.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PIL\\_imagingmath.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('PIL\\_imagingmorph.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PIL\\_imagingmorph.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('PIL\\_imagingtk.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PIL\\_imagingtk.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('PIL\\_webp.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PIL\\_webp.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('THIRD_PARTY_NOTICE_STUDIO_KINEMATICS.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\THIRD_PARTY_NOTICE_STUDIO_KINEMATICS.md',
+   'DATA'),
+  ('VCRUNTIME140.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\VCRUNTIME140.dll',
+   'BINARY'),
+  ('VCRUNTIME140_1.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\VCRUNTIME140_1.dll',
+   'BINARY'),
+  ('VERSION',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\VERSION',
+   'DATA'),
+  ('_asyncio.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_asyncio.pyd',
+   'EXTENSION'),
+  ('_bz2.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_bz2.pyd',
+   'EXTENSION'),
+  ('_cffi_backend.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\_cffi_backend.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('_ctypes.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_ctypes.pyd',
+   'EXTENSION'),
+  ('_decimal.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_decimal.pyd',
+   'EXTENSION'),
+  ('_elementtree.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_elementtree.pyd',
+   'EXTENSION'),
+  ('_hashlib.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_hashlib.pyd',
+   'EXTENSION'),
+  ('_lzma.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_lzma.pyd',
+   'EXTENSION'),
+  ('_multiprocessing.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_multiprocessing.pyd',
+   'EXTENSION'),
+  ('_overlapped.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_overlapped.pyd',
+   'EXTENSION'),
+  ('_queue.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_queue.pyd',
+   'EXTENSION'),
+  ('_socket.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_socket.pyd',
+   'EXTENSION'),
+  ('_ssl.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_ssl.pyd',
+   'EXTENSION'),
+  ('_uuid.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_uuid.pyd',
+   'EXTENSION'),
+  ('_wmi.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_wmi.pyd',
+   'EXTENSION'),
+  ('_zoneinfo.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_zoneinfo.pyd',
+   'EXTENSION'),
+  ('_zstd.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\_zstd.pyd',
+   'EXTENSION'),
+  ('aiohttp\\_http_parser.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\aiohttp\\_http_parser.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('aiohttp\\_http_writer.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\aiohttp\\_http_writer.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('aiohttp\\_websocket\\mask.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\aiohttp\\_websocket\\mask.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('aiohttp\\_websocket\\reader_c.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\aiohttp\\_websocket\\reader_c.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('attrs-26.1.0.dist-info\\INSTALLER',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\attrs-26.1.0.dist-info\\INSTALLER',
+   'DATA'),
+  ('attrs-26.1.0.dist-info\\METADATA',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\attrs-26.1.0.dist-info\\METADATA',
+   'DATA'),
+  ('attrs-26.1.0.dist-info\\RECORD',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\attrs-26.1.0.dist-info\\RECORD',
+   'DATA'),
+  ('attrs-26.1.0.dist-info\\WHEEL',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\attrs-26.1.0.dist-info\\WHEEL',
+   'DATA'),
+  ('attrs-26.1.0.dist-info\\licenses\\LICENSE',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\attrs-26.1.0.dist-info\\licenses\\LICENSE',
+   'DATA'),
+  ('base_library.zip',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\build\\ORYN\\base_library.zip',
+   'DATA'),
+  ('certifi\\cacert.pem',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\certifi\\cacert.pem',
+   'DATA'),
+  ('certifi\\py.typed',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\certifi\\py.typed',
+   'DATA'),
+  ('charset_normalizer\\cd.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\charset_normalizer\\cd.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('charset_normalizer\\md.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\charset_normalizer\\md.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('click-8.4.2.dist-info\\INSTALLER',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\click-8.4.2.dist-info\\INSTALLER',
+   'DATA'),
+  ('click-8.4.2.dist-info\\METADATA',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\click-8.4.2.dist-info\\METADATA',
+   'DATA'),
+  ('click-8.4.2.dist-info\\RECORD',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\click-8.4.2.dist-info\\RECORD',
+   'DATA'),
+  ('click-8.4.2.dist-info\\WHEEL',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\click-8.4.2.dist-info\\WHEEL',
+   'DATA'),
+  ('click-8.4.2.dist-info\\licenses\\LICENSE.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\click-8.4.2.dist-info\\licenses\\LICENSE.txt',
+   'DATA'),
+  ('clr_loader\\ffi\\dlls\\amd64\\ClrLoader.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\clr_loader\\ffi\\dlls\\amd64\\ClrLoader.dll',
+   'BINARY'),
+  ('clr_loader\\ffi\\dlls\\x86\\ClrLoader.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\clr_loader\\ffi\\dlls\\x86\\ClrLoader.dll',
+   'BINARY'),
+  ('firmware\\kinetiq_motion\\config.yaml',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\firmware\\kinetiq_motion\\config.yaml',
+   'DATA'),
+  ('firmware\\kinetiq_motion_gold\\config (DAGGKAPRIFOL).yaml',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\firmware\\kinetiq_motion_gold\\config '
+   '(DAGGKAPRIFOL).yaml',
+   'DATA'),
+  ('firmware\\kinetiq_motion_gold\\config.yaml',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\firmware\\kinetiq_motion_gold\\config.yaml',
+   'DATA'),
+  ('firmware\\kinetiq_motion_mini\\config.yaml',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\firmware\\kinetiq_motion_mini\\config.yaml',
+   'DATA'),
+  ('firmware\\kinetiq_motion_mini_pro\\config (28BYJ-48 variant).yaml',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\firmware\\kinetiq_motion_mini_pro\\config '
+   '(28BYJ-48 variant).yaml',
+   'DATA'),
+  ('firmware\\kinetiq_motion_mini_pro\\config.yaml',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\firmware\\kinetiq_motion_mini_pro\\config.yaml',
+   'DATA'),
+  ('firmware\\kinetiq_motion_pro\\config.yaml',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\firmware\\kinetiq_motion_pro\\config.yaml',
+   'DATA'),
+  ('fontTools\\misc\\bezierTools.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\fontTools\\misc\\bezierTools.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('fontTools\\varLib\\iup.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\fontTools\\varLib\\iup.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('frozenlist\\_frozenlist.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\frozenlist\\_frozenlist.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('libcrypto-3.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\libcrypto-3.dll',
+   'BINARY'),
+  ('libffi-8.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\libffi-8.dll',
+   'BINARY'),
+  ('libssl-3.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\libssl-3.dll',
+   'BINARY'),
+  ('markupsafe-3.0.3.dist-info\\INSTALLER',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\INSTALLER',
+   'DATA'),
+  ('markupsafe-3.0.3.dist-info\\METADATA',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\METADATA',
+   'DATA'),
+  ('markupsafe-3.0.3.dist-info\\RECORD',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\RECORD',
+   'DATA'),
+  ('markupsafe-3.0.3.dist-info\\WHEEL',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\WHEEL',
+   'DATA'),
+  ('markupsafe-3.0.3.dist-info\\licenses\\LICENSE.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\licenses\\LICENSE.txt',
+   'DATA'),
+  ('markupsafe-3.0.3.dist-info\\top_level.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\top_level.txt',
+   'DATA'),
+  ('markupsafe\\_speedups.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\markupsafe\\_speedups.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('multidict\\_multidict.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\multidict\\_multidict.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy-2.5.2.dist-info\\DELVEWHEEL',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\DELVEWHEEL',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\INSTALLER',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\INSTALLER',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\METADATA',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\METADATA',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\RECORD',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\RECORD',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\REQUESTED',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\REQUESTED',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\WHEEL',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\WHEEL',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\entry_points.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\entry_points.txt',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\LICENSE.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\LICENSE.txt',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\include\\numpy\\libdivide\\LICENSE.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\include\\numpy\\libdivide\\LICENSE.txt',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\common\\pythoncapi-compat\\COPYING',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\common\\pythoncapi-compat\\COPYING',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\highway\\LICENSE',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\highway\\LICENSE',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\multiarray\\dragon4_LICENSE.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\multiarray\\dragon4_LICENSE.txt',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\npysort\\x86-simd-sort\\LICENSE.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\npysort\\x86-simd-sort\\LICENSE.md',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\umath\\svml\\LICENSE',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\_core\\src\\umath\\svml\\LICENSE',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\fft\\pocketfft\\LICENSE.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\fft\\pocketfft\\LICENSE.md',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\linalg\\lapack_lite\\LICENSE.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\linalg\\lapack_lite\\LICENSE.txt',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\ma\\LICENSE',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\ma\\LICENSE',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\random\\LICENSE.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\random\\LICENSE.md',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\distributions\\LICENSE.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\distributions\\LICENSE.md',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\mt19937\\LICENSE.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\mt19937\\LICENSE.md',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\pcg64\\LICENSE.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\pcg64\\LICENSE.md',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\philox\\LICENSE.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\philox\\LICENSE.md',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\sfc64\\LICENSE.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\sfc64\\LICENSE.md',
+   'DATA'),
+  ('numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\splitmix64\\LICENSE.md',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy-2.5.2.dist-info\\licenses\\numpy\\random\\src\\splitmix64\\LICENSE.md',
+   'DATA'),
+  ('numpy.libs\\libscipy_openblas64_-327b2e0bcffce2882e0dc04cdeb4eaa6.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy.libs\\libscipy_openblas64_-327b2e0bcffce2882e0dc04cdeb4eaa6.dll',
+   'BINARY'),
+  ('numpy.libs\\msvcp140-a4c2229bdc2a2a630acdc095b4d86008.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy.libs\\msvcp140-a4c2229bdc2a2a630acdc095b4d86008.dll',
+   'BINARY'),
+  ('numpy\\_core\\_multiarray_tests.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\_core\\_multiarray_tests.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\_core\\_multiarray_umath.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\_core\\_multiarray_umath.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\_core\\_operand_flag_tests.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\_core\\_operand_flag_tests.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\_core\\_rational_tests.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\_core\\_rational_tests.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\_core\\_simd.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\_core\\_simd.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\_core\\_struct_ufunc_tests.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\_core\\_struct_ufunc_tests.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\_core\\_umath_tests.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\_core\\_umath_tests.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\fft\\_pocketfft_umath.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\fft\\_pocketfft_umath.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\linalg\\_umath_linalg.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\linalg\\_umath_linalg.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\linalg\\lapack_lite.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\linalg\\lapack_lite.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\random\\_bounded_integers.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\random\\_bounded_integers.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\random\\_common.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\random\\_common.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\random\\_generator.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\random\\_generator.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\random\\_mt19937.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\random\\_mt19937.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\random\\_pcg64.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\random\\_pcg64.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\random\\_philox.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\random\\_philox.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\random\\_sfc64.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\random\\_sfc64.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\random\\bit_generator.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\random\\bit_generator.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('numpy\\random\\mtrand.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\numpy\\random\\mtrand.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('patterns\\0-0-rotating-hearts.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\0-0-rotating-hearts.thr',
+   'DATA'),
+  ('patterns\\0-1-hubcap.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\0-1-hubcap.thr',
+   'DATA'),
+  ('patterns\\03 pnuttrellis (E) (N N).thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\03 '
+   'pnuttrellis (E) (N N).thr',
+   'DATA'),
+  ('patterns\\1-1-ibex.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\1-1-ibex.thr',
+   'DATA'),
+  ('patterns\\1-1-pizza-slice-swirl.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\1-1-pizza-slice-swirl.thr',
+   'DATA'),
+  ('patterns\\10_sided_polygon.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\10_sided_polygon.thr',
+   'DATA'),
+  ('patterns\\13b Battlesbury (C C).thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\13b '
+   'Battlesbury (C C).thr',
+   'DATA'),
+  ('patterns\\19 Itsyourmove (E) (C NW).thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\19 '
+   'Itsyourmove (E) (C NW).thr',
+   'DATA'),
+  ('patterns\\6_sided_polygon.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\6_sided_polygon.thr',
+   'DATA'),
+  ('patterns\\AcklingDykeDorset 6-4-2018.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\AcklingDykeDorset '
+   '6-4-2018.thr',
+   'DATA'),
+  ('patterns\\BattlesburyCampWilts 7-5-2017.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\BattlesburyCampWilts '
+   '7-5-2017.thr',
+   'DATA'),
+  ('patterns\\BucklandDownDorset 5-26-2018.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\BucklandDownDorset '
+   '5-26-2018.thr',
+   'DATA'),
+  ('patterns\\CleyHill 7-18-2017.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\CleyHill '
+   '7-18-2017.thr',
+   'DATA'),
+  ('patterns\\Fractal.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\Fractal.thr',
+   'DATA'),
+  ('patterns\\HackpenHill 6-9-2018.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\HackpenHill '
+   '6-9-2018.thr',
+   'DATA'),
+  ('patterns\\Hampton-on-Lucy 8-8-2015.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\Hampton-on-Lucy '
+   '8-8-2015.thr',
+   'DATA'),
+  ('patterns\\Hosta.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\Hosta.thr',
+   'DATA'),
+  ('patterns\\KeysleyDown 6-10-2018.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\KeysleyDown '
+   '6-10-2018.thr',
+   'DATA'),
+  ('patterns\\LiddingtonCastle 6-24-2001.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\LiddingtonCastle '
+   '6-24-2001.thr',
+   'DATA'),
+  ('patterns\\LongwoodWarrenHants 7-10-2018.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\LongwoodWarrenHants '
+   '7-10-2018.thr',
+   'DATA'),
+  ('patterns\\MilkHill 6-2-2009.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\MilkHill '
+   '6-2-2009.thr',
+   'DATA'),
+  ('patterns\\MilkHill 7-8-2011.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\MilkHill '
+   '7-8-2011.thr',
+   'DATA'),
+  ('patterns\\Muncombe Hill 7-14-2018.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\Muncombe '
+   'Hill 7-14-2018.thr',
+   'DATA'),
+  ('patterns\\OareWiltshire 6-21-2010.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\OareWiltshire '
+   '6-21-2010.thr',
+   'DATA'),
+  ('patterns\\Petalar.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\Petalar.thr',
+   'DATA'),
+  ('patterns\\SierpinskiTriangle (1).thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\SierpinskiTriangle '
+   '(1).thr',
+   'DATA'),
+  ('patterns\\SimpleRadiance.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\SimpleRadiance.thr',
+   'DATA'),
+  ('patterns\\SineVsBezier2.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\SineVsBezier2.thr',
+   'DATA'),
+  ('patterns\\Spiral6.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\Spiral6.thr',
+   'DATA'),
+  ('patterns\\SpiralBezier (1).thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\SpiralBezier '
+   '(1).thr',
+   'DATA'),
+  ('patterns\\SpiralGyrations-2.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\SpiralGyrations-2.thr',
+   'DATA'),
+  ('patterns\\Sponge.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\Sponge.thr',
+   'DATA'),
+  ('patterns\\StarryNight.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\StarryNight.thr',
+   'DATA'),
+  ('patterns\\SwoopyRadiance.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\SwoopyRadiance.thr',
+   'DATA'),
+  ('patterns\\WinterbourneBassett 6-1-1997.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\WinterbourneBassett '
+   '6-1-1997.thr',
+   'DATA'),
+  ('patterns\\WinterbourneStokeDown 7-18-2018.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\WinterbourneStokeDown '
+   '7-18-2018.thr',
+   'DATA'),
+  ('patterns\\cached_images\\0-0-rotating-hearts.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\0-0-rotating-hearts.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\0-1-hubcap.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\0-1-hubcap.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\03 pnuttrellis (E) (N N).thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\03 '
+   'pnuttrellis (E) (N N).thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\1-1-ibex.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\1-1-ibex.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\1-1-pizza-slice-swirl.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\1-1-pizza-slice-swirl.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\10_sided_polygon.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\10_sided_polygon.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\13b Battlesbury (C C).thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\13b '
+   'Battlesbury (C C).thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\19 Itsyourmove (E) (C NW).thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\19 '
+   'Itsyourmove (E) (C NW).thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\6_sided_polygon.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\6_sided_polygon.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\AcklingDykeDorset 6-4-2018.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\AcklingDykeDorset '
+   '6-4-2018.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\BattlesburyCampWilts 7-5-2017.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\BattlesburyCampWilts '
+   '7-5-2017.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\BucklandDownDorset 5-26-2018.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\BucklandDownDorset '
+   '5-26-2018.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\CleyHill 7-18-2017.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\CleyHill '
+   '7-18-2017.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\Fractal.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\Fractal.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\HackpenHill 6-9-2018.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\HackpenHill '
+   '6-9-2018.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\Hampton-on-Lucy 8-8-2015.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\Hampton-on-Lucy '
+   '8-8-2015.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\Hosta.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\Hosta.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\KeysleyDown 6-10-2018.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\KeysleyDown '
+   '6-10-2018.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\LiddingtonCastle 6-24-2001.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\LiddingtonCastle '
+   '6-24-2001.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\LongwoodWarrenHants 7-10-2018.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\LongwoodWarrenHants '
+   '7-10-2018.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\MilkHill 6-2-2009.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\MilkHill '
+   '6-2-2009.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\MilkHill 7-8-2011.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\MilkHill '
+   '7-8-2011.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\Muncombe Hill 7-14-2018.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\Muncombe '
+   'Hill 7-14-2018.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\OareWiltshire 6-21-2010.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\OareWiltshire '
+   '6-21-2010.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\Petalar.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\Petalar.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\SierpinskiTriangle (1).thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\SierpinskiTriangle '
+   '(1).thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\SimpleRadiance.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\SimpleRadiance.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\SineVsBezier2.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\SineVsBezier2.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\Spiral6.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\Spiral6.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\SpiralBezier (1).thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\SpiralBezier '
+   '(1).thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\SpiralGyrations-2.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\SpiralGyrations-2.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\Sponge.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\Sponge.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\StarryNight.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\StarryNight.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\SwoopyRadiance.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\SwoopyRadiance.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\WinterbourneBassett 6-1-1997.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\WinterbourneBassett '
+   '6-1-1997.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\WinterbourneStokeDown 7-18-2018.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\WinterbourneStokeDown '
+   '7-18-2018.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\chartres_labyrinthe.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\chartres_labyrinthe.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\circle-packer-rings.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\circle-packer-rings.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\circle_normalized.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\circle_normalized.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_from_in.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_from_in.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_from_in_Ultra.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_from_in_Ultra.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_from_in_mini.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_from_in_mini.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_from_in_pro.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_from_in_pro.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_from_out.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_from_out.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_from_out_Ultra.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_from_out_Ultra.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_from_out_mini.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_from_out_mini.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_from_out_pro.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_from_out_pro.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_sideway.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_sideway.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_sideway_mini.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_sideway_mini.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\clear_sideway_pro.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\clear_sideway_pro.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_cells.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_cells.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_eccentricerase.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_eccentricerase.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_gears.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_gears.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_gosper4.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_gosper4.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_hypnogrid.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_hypnogrid.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_itsyourmove.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_itsyourmove.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_nautilus.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_nautilus.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_parallel.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_parallel.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_sierpinski8.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_sierpinski8.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_strangthang.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_strangthang.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_sunburst.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_sunburst.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_tri4.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_tri4.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\dither_yinyang.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\dither_yinyang.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\even_sparser_sawtooth.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\even_sparser_sawtooth.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\fancy-bars.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\fancy-bars.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\fancy-tiles.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\fancy-tiles.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\feather.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\feather.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\flower-bubbles.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\flower-bubbles.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\flower.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\flower.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\flowsnake.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\flowsnake.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\fractal2.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\fractal2.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\hero_11loop2.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\hero_11loop2.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\hero_13wave1.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\hero_13wave1.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\hero_5loop1.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\hero_5loop1.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\hero_7loop4.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\hero_7loop4.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\hero_9wave2.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\hero_9wave2.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\hexagoner.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\hexagoner.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\koch-cube-flowers.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\koch-cube-flowers.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\maze.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\maze.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\noise-cell.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\noise-cell.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\noise-square-reversible.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\noise-square-reversible.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\noise-star-reversible.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\noise-star-reversible.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\pattern-shapespin.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\pattern-shapespin.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\pattern-superellipse.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\pattern-superellipse.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\perlin-rings.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\perlin-rings.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\reuleaux.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\reuleaux.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\rose.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\rose.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\rose_2.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\rose_2.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\sawtooth.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\sawtooth.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\shell (1).thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\shell '
+   '(1).thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\sierpinski.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\sierpinski.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\spiral_triangle.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\spiral_triangle.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\square.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\square.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\square_erase2.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\square_erase2.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\square_rotate.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\square_rotate.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\star.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\star.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\stars.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\stars.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\swirl-overlay.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\swirl-overlay.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\tesselation_twist.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\tesselation_twist.thr.webp',
+   'DATA'),
+  ('patterns\\cached_images\\wormhole.thr.webp',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\cached_images\\wormhole.thr.webp',
+   'DATA'),
+  ('patterns\\chartres_labyrinthe.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\chartres_labyrinthe.thr',
+   'DATA'),
+  ('patterns\\circle-packer-rings.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\circle-packer-rings.thr',
+   'DATA'),
+  ('patterns\\circle_normalized.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\circle_normalized.thr',
+   'DATA'),
+  ('patterns\\clear_from_in.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_from_in.thr',
+   'DATA'),
+  ('patterns\\clear_from_in_Ultra.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_from_in_Ultra.thr',
+   'DATA'),
+  ('patterns\\clear_from_in_mini.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_from_in_mini.thr',
+   'DATA'),
+  ('patterns\\clear_from_in_pro.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_from_in_pro.thr',
+   'DATA'),
+  ('patterns\\clear_from_out.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_from_out.thr',
+   'DATA'),
+  ('patterns\\clear_from_out_Ultra.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_from_out_Ultra.thr',
+   'DATA'),
+  ('patterns\\clear_from_out_mini.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_from_out_mini.thr',
+   'DATA'),
+  ('patterns\\clear_from_out_pro.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_from_out_pro.thr',
+   'DATA'),
+  ('patterns\\clear_sideway.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_sideway.thr',
+   'DATA'),
+  ('patterns\\clear_sideway_mini.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_sideway_mini.thr',
+   'DATA'),
+  ('patterns\\clear_sideway_pro.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\clear_sideway_pro.thr',
+   'DATA'),
+  ('patterns\\custom_patterns\\.gitignore',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\custom_patterns\\.gitignore',
+   'DATA'),
+  ('patterns\\dither_cells.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_cells.thr',
+   'DATA'),
+  ('patterns\\dither_eccentricerase.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_eccentricerase.thr',
+   'DATA'),
+  ('patterns\\dither_gears.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_gears.thr',
+   'DATA'),
+  ('patterns\\dither_gosper4.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_gosper4.thr',
+   'DATA'),
+  ('patterns\\dither_hypnogrid.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_hypnogrid.thr',
+   'DATA'),
+  ('patterns\\dither_itsyourmove.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_itsyourmove.thr',
+   'DATA'),
+  ('patterns\\dither_nautilus.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_nautilus.thr',
+   'DATA'),
+  ('patterns\\dither_parallel.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_parallel.thr',
+   'DATA'),
+  ('patterns\\dither_sierpinski8.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_sierpinski8.thr',
+   'DATA'),
+  ('patterns\\dither_strangthang.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_strangthang.thr',
+   'DATA'),
+  ('patterns\\dither_sunburst.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_sunburst.thr',
+   'DATA'),
+  ('patterns\\dither_tri4.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_tri4.thr',
+   'DATA'),
+  ('patterns\\dither_yinyang.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\dither_yinyang.thr',
+   'DATA'),
+  ('patterns\\even_sparser_sawtooth.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\even_sparser_sawtooth.thr',
+   'DATA'),
+  ('patterns\\fancy-bars.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\fancy-bars.thr',
+   'DATA'),
+  ('patterns\\fancy-tiles.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\fancy-tiles.thr',
+   'DATA'),
+  ('patterns\\feather.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\feather.thr',
+   'DATA'),
+  ('patterns\\flower-bubbles.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\flower-bubbles.thr',
+   'DATA'),
+  ('patterns\\flower.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\flower.thr',
+   'DATA'),
+  ('patterns\\flowsnake.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\flowsnake.thr',
+   'DATA'),
+  ('patterns\\fractal2.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\fractal2.thr',
+   'DATA'),
+  ('patterns\\hero_11loop2.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\hero_11loop2.thr',
+   'DATA'),
+  ('patterns\\hero_13wave1.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\hero_13wave1.thr',
+   'DATA'),
+  ('patterns\\hero_5loop1.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\hero_5loop1.thr',
+   'DATA'),
+  ('patterns\\hero_7loop4.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\hero_7loop4.thr',
+   'DATA'),
+  ('patterns\\hero_9wave2.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\hero_9wave2.thr',
+   'DATA'),
+  ('patterns\\hexagoner.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\hexagoner.thr',
+   'DATA'),
+  ('patterns\\koch-cube-flowers.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\koch-cube-flowers.thr',
+   'DATA'),
+  ('patterns\\maze.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\maze.thr',
+   'DATA'),
+  ('patterns\\noise-cell.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\noise-cell.thr',
+   'DATA'),
+  ('patterns\\noise-square-reversible.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\noise-square-reversible.thr',
+   'DATA'),
+  ('patterns\\noise-star-reversible.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\noise-star-reversible.thr',
+   'DATA'),
+  ('patterns\\pattern-shapespin.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\pattern-shapespin.thr',
+   'DATA'),
+  ('patterns\\pattern-superellipse.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\pattern-superellipse.thr',
+   'DATA'),
+  ('patterns\\perlin-rings.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\perlin-rings.thr',
+   'DATA'),
+  ('patterns\\reuleaux.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\reuleaux.thr',
+   'DATA'),
+  ('patterns\\rose.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\rose.thr',
+   'DATA'),
+  ('patterns\\rose_2.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\rose_2.thr',
+   'DATA'),
+  ('patterns\\sawtooth.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\sawtooth.thr',
+   'DATA'),
+  ('patterns\\shell (1).thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\shell '
+   '(1).thr',
+   'DATA'),
+  ('patterns\\sierpinski.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\sierpinski.thr',
+   'DATA'),
+  ('patterns\\spiral_triangle.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\spiral_triangle.thr',
+   'DATA'),
+  ('patterns\\square.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\square.thr',
+   'DATA'),
+  ('patterns\\square_erase2.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\square_erase2.thr',
+   'DATA'),
+  ('patterns\\square_rotate.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\square_rotate.thr',
+   'DATA'),
+  ('patterns\\star.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\star.thr',
+   'DATA'),
+  ('patterns\\stars.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\stars.thr',
+   'DATA'),
+  ('patterns\\swirl-overlay.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\swirl-overlay.thr',
+   'DATA'),
+  ('patterns\\tesselation_twist.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\tesselation_twist.thr',
+   'DATA'),
+  ('patterns\\wormhole.thr',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\patterns\\wormhole.thr',
+   'DATA'),
+  ('propcache\\_helpers_c.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\propcache\\_helpers_c.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('pydantic-2.13.4.dist-info\\INSTALLER',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\INSTALLER',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\METADATA',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\METADATA',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\RECORD',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\RECORD',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\REQUESTED',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\REQUESTED',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\WHEEL',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\WHEEL',
+   'DATA'),
+  ('pydantic-2.13.4.dist-info\\licenses\\LICENSE',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pydantic-2.13.4.dist-info\\licenses\\LICENSE',
+   'DATA'),
+  ('pydantic_core\\_pydantic_core.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pydantic_core\\_pydantic_core.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('pyexpat.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\pyexpat.pyd',
+   'EXTENSION'),
+  ('python314.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\python314.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\Microsoft.Win32.Primitives.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\Microsoft.Win32.Primitives.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\Python.Runtime.deps.json',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\Python.Runtime.deps.json',
+   'DATA'),
+  ('pythonnet\\runtime\\Python.Runtime.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\Python.Runtime.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\Python.Runtime.xml',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\Python.Runtime.xml',
+   'DATA'),
+  ('pythonnet\\runtime\\System.AppContext.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.AppContext.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Collections.Concurrent.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Collections.Concurrent.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Collections.NonGeneric.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Collections.NonGeneric.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Collections.Specialized.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Collections.Specialized.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Collections.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Collections.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.ComponentModel.EventBasedAsync.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.ComponentModel.EventBasedAsync.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.ComponentModel.Primitives.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.ComponentModel.Primitives.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.ComponentModel.TypeConverter.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.ComponentModel.TypeConverter.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.ComponentModel.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.ComponentModel.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Console.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Console.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Data.Common.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Data.Common.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Diagnostics.Contracts.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Diagnostics.Contracts.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Diagnostics.Debug.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Diagnostics.Debug.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Diagnostics.FileVersionInfo.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Diagnostics.FileVersionInfo.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Diagnostics.Process.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Diagnostics.Process.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Diagnostics.StackTrace.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Diagnostics.StackTrace.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Diagnostics.TextWriterTraceListener.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Diagnostics.TextWriterTraceListener.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Diagnostics.Tools.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Diagnostics.Tools.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Diagnostics.TraceSource.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Diagnostics.TraceSource.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Diagnostics.Tracing.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Diagnostics.Tracing.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Drawing.Primitives.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Drawing.Primitives.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Dynamic.Runtime.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Dynamic.Runtime.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Globalization.Calendars.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Globalization.Calendars.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Globalization.Extensions.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Globalization.Extensions.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Globalization.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Globalization.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.Compression.ZipFile.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.Compression.ZipFile.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.Compression.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.Compression.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.FileSystem.DriveInfo.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.FileSystem.DriveInfo.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.FileSystem.Primitives.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.FileSystem.Primitives.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.FileSystem.Watcher.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.FileSystem.Watcher.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.FileSystem.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.FileSystem.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.IsolatedStorage.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.IsolatedStorage.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.MemoryMappedFiles.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.MemoryMappedFiles.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.Pipes.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.Pipes.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.UnmanagedMemoryStream.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.UnmanagedMemoryStream.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.IO.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.IO.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Linq.Expressions.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Linq.Expressions.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Linq.Parallel.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Linq.Parallel.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Linq.Queryable.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Linq.Queryable.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Linq.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Linq.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.Http.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.Http.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.NameResolution.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.NameResolution.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.NetworkInformation.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.NetworkInformation.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.Ping.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.Ping.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.Primitives.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.Primitives.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.Requests.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.Requests.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.Security.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.Security.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.Sockets.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.Sockets.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.WebHeaderCollection.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.WebHeaderCollection.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.WebSockets.Client.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.WebSockets.Client.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Net.WebSockets.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Net.WebSockets.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.ObjectModel.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.ObjectModel.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Reflection.Extensions.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Reflection.Extensions.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Reflection.Primitives.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Reflection.Primitives.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Reflection.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Reflection.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Resources.Reader.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Resources.Reader.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Resources.ResourceManager.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Resources.ResourceManager.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Resources.Writer.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Resources.Writer.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.CompilerServices.VisualC.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.CompilerServices.VisualC.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.Extensions.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.Extensions.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.Handles.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.Handles.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.InteropServices.RuntimeInformation.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.InteropServices.RuntimeInformation.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.InteropServices.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.InteropServices.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.Numerics.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.Numerics.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.Serialization.Formatters.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.Serialization.Formatters.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.Serialization.Json.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.Serialization.Json.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.Serialization.Primitives.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.Serialization.Primitives.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.Serialization.Xml.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.Serialization.Xml.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Runtime.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Runtime.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Security.Claims.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Security.Claims.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Security.Cryptography.Algorithms.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Security.Cryptography.Algorithms.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Security.Cryptography.Csp.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Security.Cryptography.Csp.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Security.Cryptography.Encoding.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Security.Cryptography.Encoding.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Security.Cryptography.Primitives.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Security.Cryptography.Primitives.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Security.Cryptography.X509Certificates.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Security.Cryptography.X509Certificates.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Security.Principal.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Security.Principal.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Security.SecureString.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Security.SecureString.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Text.Encoding.Extensions.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Text.Encoding.Extensions.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Text.Encoding.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Text.Encoding.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Text.RegularExpressions.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Text.RegularExpressions.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Threading.Overlapped.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Threading.Overlapped.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Threading.Tasks.Parallel.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Threading.Tasks.Parallel.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Threading.Tasks.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Threading.Tasks.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Threading.Thread.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Threading.Thread.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Threading.ThreadPool.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Threading.ThreadPool.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Threading.Timer.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Threading.Timer.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Threading.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Threading.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.ValueTuple.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.ValueTuple.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Xml.ReaderWriter.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Xml.ReaderWriter.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Xml.XDocument.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Xml.XDocument.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Xml.XPath.XDocument.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Xml.XPath.XDocument.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Xml.XPath.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Xml.XPath.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Xml.XmlDocument.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Xml.XmlDocument.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\System.Xml.XmlSerializer.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\System.Xml.XmlSerializer.dll',
+   'BINARY'),
+  ('pythonnet\\runtime\\netstandard.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\pythonnet\\runtime\\netstandard.dll',
+   'BINARY'),
+  ('scipy.libs\\libscipy_openblas-197ee2fc9b4d071f7e048078cac74115.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy.libs\\libscipy_openblas-197ee2fc9b4d071f7e048078cac74115.dll',
+   'BINARY'),
+  ('scipy\\_cyutility.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\_cyutility.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\_lib\\_ccallback_c.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\_lib\\_ccallback_c.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\_lib\\_fpumode.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\_lib\\_fpumode.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\_lib\\_uarray\\_uarray.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\_lib\\_uarray\\_uarray.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\_lib\\messagestream.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\_lib\\messagestream.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\fft\\_duccfft\\pyduccfft.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\fft\\_duccfft\\pyduccfft.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\integrate\\_dop.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\integrate\\_dop.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\integrate\\_odepack.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\integrate\\_odepack.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\integrate\\_quadpack.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\integrate\\_quadpack.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\integrate\\_vode.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\integrate\\_vode.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\interpolate\\_dierckx.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\interpolate\\_dierckx.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\interpolate\\_fitpack.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\interpolate\\_fitpack.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\interpolate\\_interpnd.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\interpolate\\_interpnd.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\interpolate\\_ppoly.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\interpolate\\_ppoly.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\interpolate\\_rbfinterp_pythran.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\interpolate\\_rbfinterp_pythran.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\interpolate\\_rgi_cython.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\interpolate\\_rgi_cython.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_batched_linalg.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_batched_linalg.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_cythonized_array_utils.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_cythonized_array_utils.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_decomp_interpolative.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_decomp_interpolative.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_decomp_update.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_decomp_update.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_fblas.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_fblas.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_flapack.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_flapack.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_internal_matfuncs.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_internal_matfuncs.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_linalg_pythran.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_linalg_pythran.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_matfuncs_sqrtm_triu.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_matfuncs_sqrtm_triu.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\_solve_toeplitz.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\_solve_toeplitz.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\cython_blas.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\cython_blas.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\linalg\\cython_lapack.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\linalg\\cython_lapack.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\ndimage\\_nd_image.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\ndimage\\_nd_image.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\ndimage\\_ni_label.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\ndimage\\_ni_label.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\ndimage\\_rank_filter_1d.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\ndimage\\_rank_filter_1d.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_bglu_dense.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_bglu_dense.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_direct.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_direct.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_group_columns.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_group_columns.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_highspy\\_core.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_highspy\\_core.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_highspy\\_highs_options.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_highspy\\_highs_options.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_lbfgsb.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_lbfgsb.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_lsap.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_lsap.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_lsq\\givens_elimination.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_lsq\\givens_elimination.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_minpack.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_minpack.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_moduleTNC.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_moduleTNC.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_pava_pybind.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_pava_pybind.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_slsqplib.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_slsqplib.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_trlib\\_trlib.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_trlib\\_trlib.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\optimize\\_zeros.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\optimize\\_zeros.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\_csparsetools.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\_csparsetools.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\_sparsetools.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\_sparsetools.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\csgraph\\_flow.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\csgraph\\_flow.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\csgraph\\_matching.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\csgraph\\_matching.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\csgraph\\_min_spanning_tree.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\csgraph\\_min_spanning_tree.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\csgraph\\_reordering.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\csgraph\\_reordering.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\csgraph\\_shortest_path.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\csgraph\\_shortest_path.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\csgraph\\_tools.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\csgraph\\_tools.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\csgraph\\_traversal.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\csgraph\\_traversal.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\linalg\\_dsolve\\_superlu.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\linalg\\_dsolve\\_superlu.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\linalg\\_eigen\\arpack\\_arpacklib.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\linalg\\_eigen\\arpack\\_arpacklib.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\sparse\\linalg\\_propack.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\sparse\\linalg\\_propack.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\spatial\\_ckdtree.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\spatial\\_ckdtree.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\spatial\\_distance_pybind.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\spatial\\_distance_pybind.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\spatial\\_distance_wrap.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\spatial\\_distance_wrap.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\spatial\\_hausdorff.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\spatial\\_hausdorff.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\spatial\\_qhull.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\spatial\\_qhull.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\spatial\\_voronoi.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\spatial\\_voronoi.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\spatial\\transform\\_rigid_transform_cy.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\spatial\\transform\\_rigid_transform_cy.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\spatial\\transform\\_rotation_cy.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\spatial\\transform\\_rotation_cy.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\special\\_comb.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\special\\_comb.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\special\\_ellip_harm_2.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\special\\_ellip_harm_2.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\special\\_gufuncs.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\special\\_gufuncs.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\special\\_specfun.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\special\\_specfun.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\special\\_special_ufuncs.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\special\\_special_ufuncs.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\special\\_ufuncs.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\special\\_ufuncs.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\special\\_ufuncs_cxx.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\special\\_ufuncs_cxx.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\special\\cython_special.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\special\\cython_special.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\stats\\_ansari_swilk_statistics.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\stats\\_ansari_swilk_statistics.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\stats\\_biasedurn.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\stats\\_biasedurn.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\stats\\_levy_stable\\levyst.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\stats\\_levy_stable\\levyst.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\stats\\_qmc_cy.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\stats\\_qmc_cy.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\stats\\_qmvnt_cy.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\stats\\_qmvnt_cy.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\stats\\_rcont\\rcont.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\stats\\_rcont\\rcont.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\stats\\_sobol.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\stats\\_sobol.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\stats\\_stats.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\stats\\_stats.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('scipy\\stats\\_stats_pythran.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\scipy\\stats\\_stats_pythran.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('select.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\select.pyd',
+   'EXTENSION'),
+  ('setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\INSTALLER',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\INSTALLER',
+   'DATA'),
+  ('setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\METADATA',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\METADATA',
+   'DATA'),
+  ('setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\RECORD',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\RECORD',
+   'DATA'),
+  ('setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\REQUESTED',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\REQUESTED',
+   'DATA'),
+  ('setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\WHEEL',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\WHEEL',
+   'DATA'),
+  ('setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\licenses\\LICENSE',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\licenses\\LICENSE',
+   'DATA'),
+  ('setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\top_level.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.7.1.dist-info\\top_level.txt',
+   'DATA'),
+  ('setuptools\\_vendor\\jaraco\\text\\Lorem ipsum.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\setuptools\\_vendor\\jaraco\\text\\Lorem '
+   'ipsum.txt',
+   'DATA'),
+  ('static\\android-chrome-192x192.png',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\android-chrome-192x192.png',
+   'DATA'),
+  ('static\\android-chrome-512x512.png',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\android-chrome-512x512.png',
+   'DATA'),
+  ('static\\apple-touch-icon.png',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\apple-touch-icon.png',
+   'DATA'),
+  ('static\\custom\\.gitkeep',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\.gitkeep',
+   'DATA'),
+  ('static\\custom\\oryn-final-only.css',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-final-only.css',
+   'DATA'),
+  ('static\\custom\\oryn-final-only.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-final-only.js',
+   'DATA'),
+  ('static\\custom\\oryn-v33-exact-ui.css',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-v33-exact-ui.css',
+   'DATA'),
+  ('static\\custom\\oryn-v33-exact-ui.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-v33-exact-ui.js',
+   'DATA'),
+  ('static\\custom\\oryn-v34-pattern-forge.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-v34-pattern-forge.js',
+   'DATA'),
+  ('static\\custom\\oryn-v34-premium.css',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-v34-premium.css',
+   'DATA'),
+  ('static\\custom\\oryn-v35-final-ui.css',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-v35-final-ui.css',
+   'DATA'),
+  ('static\\custom\\oryn-v35-final-ui.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-v35-final-ui.js',
+   'DATA'),
+  ('static\\custom\\oryn-v36-final-polish.css',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-v36-final-polish.css',
+   'DATA'),
+  ('static\\custom\\oryn-v36-final-polish.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\oryn-v36-final-polish.js',
+   'DATA'),
+  ('static\\custom\\studio-kinematics-logo.png',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\custom\\studio-kinematics-logo.png',
+   'DATA'),
+  ('static\\dist\\assets\\index-BdTg2vct.css',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\index-BdTg2vct.css',
+   'DATA'),
+  ('static\\dist\\assets\\index-D3rZVjEB.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\index-D3rZVjEB.js',
+   'DATA'),
+  ('static\\dist\\assets\\material-icons-Dr0goTwe.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\material-icons-Dr0goTwe.woff',
+   'DATA'),
+  ('static\\dist\\assets\\material-icons-kAwBdRge.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\material-icons-kAwBdRge.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\material-icons-outlined-BpWbwl2n.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\material-icons-outlined-BpWbwl2n.woff',
+   'DATA'),
+  ('static\\dist\\assets\\material-icons-outlined-DZhiGvEA.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\material-icons-outlined-DZhiGvEA.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-400-normal-BDYvNhAR.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-400-normal-BDYvNhAR.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-400-normal-CHP_ranX.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-400-normal-CHP_ranX.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-500-normal-9zZ_jNuA.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-500-normal-9zZ_jNuA.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-500-normal-BxM0HQjg.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-500-normal-BxM0HQjg.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-600-normal-BRIw9PIU.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-600-normal-BRIw9PIU.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-600-normal-KpAl9xZA.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-600-normal-KpAl9xZA.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-700-normal-D8UNalU-.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-700-normal-D8UNalU-.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-700-normal-DYZmzPmX.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-700-normal-DYZmzPmX.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-ext-400-normal-BjDhGU6t.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-ext-400-normal-BjDhGU6t.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-ext-400-normal-d9FrwbiD.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-ext-400-normal-d9FrwbiD.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-ext-500-normal-Bw4G4pNe.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-ext-500-normal-Bw4G4pNe.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-ext-500-normal-CuwgPeWW.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-ext-500-normal-CuwgPeWW.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-ext-600-normal-Cwz1867h.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-ext-600-normal-Cwz1867h.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-ext-600-normal-DlWr7wnj.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-ext-600-normal-DlWr7wnj.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-ext-700-normal-D83T7awq.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-ext-700-normal-D83T7awq.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-cyrillic-ext-700-normal-OK-fZO_i.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-cyrillic-ext-700-normal-OK-fZO_i.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-devanagari-400-normal-C3FccbrF.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-devanagari-400-normal-C3FccbrF.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-devanagari-400-normal-g9fsM2jL.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-devanagari-400-normal-g9fsM2jL.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-devanagari-500-normal-B62tDw8r.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-devanagari-500-normal-B62tDw8r.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-devanagari-500-normal-VG35fhMU.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-devanagari-500-normal-VG35fhMU.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-devanagari-600-normal-Bly84zfI.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-devanagari-600-normal-Bly84zfI.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-devanagari-600-normal-Ewgvvq1j.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-devanagari-600-normal-Ewgvvq1j.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-devanagari-700-normal-CT12sGlc.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-devanagari-700-normal-CT12sGlc.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-devanagari-700-normal-DVs0dmkg.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-devanagari-700-normal-DVs0dmkg.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-400-normal-Be2BcUUc.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-400-normal-Be2BcUUc.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-400-normal-DCESwnT1.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-400-normal-DCESwnT1.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-500-normal-BAAA_uK7.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-500-normal-BAAA_uK7.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-500-normal-D_0l3T9g.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-500-normal-D_0l3T9g.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-600-normal-C0bz_iEd.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-600-normal-C0bz_iEd.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-600-normal-CT9U7UAD.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-600-normal-CT9U7UAD.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-700-normal-DDNJsN3F.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-700-normal-DDNJsN3F.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-700-normal-x3kNWF-0.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-700-normal-x3kNWF-0.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-ext-400-normal-L11LEhi4.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-ext-400-normal-L11LEhi4.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-ext-400-normal-i2oSBwXz.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-ext-400-normal-i2oSBwXz.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-ext-500-normal-CbZNESfr.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-ext-500-normal-CbZNESfr.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-ext-500-normal-D6bOGD5V.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-ext-500-normal-D6bOGD5V.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-ext-600-normal-B4z4a2vi.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-ext-600-normal-B4z4a2vi.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-ext-600-normal-BjvVOqxV.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-ext-600-normal-BjvVOqxV.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-ext-700-normal-BOmIwFkq.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-ext-700-normal-BOmIwFkq.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-greek-ext-700-normal-Dq1WA5-1.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-greek-ext-700-normal-Dq1WA5-1.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-400-normal-BTkUljjl.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-400-normal-BTkUljjl.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-400-normal-DPpKfCgK.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-400-normal-DPpKfCgK.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-500-normal-CDPngY5C.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-500-normal-CDPngY5C.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-500-normal-DCA2Z9Cj.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-500-normal-DCA2Z9Cj.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-600-normal-DVJMj_t0.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-600-normal-DVJMj_t0.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-600-normal-Dkgu5AE5.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-600-normal-Dkgu5AE5.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-700-normal-CrvTEWhy.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-700-normal-CrvTEWhy.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-700-normal-ZyrKABVF.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-700-normal-ZyrKABVF.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-ext-400-normal-CNh9dRW_.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-ext-400-normal-CNh9dRW_.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-ext-400-normal-CVf-LbaS.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-ext-400-normal-CVf-LbaS.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-ext-500-normal-Bn9_h39k.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-ext-500-normal-Bn9_h39k.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-ext-500-normal-D88cFz81.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-ext-500-normal-D88cFz81.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-ext-600-normal-B3lLaxXr.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-ext-600-normal-B3lLaxXr.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-ext-600-normal-Has_8ph9.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-ext-600-normal-Has_8ph9.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-ext-700-normal-BypTtJma.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-ext-700-normal-BypTtJma.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-latin-ext-700-normal-CgsG9aVh.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-latin-ext-700-normal-CgsG9aVh.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-vietnamese-400-normal-C3Al4sv4.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-vietnamese-400-normal-C3Al4sv4.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-vietnamese-400-normal-D2wP-Vm-.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-vietnamese-400-normal-D2wP-Vm-.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-vietnamese-500-normal-BBHKifio.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-vietnamese-500-normal-BBHKifio.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-vietnamese-500-normal-B_DgfjT4.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-vietnamese-500-normal-B_DgfjT4.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-vietnamese-600-normal-D0HZFEqa.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-vietnamese-600-normal-D0HZFEqa.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-vietnamese-600-normal-mhyQDSzg.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-vietnamese-600-normal-mhyQDSzg.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-vietnamese-700-normal-1GL2JyGE.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-vietnamese-700-normal-1GL2JyGE.woff',
+   'DATA'),
+  ('static\\dist\\assets\\noto-sans-vietnamese-700-normal-DayJ0F-f.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\noto-sans-vietnamese-700-normal-DayJ0F-f.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-400-normal-BDKaGhyp.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-400-normal-BDKaGhyp.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-400-normal-Dhut76fR.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-400-normal-Dhut76fR.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-500-normal-Bf-nb4oT.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-500-normal-Bf-nb4oT.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-500-normal-DYtqi0QS.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-500-normal-DYtqi0QS.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-600-normal-BR_Ojra4.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-600-normal-BR_Ojra4.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-600-normal-DLTa1BUW.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-600-normal-DLTa1BUW.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-700-normal-CfpNZvy6.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-700-normal-CfpNZvy6.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-700-normal-DqEcQeE5.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-700-normal-DqEcQeE5.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-ext-400-normal-2ppkqaOR.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-ext-400-normal-2ppkqaOR.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-ext-400-normal-D127hM_v.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-ext-400-normal-D127hM_v.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-ext-500-normal-9VZagAe1.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-ext-500-normal-9VZagAe1.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-ext-500-normal-CqEEAICU.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-ext-500-normal-CqEEAICU.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-ext-600-normal-B0WRRYJ1.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-ext-600-normal-B0WRRYJ1.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-ext-600-normal-DQgPU_Cg.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-ext-600-normal-DQgPU_Cg.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-ext-700-normal-8-d-IyIQ.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-ext-700-normal-8-d-IyIQ.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-latin-ext-700-normal-BajbvANd.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-latin-ext-700-normal-BajbvANd.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-vietnamese-400-normal-B8TCSmUq.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-vietnamese-400-normal-B8TCSmUq.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-vietnamese-400-normal-Cg2kxhWu.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-vietnamese-400-normal-Cg2kxhWu.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-vietnamese-500-normal-CvE5C8T-.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-vietnamese-500-normal-CvE5C8T-.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-vietnamese-500-normal-DiU8zqi-.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-vietnamese-500-normal-DiU8zqi-.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-vietnamese-600-normal-5YsyKbU1.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-vietnamese-600-normal-5YsyKbU1.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-vietnamese-600-normal-Y4VTTRme.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-vietnamese-600-normal-Y4VTTRme.woff2',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-vietnamese-700-normal-BCh_uG_5.woff',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-vietnamese-700-normal-BCh_uG_5.woff',
+   'DATA'),
+  ('static\\dist\\assets\\plus-jakarta-sans-vietnamese-700-normal-CV6qDkkj.woff2',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\assets\\plus-jakarta-sans-vietnamese-700-normal-CV6qDkkj.woff2',
+   'DATA'),
+  ('static\\dist\\index.html',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\index.html',
+   'DATA'),
+  ('static\\dist\\registerSW.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\registerSW.js',
+   'DATA'),
+  ('static\\dist\\sw.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\sw.js',
+   'DATA'),
+  ('static\\dist\\workbox-78ef5c9b.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\dist\\workbox-78ef5c9b.js',
+   'DATA'),
+  ('static\\favicon-16x16.png',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\favicon-16x16.png',
+   'DATA'),
+  ('static\\favicon-32x32.png',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\favicon-32x32.png',
+   'DATA'),
+  ('static\\favicon.ico',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\favicon.ico',
+   'DATA'),
+  ('static\\icon.jpeg',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\icon.jpeg',
+   'DATA'),
+  ('static\\og-image.jpg',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\og-image.jpg',
+   'DATA'),
+  ('static\\site.webmanifest',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\static\\site.webmanifest',
+   'DATA'),
+  ('steps_calibration\\steps_calibration_esp32.ino',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\steps_calibration\\steps_calibration_esp32.ino',
+   'DATA'),
+  ('steps_calibration\\steps_calibration_tmc2209.ino',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\steps_calibration\\steps_calibration_tmc2209.ino',
+   'DATA'),
+  ('templates\\redirect.html',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\templates\\redirect.html',
+   'DATA'),
+  ('tqdm-4.70.0.dist-info\\INSTALLER',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\tqdm-4.70.0.dist-info\\INSTALLER',
+   'DATA'),
+  ('tqdm-4.70.0.dist-info\\METADATA',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\tqdm-4.70.0.dist-info\\METADATA',
+   'DATA'),
+  ('tqdm-4.70.0.dist-info\\RECORD',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\tqdm-4.70.0.dist-info\\RECORD',
+   'DATA'),
+  ('tqdm-4.70.0.dist-info\\REQUESTED',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\tqdm-4.70.0.dist-info\\REQUESTED',
+   'DATA'),
+  ('tqdm-4.70.0.dist-info\\WHEEL',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\tqdm-4.70.0.dist-info\\WHEEL',
+   'DATA'),
+  ('tqdm-4.70.0.dist-info\\entry_points.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\tqdm-4.70.0.dist-info\\entry_points.txt',
+   'DATA'),
+  ('tqdm-4.70.0.dist-info\\licenses\\LICENCE',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\tqdm-4.70.0.dist-info\\licenses\\LICENCE',
+   'DATA'),
+  ('tqdm-4.70.0.dist-info\\top_level.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\tqdm-4.70.0.dist-info\\top_level.txt',
+   'DATA'),
+  ('unicodedata.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs\\unicodedata.pyd',
+   'EXTENSION'),
+  ('websockets-17.0.1.dist-info\\INSTALLER',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\websockets-17.0.1.dist-info\\INSTALLER',
+   'DATA'),
+  ('websockets-17.0.1.dist-info\\METADATA',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\websockets-17.0.1.dist-info\\METADATA',
+   'DATA'),
+  ('websockets-17.0.1.dist-info\\RECORD',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\websockets-17.0.1.dist-info\\RECORD',
+   'DATA'),
+  ('websockets-17.0.1.dist-info\\REQUESTED',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\websockets-17.0.1.dist-info\\REQUESTED',
+   'DATA'),
+  ('websockets-17.0.1.dist-info\\WHEEL',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\websockets-17.0.1.dist-info\\WHEEL',
+   'DATA'),
+  ('websockets-17.0.1.dist-info\\entry_points.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\websockets-17.0.1.dist-info\\entry_points.txt',
+   'DATA'),
+  ('websockets-17.0.1.dist-info\\licenses\\LICENSE',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\websockets-17.0.1.dist-info\\licenses\\LICENSE',
+   'DATA'),
+  ('websockets-17.0.1.dist-info\\top_level.txt',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\websockets-17.0.1.dist-info\\top_level.txt',
+   'DATA'),
+  ('websockets\\speedups.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\websockets\\speedups.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('webview\\js\\api.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\js\\api.js',
+   'DATA'),
+  ('webview\\js\\customize.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\js\\customize.js',
+   'DATA'),
+  ('webview\\js\\finish.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\js\\finish.js',
+   'DATA'),
+  ('webview\\js\\lib\\dom_json.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\js\\lib\\dom_json.js',
+   'DATA'),
+  ('webview\\js\\lib\\polyfill.js',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\js\\lib\\polyfill.js',
+   'DATA'),
+  ('webview\\lib\\Microsoft.Web.WebView2.Core.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\lib\\Microsoft.Web.WebView2.Core.dll',
+   'BINARY'),
+  ('webview\\lib\\Microsoft.Web.WebView2.WinForms.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\lib\\Microsoft.Web.WebView2.WinForms.dll',
+   'BINARY'),
+  ('webview\\lib\\WebBrowserInterop.x64.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\lib\\WebBrowserInterop.x64.dll',
+   'BINARY'),
+  ('webview\\lib\\WebBrowserInterop.x86.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\lib\\WebBrowserInterop.x86.dll',
+   'BINARY'),
+  ('webview\\lib\\pywebview-android.jar',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\lib\\pywebview-android.jar',
+   'DATA'),
+  ('webview\\lib\\runtimes\\win-arm64\\native\\WebView2Loader.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\lib\\runtimes\\win-arm64\\native\\WebView2Loader.dll',
+   'BINARY'),
+  ('webview\\lib\\runtimes\\win-x64\\native\\WebView2Loader.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\lib\\runtimes\\win-x64\\native\\WebView2Loader.dll',
+   'BINARY'),
+  ('webview\\lib\\runtimes\\win-x86\\native\\WebView2Loader.dll',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\webview\\lib\\runtimes\\win-x86\\native\\WebView2Loader.dll',
+   'BINARY'),
+  ('wifi\\autohotspot',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\wifi\\autohotspot',
+   'DATA'),
+  ('wifi\\autohotspot-check.service',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\wifi\\autohotspot-check.service',
+   'DATA'),
+  ('wifi\\autohotspot-check.timer',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\wifi\\autohotspot-check.timer',
+   'DATA'),
+  ('wifi\\autohotspot.service',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\wifi\\autohotspot.service',
+   'DATA'),
+  ('wifi\\dnsmasq-hotspot.conf',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\wifi\\dnsmasq-hotspot.conf',
+   'DATA'),
+  ('wifi\\setup-wifi.sh',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\wifi\\setup-wifi.sh',
+   'DATA'),
+  ('yarl\\_quoting_c.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\yarl\\_quoting_c.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_cache.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_cache.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_dns.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_dns.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_handlers\\answers.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_handlers\\answers.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_handlers\\multicast_outgoing_queue.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_handlers\\multicast_outgoing_queue.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_handlers\\query_handler.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_handlers\\query_handler.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_handlers\\record_manager.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_handlers\\record_manager.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_history.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_history.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_listener.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_listener.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_protocol\\incoming.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_protocol\\incoming.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_protocol\\outgoing.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_protocol\\outgoing.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_record_update.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_record_update.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_services\\__init__.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_services\\__init__.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_services\\browser.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_services\\browser.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_services\\info.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_services\\info.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_services\\registry.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_services\\registry.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_updates.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_updates.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_utils\\ipaddress.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_utils\\ipaddress.cp314-win_amd64.pyd',
+   'EXTENSION'),
+  ('zeroconf\\_utils\\time.cp314-win_amd64.pyd',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\zeroconf\\_utils\\time.cp314-win_amd64.pyd',
+   'EXTENSION')],)

@@ -177,7 +177,11 @@ cmd_update() {
 
     echo "Updating Python dependencies..."
     source .venv/bin/activate
-    run_as_user .venv/bin/pip install -r requirements.txt
+    if [[ -f requirements-pi.txt ]]; then
+        run_as_user .venv/bin/pip install -r requirements-pi.txt
+    else
+        run_as_user .venv/bin/pip install -r requirements.txt
+    fi
 
     # Update nginx config
     echo "Updating nginx config..."

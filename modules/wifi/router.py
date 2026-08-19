@@ -110,7 +110,7 @@ CAPTIVE_PORTAL_HTML = """<!DOCTYPE html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>KinetiQ Motion</title>
+    <title>ORYN</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -137,7 +137,7 @@ CAPTIVE_PORTAL_HTML = """<!DOCTYPE html>
 </head>
 <body>
     <div class="card">
-        <h1>Welcome to KinetiQ Motion</h1>
+        <h1>Welcome to ORYN</h1>
         <p>What would you like to do?</p>
         <div class="buttons">
             <a href="/wifi-setup" class="btn-primary">Connect to WiFi</a>

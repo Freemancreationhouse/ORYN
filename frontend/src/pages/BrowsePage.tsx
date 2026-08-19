@@ -745,13 +745,7 @@ export function BrowsePage() {
 
   const handleDeletePattern = async () => {
     if (!selectedPattern) return
-
-    if (!selectedPattern.path.startsWith('custom_patterns/')) {
-      toast.error('Only custom patterns can be deleted')
-      return
-    }
-
-    if (!confirm(`Delete "${selectedPattern.name}"? This cannot be undone.`)) {
+if (!confirm(`Delete "${selectedPattern.name}"? This cannot be undone.`)) {
       return
     }
 
@@ -795,8 +789,7 @@ export function BrowsePage() {
     return `(${coord.x.toFixed(1)}, ${coord.y.toFixed(1)})`
   }
 
-  const canDelete = selectedPattern?.path.startsWith('custom_patterns/')
-
+  const canDelete = !!selectedPattern && !['clear_from_in.thr','clear_from_out.thr','clear_sideway.thr'].includes(selectedPattern.path.split('/').pop()?.toLowerCase() || '')
   // Cache all previews handler
   const handleCacheAllPreviews = async () => {
     if (isCaching) return

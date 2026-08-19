@@ -1,4 +1,4 @@
-"""KinetiQ Motion pattern import/generation.
+"""ORYN Pattern Forge artwork import/generation.
 
 This module is intentionally isolated from the proven motion/controller core.
 It only turns artwork into normalized theta/rho coordinates and writes .thr text.
@@ -179,23 +179,67 @@ def _zhang_suen(mask):
 
 
 def _walk_component(comp, shape):
-    pixels=set(comp); h,w=shape; adj={}
+    """Iterative skeleton traversal safe for detailed raster artwork."""
+    pixels=set(comp)
+    adj={}
     for p in pixels:
-        y,x=p; ns=[]
+        y,x=p
+        ns=[]
         for dy in (-1,0,1):
             for dx in (-1,0,1):
+                if not (dx or dy):
+                    continue
                 q=(y+dy,x+dx)
-                if (dx or dy) and q in pixels: ns.append(q)
+                if q not in pixels:
+                    continue
+
+                # A thinned raster uses 8-neighbour pixels so true diagonal
+                # strokes remain connected. But at an ordinary 90-degree
+                # corner, adding the diagonal neighbour as well creates a tiny
+                # triangular graph shortcut. Traversing thousands of those
+                # shortcuts produced the jagged/triangular Pattern Forge
+                # output seen in the user's video. Suppress only that shortcut
+                # when an orthogonal bridge pixel already connects the corner.
+                if dx and dy and ((y, x+dx) in pixels or (y+dy, x) in pixels):
+                    continue
+
+                ns.append(q)
         adj[p]=ns
+
     endpoints=[p for p,v in adj.items() if len(v)==1]
-    start=endpoints[0] if endpoints else next(iter(pixels)); used=set(); route=[start]
-    def edge(a,b): return tuple(sorted((a,b)))
-    def dfs(v):
-        for u in adj[v]:
-            e=edge(v,u)
-            if e in used: continue
-            used.add(e); route.append(u); dfs(u); route.append(v)
-    dfs(start)
+    start=endpoints[0] if endpoints else next(iter(pixels))
+
+    def edge(a,b):
+        return tuple(sorted((a,b)))
+
+    used=set()
+    route=[start]
+    stack=[[start,0]]
+
+    while stack:
+        v,idx=stack[-1]
+        neighbours=adj[v]
+
+        while idx<len(neighbours) and edge(v,neighbours[idx]) in used:
+            idx+=1
+        stack[-1][1]=idx
+
+        if idx>=len(neighbours):
+            stack.pop()
+            if stack:
+                route.append(stack[-1][0])
+            continue
+
+        u=neighbours[idx]
+        stack[-1][1]+=1
+        e=edge(v,u)
+        if e in used:
+            continue
+
+        used.add(e)
+        route.append(u)
+        stack.append([u,0])
+
     return [(float(x),float(y)) for y,x in route]
 
 
@@ -424,7 +468,110 @@ def _raster_paths(path: Path, threshold=128, invert=False) -> List[List[Point]]:
     return paths
 
 
-def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fit: float=.94):
+def _moving_average_path(path: List[Point], passes: int=0) -> List[Point]:
+    """Gentle geometry smoothing without changing endpoints."""
+    pts=list(path)
+    passes=max(0,min(int(passes),6))
+    for _ in range(passes):
+        if len(pts)<3:
+            break
+        nxt=[pts[0]]
+        for i in range(1,len(pts)-1):
+            x=(pts[i-1][0]+2*pts[i][0]+pts[i+1][0])/4.0
+            y=(pts[i-1][1]+2*pts[i][1]+pts[i+1][1])/4.0
+            nxt.append((x,y))
+        nxt.append(pts[-1])
+        pts=nxt
+    return pts
+
+
+def _transform_paths(paths: List[List[Point]], rotation_deg: float=0.0,
+                     offset_x: float=0.0, offset_y: float=0.0) -> List[List[Point]]:
+    """Rotate and offset normalized artwork inside the table."""
+    a=math.radians(float(rotation_deg))
+    ca,sa=math.cos(a),math.sin(a)
+    ox=max(-0.75,min(0.75,float(offset_x)))
+    oy=max(-0.75,min(0.75,float(offset_y)))
+    out=[]
+    for path in paths:
+        q=[]
+        for x,y in path:
+            q.append((x*ca-y*sa+ox, x*sa+y*ca+oy))
+        out.append(q)
+    return out
+
+
+def _nearest_route_cost(paths: List[List[Point]]) -> float:
+    ordered=_nearest_order(paths)
+    if not ordered:
+        return 0.0
+    total=0.0
+    for a,b in zip(ordered,ordered[1:]):
+        total += _dist(a[-1],b[0])
+    return total
+
+
+def _choose_start_path(paths: List[List[Point]], start_mode: str="auto") -> List[List[Point]]:
+    """
+    Reorder the first drawable island. 'perimeter' prefers geometry nearest the
+    circular edge; 'center' prefers geometry nearest the origin; 'auto' chooses
+    whichever gives the lower nearest-neighbour connector cost.
+    """
+    paths=[p[:] for p in paths if len(p)>1]
+    if len(paths)<2:
+        return paths
+
+    def score_center(p):
+        a=min(_dist((0.0,0.0),p[0]),_dist((0.0,0.0),p[-1]))
+        return a
+
+    def score_perimeter(p):
+        ra=max(math.hypot(*p[0]),math.hypot(*p[-1]))
+        return -ra
+
+    mode=(start_mode or "auto").lower()
+    if mode=="center":
+        idx=min(range(len(paths)),key=lambda i:score_center(paths[i]))
+    elif mode=="perimeter":
+        idx=min(range(len(paths)),key=lambda i:score_perimeter(paths[i]))
+    else:
+        # compare center/perimeter candidates by total connector cost
+        ci=min(range(len(paths)),key=lambda i:score_center(paths[i]))
+        pi=min(range(len(paths)),key=lambda i:score_perimeter(paths[i]))
+        candidates=[]
+        for idx0 in {ci,pi}:
+            test=[paths[idx0]]+[p for j,p in enumerate(paths) if j!=idx0]
+            candidates.append((_nearest_route_cost(test),idx0))
+        idx=min(candidates)[1]
+    return [paths[idx]]+[p for j,p in enumerate(paths) if j!=idx]
+
+
+def _rdp(points: List[Point], epsilon: float) -> List[Point]:
+    """Ramer-Douglas-Peucker simplification."""
+    if len(points)<3 or epsilon<=0:
+        return points[:]
+    a,b=points[0],points[-1]
+    vx,vy=b[0]-a[0],b[1]-a[1]
+    denom=math.hypot(vx,vy)
+    best_d=-1.0; best_i=0
+    for i,p in enumerate(points[1:-1],1):
+        if denom<1e-12:
+            d=_dist(a,p)
+        else:
+            d=abs(vy*p[0]-vx*p[1]+b[0]*a[1]-b[1]*a[0])/denom
+        if d>best_d:
+            best_d=d;best_i=i
+    if best_d>epsilon:
+        left=_rdp(points[:best_i+1],epsilon)
+        right=_rdp(points[best_i:],epsilon)
+        return left[:-1]+right
+    return [a,b]
+
+
+def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fit: float=.94,
+                          smoothing: int=1, simplify: float=0.0025,
+                          rotation_deg: float=0.0, offset_x: float=0.0, offset_y: float=0.0,
+                          max_bridge: float=0.055, start_mode: str="auto"):
     ext=path.suffix.lower()
     if ext==".thr":
         pts=[]
@@ -442,17 +589,42 @@ def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fi
     elif ext in {".png",".jpg",".jpeg",".webp",".bmp"}: paths=_raster_paths(path,threshold,invert)
     else: raise ValueError("Supported formats: SVG, DXF, PNG, JPG/JPEG, WEBP, BMP, THR")
     paths=_normalize(paths,fit)
-    # trim anything outside circular table radius
+    paths=_transform_paths(paths,rotation_deg,offset_x,offset_y)
+    paths=[_moving_average_path(p,smoothing) for p in paths]
+    simp=max(0.0,min(float(simplify),0.025))
+    if simp>0:
+        paths=[_rdp(p,simp) if len(p)>3 else p for p in paths]
+    paths=_choose_start_path(paths,start_mode)
+
+    # Trim anything outside circular table radius.
     clipped=[]
+    clipped_points=0
     for p in paths:
         q=[]
         for x,y in p:
             r=math.hypot(x,y)
-            if r<=1.001: q.append((x,y))
-        if len(q)>1: clipped.append(q)
-    route,skipped=_join_clean(clipped,max_bridge=.085)
+            if r<=1.001:
+                q.append((x,y))
+            else:
+                clipped_points += 1
+        if len(q)>1:
+            clipped.append(q)
+
+    bridge=max(0.0,min(float(max_bridge),0.16))
+    route,skipped=_join_clean(clipped,max_bridge=bridge)
     thr=_xy_to_thr(route)
-    stats={"source":ext.lstrip('.'),"skipped_islands":skipped,"route_points":len(thr),"input_paths":len(paths)}
+    stats={
+        "source":ext.lstrip('.'),
+        "skipped_islands":skipped,
+        "route_points":len(thr),
+        "input_paths":len(paths),
+        "clipped_points":clipped_points,
+        "smoothing":int(max(0,min(int(smoothing),6))),
+        "simplify":round(simp,5),
+        "rotation_deg":round(float(rotation_deg),2),
+        "max_bridge":round(bridge,4),
+        "start_mode":start_mode,
+    }
     if ext in {".png",".jpg",".jpeg",".webp",".bmp"}:
         stats.update(getattr(_raster_paths,"last_stats",{}) or {})
     return thr,stats

@@ -307,7 +307,11 @@ deploy_native() {
     # Install dependencies as real user (pip writes to user-owned .venv)
     print_step "Installing Python packages..."
     run_as_user .venv/bin/pip install --upgrade pip
-    run_as_user .venv/bin/pip install -r requirements.txt
+    if [[ -f requirements-pi.txt ]]; then
+        run_as_user .venv/bin/pip install -r requirements-pi.txt
+    else
+        run_as_user .venv/bin/pip install -r requirements.txt
+    fi
 
     # Ensure nginx (www-data) can traverse to static files
     # chmod o+x grants traversal only, not directory listing

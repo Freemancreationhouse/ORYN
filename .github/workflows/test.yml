@@ -3,16 +3,29 @@ name: Tests
 on:
   push:
     branches: [ "main", "feature/*" ]
+    paths:
+      - '**.py'
+      - 'requirements*.txt'
+      - 'pyproject.toml'
+      - 'tests/**'
+      - 'frontend/**'
+      - '.github/workflows/test.yml'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - '**.py'
+      - 'requirements*.txt'
+      - 'pyproject.toml'
+      - 'tests/**'
+      - 'frontend/**'
+      - '.github/workflows/test.yml'
+  # Allow manual trigger
   workflow_dispatch:
 
 jobs:
-  backend-check:
-    name: Backend release check
+  # Backend tests
+  test:
     runs-on: ubuntu-latest
-    env:
-      PYTHONPATH: ${{ github.workspace }}
 
     steps:
       - name: Checkout repository
@@ -28,34 +41,25 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install -r requirements-dev.txt
 
-      - name: Verify Python syntax
+      - name: Run unit tests with coverage
+        env:
+          CI: true
         run: |
-          python -m compileall -q main.py modules
+          pytest tests/unit/ -v --cov=modules --cov=main --cov-report=xml --cov-report=term-missing
 
-      - name: Verify project imports from repository root
-        run: |
-          python - <<'PY'
-          import os, sys
-          print("cwd:", os.getcwd())
-          print("repo on sys.path:", os.getcwd() in sys.path)
-          import modules
-          import main
-          print("ORYN backend imports: OK")
-          PY
-
-      - name: Legacy unit suite diagnostic
-        continue-on-error: true
-        run: |
-          if [ -d tests/unit ]; then
-            python -m pytest tests/unit/ -v --tb=short
-          else
-            echo "No legacy unit test directory found."
-          fi
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   lint:
-    name: Python lint
     runs-on: ubuntu-latest
 
     steps:
@@ -66,39 +70,49 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
-      - name: Install Ruff
-        run: python -m pip install ruff
+      - name: Install linting dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
 
-      - name: Run Ruff
-        run: ruff check --output-format=github .
+      - name: Run Ruff linter
+        run: |
+          ruff check --output-format=github .
         continue-on-error: true
 
+  # Frontend unit/integration tests
   frontend-test:
-    name: Frontend production artifact
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Verify shipped ORYN frontend
-        run: |
-          test -f static/dist/index.html
-          test -d static/dist/assets
-          test -n "$(find static/dist/assets -maxdepth 1 -type f -name '*.js' -print -quit)"
-          test -n "$(find static/dist/assets -maxdepth 1 -type f -name '*.css' -print -quit)"
-          echo "ORYN production frontend artifact: OK"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Verify ORYN branding in production shell
-        run: |
-          grep -qi "ORYN" static/dist/index.html
-          ! grep -qi "KinetiQ" static/dist/index.html
-          echo "ORYN production branding shell: OK"
+      - name: Install dependencies
+        run: npm ci
 
+      - name: Run Vitest tests
+        run: npm test
+
+      - name: Run Vitest with coverage
+        run: npm run test:coverage
+        continue-on-error: true
+
+  # Frontend E2E tests
   frontend-e2e:
-    name: Frontend E2E manual
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -120,7 +134,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Chromium
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests

@@ -1768,12 +1768,7 @@ export function Layout() {
       >
         <Outlet context={{ isPlayOnlyActive }} />
         <footer className="km-brand-footer" aria-label="Studio Kinematics branding">
-          <img src={apiClient.getAssetUrl('/static/custom/studio-kinematics-logo.png')} alt="" className="km-brand-footer-logo" />
-          <span>ORYN</span>
-          <span className="km-brand-footer-sep">•</span>
-          <span>Designed to Move</span>
-          <span className="km-brand-footer-sep">•</span>
-          <span>by <strong>Studio Kinematics™</strong></span>
+          <span><strong>ORYN</strong> — Designed to Move — by <strong>Studio Kinematics™</strong></span>
         </footer>
       </main>
 

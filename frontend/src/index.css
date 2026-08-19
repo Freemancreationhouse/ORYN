@@ -856,52 +856,175 @@ nav.fixed.bottom-0 a:hover,nav.fixed.bottom-0 a[aria-current="page"],nav.fixed.b
 .km-brand-footer{border-top-color:rgba(255,214,0,.18)!important}
 ::-webkit-scrollbar-track{background:#080808!important}::-webkit-scrollbar-thumb{background:#333!important}::-webkit-scrollbar-thumb:hover{background:#ffd600!important}
 
-/* ORYN FINAL READABILITY FIX — UI ONLY */
-:root, html, html.dark, body, #root {
+/* ORYN v3.4: hide firmware advisory visually only */
+header [class*="text-amber"],header [class*="text-orange"]{display:none!important}
+
+/* =======================================================================
+   ORYN FINAL READABILITY PATCH
+   Keeps ORYN branding and black/yellow/white theme.
+   Fixes unreadable text and removes the unwanted bottom horizontal line.
+   ======================================================================= */
+
+:root,
+html,
+html.dark,
+body,
+#root {
   color-scheme: dark !important;
-  --background:0 0% 2%!important;
-  --foreground:0 0% 98%!important;
-  --card:0 0% 6%!important;
-  --card-foreground:0 0% 98%!important;
-  --popover:0 0% 6%!important;
-  --popover-foreground:0 0% 98%!important;
-  --primary:48 100% 50%!important;
-  --primary-foreground:0 0% 2%!important;
-  --secondary:0 0% 10%!important;
-  --secondary-foreground:0 0% 98%!important;
-  --muted:0 0% 11%!important;
-  --muted-foreground:0 0% 72%!important;
-  --border:0 0% 20%!important;
-  --input:0 0% 14%!important;
-  --ring:48 100% 50%!important;
+  --background: 0 0% 2% !important;
+  --foreground: 0 0% 98% !important;
+  --card: 0 0% 6% !important;
+  --card-foreground: 0 0% 98% !important;
+  --popover: 0 0% 6% !important;
+  --popover-foreground: 0 0% 98% !important;
+  --primary: 48 100% 50% !important;
+  --primary-foreground: 0 0% 2% !important;
+  --secondary: 0 0% 10% !important;
+  --secondary-foreground: 0 0% 98% !important;
+  --muted: 0 0% 11% !important;
+  --muted-foreground: 0 0% 72% !important;
+  --accent: 48 100% 50% !important;
+  --accent-foreground: 0 0% 2% !important;
+  --border: 0 0% 20% !important;
+  --input: 0 0% 14% !important;
+  --ring: 48 100% 50% !important;
 }
-html,body,#root,main{background:#050505!important;color:#f7f7f7!important}
-header,[class*="sticky"][class*="top-0"]{background:#080808!important;color:#fff!important;border-color:#202020!important}
-.bg-background,[class*="bg-background"]{background:#050505!important;color:#f7f7f7!important}
-.bg-card,[class*="bg-card"]{background:#101010!important;color:#f7f7f7!important}
-.bg-muted,[class*="bg-muted"],.bg-secondary,[class*="bg-secondary"]{background:#171717!important;color:#f7f7f7!important}
-.text-foreground,[class*="text-foreground"],.text-card-foreground,[class*="text-card-foreground"]{color:#fafafa!important}
-.text-muted-foreground,[class*="text-muted-foreground"]{color:#b8b8b8!important}
-[class*="text-slate-"],[class*="text-gray-"],[class*="text-zinc-"],[class*="text-neutral-"]{color:#c1c1c1!important}
-h1,h2,h3,h4,h5,h6,label,legend,dt{color:#fafafa!important}
-input,select,textarea,[role="combobox"],button[role="combobox"]{
-  background:#0b0b0b!important;color:#f8f8f8!important;border-color:#383838!important
+
+html, body, #root, main {
+  background: #050505 !important;
+  color: #f7f7f7 !important;
 }
-input::placeholder,textarea::placeholder{color:#909090!important;opacity:1!important}
-input:disabled,select:disabled,textarea:disabled,[aria-disabled="true"][role="combobox"]{
-  opacity:.70!important;color:#cfcfcf!important;-webkit-text-fill-color:#cfcfcf!important;
-  background:#111!important;border-color:#303030!important
+
+header,
+[class*="sticky"][class*="top-0"] {
+  background: #080808 !important;
+  color: #ffffff !important;
+  border-color: #202020 !important;
 }
-button:disabled,[aria-disabled="true"]{opacity:.58!important}
-[role="alert"],[class*="alert"],[class*="Alert"],
-[class*="bg-white"],[class*="bg-slate-50"],[class*="bg-gray-50"],[class*="bg-zinc-50"],[class*="bg-neutral-50"]{
-  background:#0b0b0b!important;color:#f4f4f4!important;border-color:#343434!important
+
+/* Cards / panels / accordions */
+.bg-background,
+[class*="bg-background"] {
+  background: #050505 !important;
+  color: #f7f7f7 !important;
 }
-.bg-primary,[class*="bg-primary"]{background:#ffd600!important;color:#050505!important;border-color:#ffd600!important}
-.text-primary,[class*="text-primary"]{color:#ffd600!important}
-nav.fixed.bottom-0{background:#11161b!important;border:1px solid #2d3237!important;box-shadow:0 14px 40px rgba(0,0,0,.5)!important}
-nav.fixed.bottom-0 a,nav.fixed.bottom-0 button{color:#a9afb5!important}
-nav.fixed.bottom-0 a[aria-current="page"],nav.fixed.bottom-0 a[class*="text-primary"]{color:#ffd600!important;background:rgba(255,214,0,.12)!important}
-footer,.km-brand-footer{border-top:0!important;box-shadow:none!important}
-.km-brand-footer{background:transparent!important;color:#b8b8b8!important}
-.km-brand-footer strong{color:#fff!important}
+.bg-card,
+[class*="bg-card"],
+.bg-muted,
+[class*="bg-muted"],
+.bg-secondary,
+[class*="bg-secondary"],
+.bg-popover,
+[class*="bg-popover"] {
+  background: #101010 !important;
+  color: #f7f7f7 !important;
+}
+
+/* Text */
+.text-foreground,
+[class*="text-foreground"],
+.text-card-foreground,
+[class*="text-card-foreground"] {
+  color: #fafafa !important;
+}
+.text-muted-foreground,
+[class*="text-muted-foreground"] {
+  color: #b8b8b8 !important;
+}
+[class*="text-slate-"],
+[class*="text-gray-"],
+[class*="text-zinc-"],
+[class*="text-neutral-"] {
+  color: #c2c2c2 !important;
+}
+h1,h2,h3,h4,h5,h6,label,legend,dt {
+  color: #fafafa !important;
+}
+
+/* Inputs / selects / disabled fields */
+input,
+select,
+textarea,
+[role="combobox"],
+button[role="combobox"] {
+  background: #0b0b0b !important;
+  color: #f8f8f8 !important;
+  border-color: #383838 !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #929292 !important;
+  opacity: 1 !important;
+}
+input:disabled,
+select:disabled,
+textarea:disabled,
+[aria-disabled="true"][role="combobox"] {
+  opacity: .72 !important;
+  color: #d0d0d0 !important;
+  -webkit-text-fill-color: #d0d0d0 !important;
+  background: #111 !important;
+  border-color: #303030 !important;
+}
+button:disabled,
+[aria-disabled="true"] {
+  opacity: .58 !important;
+}
+
+/* Previously unreadable light boxes */
+[role="alert"],
+[class*="alert"],
+[class*="Alert"],
+[class*="bg-white"],
+[class*="bg-slate-50"],
+[class*="bg-gray-50"],
+[class*="bg-zinc-50"],
+[class*="bg-neutral-50"] {
+  background: #0b0b0b !important;
+  color: #f4f4f4 !important;
+  border-color: #343434 !important;
+}
+
+/* Yellow ORYN accents */
+.bg-primary,
+[class*="bg-primary"] {
+  background: #ffd600 !important;
+  color: #050505 !important;
+  border-color: #ffd600 !important;
+}
+.text-primary,
+[class*="text-primary"] {
+  color: #ffd600 !important;
+}
+
+/* Bottom navigation */
+nav.fixed.bottom-0 {
+  background: #11161b !important;
+  border: 1px solid #2d3237 !important;
+  box-shadow: 0 14px 40px rgba(0,0,0,.5) !important;
+}
+nav.fixed.bottom-0 a,
+nav.fixed.bottom-0 button {
+  color: #a9afb5 !important;
+}
+nav.fixed.bottom-0 a[aria-current="page"],
+nav.fixed.bottom-0 a[class*="text-primary"] {
+  color: #ffd600 !important;
+  background: rgba(255,214,0,.12) !important;
+}
+
+/* Remove the unwanted full-width line near bottom/footer */
+main > footer,
+body > footer,
+#root > footer,
+.km-brand-footer {
+  border-top: 0 !important;
+  box-shadow: none !important;
+}
+.km-brand-footer {
+  background: transparent !important;
+  color: #b8b8b8 !important;
+}
+.km-brand-footer strong {
+  color: #fff !important;
+}

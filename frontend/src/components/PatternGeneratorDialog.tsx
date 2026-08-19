@@ -54,7 +54,7 @@ export function PatternGeneratorDialog({open,onOpenChange,onSaved}:{open:boolean
 
   const ext=file?.name.split('.').pop()?.toUpperCase()||'—'
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-w-5xl p-0 overflow-hidden border-white/10 bg-[#0d1218] text-white rounded-[22px]">
+    <DialogContent className="max-w-5xl max-h-[92vh] p-0 overflow-hidden border-white/10 bg-[#0d1218] text-white rounded-[22px] flex flex-col">
       <DialogHeader className="px-6 py-5 border-b border-white/10 bg-gradient-to-r from-[#151c24] to-[#0d1218]">
         <DialogTitle className="flex items-center gap-3 text-xl">
           <span className="km-icon-tile km-icon-tile-gold"><Sparkles size={20}/></span>
@@ -62,8 +62,8 @@ export function PatternGeneratorDialog({open,onOpenChange,onSaved}:{open:boolean
           <span className="text-xs font-normal text-white/45">SVG · DXF · PNG · JPG · THR</span>
         </DialogTitle>
       </DialogHeader>
-      <div className="grid md:grid-cols-[360px_1fr] min-h-[560px]">
-        <div className="p-6 border-r border-white/10 space-y-5">
+      <div className="grid md:grid-cols-[360px_1fr] min-h-0 flex-1 overflow-hidden">
+        <div className="p-6 border-r border-white/10 space-y-5 overflow-y-auto min-h-0 pb-14">
           <label className="km-drop-zone">
             <input type="file" className="sr-only" accept=".svg,.dxf,.png,.jpg,.jpeg,.webp,.bmp,.thr" onChange={e=>{const f=e.target.files?.[0]||null;setFile(f);setPreview(null);if(f)setName(f.name.replace(/\.[^.]+$/,''))}}/>
             <div className="flex gap-3 items-center"><span className="km-icon-tile"><FileImage size={22}/></span><div><b>{file?file.name:'Choose artwork'}</b><p>Vector or high-contrast line artwork</p></div></div>
@@ -76,7 +76,15 @@ export function PatternGeneratorDialog({open,onOpenChange,onSaved}:{open:boolean
           <div className="km-generator-note"><Route size={17}/><span>Long disconnected islands are skipped instead of drawing a straight pass-line through the design.</span></div>
           <Button onClick={generate} disabled={!file||working} className="w-full h-12 km-action-primary gap-2">{working?<RefreshCw className="animate-spin" size={18}/>:<DraftingCompass size={18}/>} Generate Clean Route</Button>
         </div>
-        <div className="p-6 flex flex-col">
+        <div className="p-6 flex flex-col min-h-0 overflow-y-auto">
+          {sourcePreview && (
+            <div className="mb-4 rounded-xl border border-white/10 bg-white/[.03] p-3">
+              <div className="text-[10px] tracking-[.16em] text-white/40 mb-2">SOURCE ARTWORK</div>
+              <div className="h-36 rounded-lg overflow-hidden bg-[#eee6da] flex items-center justify-center">
+                <img src={sourcePreview} alt="Original uploaded artwork" className="w-full h-full object-contain"/>
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-4"><div><p className="text-xs uppercase tracking-[.2em] text-white/35">Route Preview</p><h3 className="text-lg font-semibold">Sand-table path</h3></div>{preview&&<div className="flex gap-2"><span className="km-stat-chip">{preview.points} pts</span><span className="km-stat-chip">{Number(preview.stats?.skipped_islands||0)} crossings removed</span></div>}</div>
           <div className={`km-forge-preview flex-1 ${sourcePreview&&preview?'grid md:grid-cols-2 gap-3 p-3':'grid place-items-center'}`}>
             {sourcePreview&&preview&&<div className="km-forge-source-panel"><span className="km-forge-panel-label">ORIGINAL</span><img src={sourcePreview} alt="Original uploaded artwork" className="km-forge-source-image"/></div>}

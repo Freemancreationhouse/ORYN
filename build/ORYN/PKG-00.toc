@@ -1,0 +1,67 @@
+('C:\\Users\\Studio '
+ 'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\build\\ORYN\\ORYN.pkg',
+ {'BINARY': True,
+  'DATA': True,
+  'EXECUTABLE': True,
+  'EXTENSION': True,
+  'PYMODULE': True,
+  'PYSOURCE': True,
+  'PYZ': False,
+  'SPLASH': True,
+  'SYMLINK': False},
+ [('PYZ-00.pyz',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\build\\ORYN\\PYZ-00.pyz',
+   'PYZ'),
+  ('struct',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\build\\ORYN\\localpycs\\struct.pyc',
+   'PYMODULE'),
+  ('pyimod01_archive',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\build\\ORYN\\localpycs\\pyimod01_archive.pyc',
+   'PYMODULE'),
+  ('pyimod02_importers',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\build\\ORYN\\localpycs\\pyimod02_importers.pyc',
+   'PYMODULE'),
+  ('pyimod03_ctypes',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\build\\ORYN\\localpycs\\pyimod03_ctypes.pyc',
+   'PYMODULE'),
+  ('pyimod04_pywin32',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\build\\ORYN\\localpycs\\pyimod04_pywin32.pyc',
+   'PYMODULE'),
+  ('pyiboot01_bootstrap',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
+   'PYSOURCE'),
+  ('pyi_rth_pkgutil',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pkgutil.py',
+   'PYSOURCE'),
+  ('pyi_rth_multiprocessing',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_multiprocessing.py',
+   'PYSOURCE'),
+  ('pyi_rth_inspect',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
+   'PYSOURCE'),
+  ('pyi_rth_setuptools',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\.build-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_setuptools.py',
+   'PYSOURCE'),
+  ('oryn_windows_entry',
+   'C:\\Users\\Studio '
+   'Kinematics\\Downloads\\Studio_Kinematics_ORYN_FULL_AND_FINAL_WINDOWS\\ORYN\\packaging\\windows\\oryn_windows_entry.py',
+   'PYSOURCE')],
+ 'python314.dll',
+ True,
+ False,
+ False,
+ [],
+ None,
+ None,
+ None)
