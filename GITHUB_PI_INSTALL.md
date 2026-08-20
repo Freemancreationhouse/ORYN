@@ -14,9 +14,9 @@ The frontend is already pre-built in `static/dist`, so Node.js is not required o
 
 ## 1. Put this project on GitHub
 
-Use the GitHub repository named:
+Create a GitHub repository named:
 
-`ORYN`
+`ORYN-Motion`
 
 under the GitHub account/organization:
 

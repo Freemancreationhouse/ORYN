@@ -307,6 +307,8 @@ deploy_native() {
     # Install dependencies as real user (pip writes to user-owned .venv)
     print_step "Installing Python packages..."
     run_as_user .venv/bin/pip install --upgrade pip
+    # Raspberry Pi deployment dependencies. Keep application source identical
+    # to the locked Windows release while installing the Pi-specific runtime.
     if [[ -f requirements-pi.txt ]]; then
         run_as_user .venv/bin/pip install -r requirements-pi.txt
     else
