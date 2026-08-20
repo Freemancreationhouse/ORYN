@@ -1,0 +1,54 @@
+/* ============================================================
+   ORYN PI VISUAL-ONLY CORRECTION
+   ONLY:
+   1) light-mode pattern preview visibility
+   2) selected clear-choice text/icon contrast
+   Dark mode and all functional code are untouched.
+   ============================================================ */
+
+/* LIGHT MODE ONLY:
+   Force the actual preview disc to the same warm-yellow plate used by
+   the locked Windows build. Keep black/grey linework crisp. */
+html:not(.dark) div:has(> img.pattern-preview),
+body.oryn-theme-light div:has(> img.pattern-preview) {
+  background: #DDBA62 !important;
+  border-color: #B89245 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.30),
+    0 4px 12px rgba(65,46,16,.17) !important;
+}
+
+html:not(.dark) img.pattern-preview,
+body.oryn-theme-light img.pattern-preview {
+  filter: none !important;
+  mix-blend-mode: multiply !important;
+  opacity: 1 !important;
+  background: transparent !important;
+}
+
+/* Selected Clear strategy:
+   Keep the existing gold selected state, but make ALL of its text/icon
+   descendants explicitly dark and readable. */
+.km-clear-tile.is-selected {
+  background: #D3AE5D !important;
+  border-color: #B58D3C !important;
+  color: #11100D !important;
+}
+
+.km-clear-tile.is-selected *,
+.km-clear-tile.is-selected b,
+.km-clear-tile.is-selected small,
+.km-clear-tile.is-selected span,
+.km-clear-tile.is-selected p,
+.km-clear-tile.is-selected svg {
+  color: #11100D !important;
+  opacity: 1 !important;
+}
+
+.km-clear-tile.is-selected small {
+  color: #4A3B21 !important;
+}
+
+.km-clear-tile.is-selected svg {
+  stroke: currentColor !important;
+}
