@@ -52,3 +52,217 @@ body.oryn-theme-light img.pattern-preview {
 .km-clear-tile.is-selected svg {
   stroke: currentColor !important;
 }
+
+
+/* =========================================================
+   ORYN PI FINAL TWO VISUAL CORRECTIONS
+   Logo + selected Clear option readability ONLY
+   ========================================================= */
+
+/* CLEAR OPTIONS:
+   Never allow yellow background to hide the label */
+button[data-state="on"],
+button[aria-pressed="true"],
+[role="radio"][data-state="checked"],
+[role="radio"][aria-checked="true"] {
+    color: #17130a !important;
+}
+
+button[data-state="on"] *,
+button[aria-pressed="true"] *,
+[role="radio"][data-state="checked"] *,
+[role="radio"][aria-checked="true"] * {
+    color: #17130a !important;
+    opacity: 1 !important;
+}
+
+
+/* ORYN header logo repair */
+header img.w-8.h-8 {
+    content: url("/static/custom/studio-kinematics-logo.png") !important;
+    object-fit: contain !important;
+    background: #111 !important;
+    border-radius: 50% !important;
+}
+
+/* ==========================================================
+   ORYN PI — FINAL TEXT VISIBILITY FIX ONLY
+   1. Clear selected option
+   2. Sand-table selected card
+   ========================================================== */
+
+/* CLEAR PANEL:
+   Selected gold/yellow control must always have dark readable text */
+div[role="dialog"] button[aria-pressed="true"],
+div[role="dialog"] button[data-state="on"],
+div[role="dialog"] [role="radio"][aria-checked="true"],
+div[role="dialog"] [role="radio"][data-state="checked"] {
+    color: #17130a !important;
+    -webkit-text-fill-color: #17130a !important;
+}
+
+div[role="dialog"] button[aria-pressed="true"] *,
+div[role="dialog"] button[data-state="on"] *,
+div[role="dialog"] [role="radio"][aria-checked="true"] *,
+div[role="dialog"] [role="radio"][data-state="checked"] * {
+    color: #17130a !important;
+    -webkit-text-fill-color: #17130a !important;
+    opacity: 1 !important;
+}
+
+
+/* SAND TABLE DROPDOWN:
+   Light selected table card must use dark readable typography */
+[role="menu"] [aria-checked="true"],
+[role="listbox"] [aria-selected="true"],
+[role="option"][aria-selected="true"] {
+    color: #17130a !important;
+    -webkit-text-fill-color: #17130a !important;
+}
+
+[role="menu"] [aria-checked="true"] *,
+[role="listbox"] [aria-selected="true"] *,
+[role="option"][aria-selected="true"] * {
+    color: #17130a !important;
+    -webkit-text-fill-color: #17130a !important;
+    opacity: 1 !important;
+}
+
+/* Keep secondary IP/address readable */
+[role="menu"] [aria-checked="true"] small,
+[role="listbox"] [aria-selected="true"] small,
+[role="option"][aria-selected="true"] small {
+    color: #5d6065 !important;
+    -webkit-text-fill-color: #5d6065 !important;
+}
+
+/* Preserve green connection indicator */
+[role="menu"] [aria-checked="true"] .bg-green-500,
+[role="listbox"] [aria-selected="true"] .bg-green-500,
+[role="option"][aria-selected="true"] .bg-green-500 {
+    background-color: #22c55e !important;
+}
+
+
+
+/* ==========================================================
+   ORYN PI — TWO REMAINING VISUAL CORRECTIONS ONLY
+   ========================================================== */
+
+
+/* ----------------------------------------------------------
+   1. CLEAR / AUTO BUTTON
+   Remove the solid yellow selected fill completely.
+   Keep only premium outline + readable text.
+   ---------------------------------------------------------- */
+
+button.bg-primary,
+[role="dialog"] button.bg-primary {
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #e8e8e8 !important;
+    -webkit-text-fill-color: #e8e8e8 !important;
+    border-color: #d2ad57 !important;
+}
+
+button.bg-primary *,
+[role="dialog"] button.bg-primary * {
+    color: #e8e8e8 !important;
+    -webkit-text-fill-color: #e8e8e8 !important;
+    opacity: 1 !important;
+}
+
+
+/* ----------------------------------------------------------
+   2. SELECTED SAND TABLE CARD
+   The card is light, therefore all textual information
+   inside it must be dark.
+   ---------------------------------------------------------- */
+
+[data-radix-popper-content-wrapper] button.bg-accent,
+[data-radix-popper-content-wrapper] button.bg-secondary,
+[data-radix-popper-content-wrapper] [data-highlighted],
+[data-radix-popper-content-wrapper] [data-state="checked"] {
+    color: #171717 !important;
+    -webkit-text-fill-color: #171717 !important;
+}
+
+[data-radix-popper-content-wrapper] button.bg-accent *,
+[data-radix-popper-content-wrapper] button.bg-secondary *,
+[data-radix-popper-content-wrapper] [data-highlighted] *,
+[data-radix-popper-content-wrapper] [data-state="checked"] * {
+    color: #171717 !important;
+    -webkit-text-fill-color: #171717 !important;
+    opacity: 1 !important;
+}
+
+
+/* Machine name */
+[data-radix-popper-content-wrapper] .font-medium,
+[data-radix-popper-content-wrapper] .font-semibold {
+    color: #151515 !important;
+    -webkit-text-fill-color: #151515 !important;
+    opacity: 1 !important;
+}
+
+
+/* Machine IP / secondary information */
+[data-radix-popper-content-wrapper] .text-muted-foreground {
+    color: #62666b !important;
+    -webkit-text-fill-color: #62666b !important;
+    opacity: 1 !important;
+}
+
+
+/* Don't alter the green online indicator */
+[data-radix-popper-content-wrapper] .bg-green-500 {
+    background-color: #22c55e !important;
+}
+
+
+/* Don't alter the yellow check mark */
+[data-radix-popper-content-wrapper] .text-primary {
+    color: #d3aa46 !important;
+    -webkit-text-fill-color: #d3aa46 !important;
+}
+
+
+/* EXACT ORYN PI CLEAR SELECTION FIX */
+label:has(input[name="preExecutionAction"][value="adaptive"]:checked),
+label:has(input[name="preExecutionAction"][value="clear_from_in"]:checked),
+label:has(input[name="preExecutionAction"][value="clear_from_out"]:checked),
+label:has(input[name="preExecutionAction"][value="clear_sideway"]:checked),
+label:has(input[name="preExecutionAction"][value="none"]:checked) {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+
+    color: #F2F2F2 !important;
+    -webkit-text-fill-color: #F2F2F2 !important;
+
+    border-color: #D3AA46 !important;
+    box-shadow: 0 0 0 2px #D3AA46 !important;
+    opacity: 1 !important;
+}
+
+label:has(input[name="preExecutionAction"]:checked) * {
+    color: #F2F2F2 !important;
+    -webkit-text-fill-color: #F2F2F2 !important;
+    opacity: 1 !important;
+}
+
+
+/* EXACT ORYN PI MACHINE CARD TEXT FIX ONLY */
+
+.flex-1.min-w-0 > .flex.items-center.gap-2 > span.text-sm.truncate {
+    color: #151515 !important;
+    -webkit-text-fill-color: #151515 !important;
+    opacity: 1 !important;
+}
+
+.flex-1.min-w-0 > span.text-xs.text-muted-foreground.truncate.block {
+    color: #62666B !important;
+    -webkit-text-fill-color: #62666B !important;
+    opacity: 1 !important;
+}
+
