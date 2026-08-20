@@ -177,7 +177,7 @@ cmd_update() {
 
     echo "Updating Python dependencies..."
     source .venv/bin/activate
-    run_as_user .venv/bin/pip install -r requirements.txt
+    run_as_user .venv/bin/pip install -r requirements-pi.txt
 
     # Update nginx config
     echo "Updating nginx config..."
@@ -368,7 +368,7 @@ cmd_checkout() {
     # Update Python dependencies
     echo "Updating Python dependencies..."
     source .venv/bin/activate
-    run_as_user .venv/bin/pip install -r requirements.txt
+    run_as_user .venv/bin/pip install -r requirements-pi.txt
 
     # Update dw CLI from the new branch
     sudo cp "$INSTALL_DIR/oryn" /usr/local/bin/oryn
