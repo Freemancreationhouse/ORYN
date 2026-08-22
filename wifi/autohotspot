@@ -19,7 +19,7 @@
 
 set -euo pipefail
 
-HOTSPOT_CON_NAME="KinetiQMotion-Hotspot"
+HOTSPOT_CON_NAME="ORYNMotion-Hotspot"
 MODE_FILE="/tmp/dw-wifi-mode"
 SCAN_TIMEOUT=30
 SCAN_INTERVAL=5

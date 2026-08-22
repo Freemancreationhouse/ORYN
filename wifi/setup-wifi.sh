@@ -70,10 +70,17 @@ check_prereqs() {
 create_hotspot_profile() {
     print_step "Creating hotspot connection profile..."
 
-    # Remove existing profile if present
+    # Remove existing current profile if present
     if nmcli con show "$HOTSPOT_CON_NAME" &>/dev/null; then
         echo "Removing existing hotspot profile..."
         sudo nmcli con delete "$HOTSPOT_CON_NAME" 2>/dev/null || true
+    fi
+
+    # Migration from older ORYN/KinetiQ builds: remove only the obsolete
+    # hotspot profile name. Normal saved WiFi networks are never deleted.
+    if nmcli con show "KinetiQMotion-Hotspot" &>/dev/null; then
+        echo "Removing obsolete hotspot profile name..."
+        sudo nmcli con delete "KinetiQMotion-Hotspot" 2>/dev/null || true
     fi
 
     # Read app name from state.json if available
@@ -90,7 +97,7 @@ create_hotspot_profile() {
 
     # Create the hotspot profile (open network, no password)
     sudo nmcli con add type wifi ifname "$IFACE" mode ap con-name "$HOTSPOT_CON_NAME" \
-        ssid "$ssid" autoconnect no \
+        ssid "$ssid" autoconnect no connection.autoconnect-priority -100 \
         ipv4.method shared ipv4.addresses "$HOTSPOT_IP"
 
     print_success "Hotspot profile created: SSID='$ssid', IP=${HOTSPOT_IP%/*}"
