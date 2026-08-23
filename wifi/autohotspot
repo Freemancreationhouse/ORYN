@@ -51,23 +51,32 @@ get_saved_wifi() {
 
 # Get current wlan0 connection state: "client", "hotspot", or "disconnected"
 get_current_state() {
-    local active
-    active=$(nmcli -t -f NAME,TYPE,DEVICE con show --active 2>/dev/null || true)
+    local active_name
+    local device_state
+    local ipv4
 
-    while IFS= read -r line; do
-        local name device
-        name=$(echo "$line" | cut -d: -f1)
-        device=$(echo "$line" | rev | cut -d: -f1 | rev)
-        if [ "$device" = "$IFACE" ]; then
-            if [ "$name" = "$HOTSPOT_CON_NAME" ]; then
-                echo "hotspot"
-                return
-            fi
-            echo "client"
-            return
-        fi
-    done <<< "$active"
+    active_name=$(nmcli -g GENERAL.CONNECTION dev show "$IFACE" 2>/dev/null | head -1 || true)
+    device_state=$(nmcli -g GENERAL.STATE dev show "$IFACE" 2>/dev/null | head -1 || true)
+    ipv4=$(nmcli -g IP4.ADDRESS dev show "$IFACE" 2>/dev/null | head -1 || true)
 
+    # ORYN hotspot is explicitly active.
+    if [ "$active_name" = "$HOTSPOT_CON_NAME" ]; then
+        echo "hotspot"
+        return
+    fi
+
+    # Client mode is valid ONLY when NetworkManager reports wlan0 fully
+    # connected AND it has actually received an IPv4 address.
+    if echo "$device_state" | grep -q '^100' \
+       && [ -n "$active_name" ] \
+       && [ "$active_name" != "--" ] \
+       && [ -n "$ipv4" ]; then
+        echo "client"
+        return
+    fi
+
+    # Associating, disconnected, failed DHCP, stale connection profile, etc.
+    # must all enter recovery instead of being mistaken for a working client.
     echo "disconnected"
 }
 
