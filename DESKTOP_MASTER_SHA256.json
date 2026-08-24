@@ -1,0 +1,21 @@
+{
+  "main.py": "a4b0740e2a2217e4a5a8c842ebd22499557f41bbdec90d0742b10b73709ebda4",
+  "frontend/src/index.css": "b6ced09feb049a36737c87fff4799eec9ce58881dced96e6a0acffbe47dbc9e3",
+  "frontend/src/pages/BrowsePage.tsx": "cb28629213d9f9175274628b13939fd2520262c381e837b2875fe52a4305578b",
+  "frontend/src/pages/TableControlPage.tsx": "e4f02fe29e50572bd56f8cf127f5cf8a5e906b0844dabf5ac0b6f41e1168229c",
+  "frontend/src/components/PatternGeneratorDialog.tsx": "59bdfad6f9feafe772cdcc15a6f7cd407e647bf607687d249223574f3327b8db",
+  "static/dist/index.html": "b1c7c35ff83ec0d1342f1c4276383803a8306ae7f3e5207947ddfca819b774ed",
+  "static/dist/assets/index-BdTg2vct.css": "7b5578340cc27e8fc3d8ebedc82361655dcbe08df180c8e3ef2c91993c4a1bf6",
+  "static/dist/assets/index-D3rZVjEB.js": "1d7f8df936816daf1939b5a700bd2e4e4659df3b160b3718a68a48a9b7d6641a",
+  "static/custom/oryn-final-only.css": "4b141f30afe52756c7a05cff34e16b00aad18b1075dbebb6bfacd1645b7c8185",
+  "static/custom/oryn-final-only.js": "967b93c7dcbb0ff93e46dab7cff256391a3309315885cb6b08127a6cd40a0405",
+  "static/custom/oryn-v33-exact-ui.css": "8206c90d75a874a086fe1cc18381d3b1319358b95874d9c11874ef564771e953",
+  "static/custom/oryn-v33-exact-ui.js": "b1afcbdc7ba4a84443adc63243d3009ab9f01b05f58ceef8a7bfdd657168334d",
+  "static/custom/oryn-v34-pattern-forge.js": "dadddb0a7fc5748284467f46c06f5fbb879d61f57b172561875108e6bc114ce5",
+  "static/custom/oryn-v34-premium.css": "630feeb96fed222a5fb55b54ceebd63c80481ccda3006cd741493383cb8b5ac0",
+  "static/custom/oryn-v35-final-ui.css": "6a82a99cdfc15f57a913f127887c7ad69b1702188a1d12de54be8d195bab6a36",
+  "static/custom/oryn-v35-final-ui.js": "c63ed5b8c6f13ff9da00b7594f1e00d081c7a6c52809e7f0866164ea4f68258f",
+  "static/custom/oryn-v36-final-polish.css": "b049935f6fd12ba8cff3be4ceb87e689c581fa121d4c29d1c0847c369a8f2ef1",
+  "static/custom/oryn-v36-final-polish.js": "d51eb8f547d650dd46be8bbb594f0eda93d61ab9fff2ba1e884a8873478d51d7",
+  "static/custom/studio-kinematics-logo.png": "195f471cb70ad5031436067a826ae40868432b893449010470c85e735f14cb80"
+}

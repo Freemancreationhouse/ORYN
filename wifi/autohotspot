@@ -65,8 +65,8 @@ get_current_state() {
         return
     fi
 
-    # Client mode is valid ONLY when NetworkManager reports wlan0 fully
-    # connected AND it has actually received an IPv4 address.
+    # Client mode is valid ONLY when wlan0 is genuinely connected
+    # and has obtained an IPv4 address.
     if echo "$device_state" | grep -q '^100' \
        && [ -n "$active_name" ] \
        && [ "$active_name" != "--" ] \
@@ -75,8 +75,8 @@ get_current_state() {
         return
     fi
 
-    # Associating, disconnected, failed DHCP, stale connection profile, etc.
-    # must all enter recovery instead of being mistaken for a working client.
+    # Associating, failed DHCP, stale profiles, and disconnected states
+    # all enter recovery so ORYN can fall back to its setup hotspot.
     echo "disconnected"
 }
 

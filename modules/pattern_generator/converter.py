@@ -25,12 +25,23 @@ def _dedupe(points: Iterable[Point], eps: float = 1e-5) -> List[Point]:
 
 
 def _normalize(paths: List[List[Point]], fit: float = 0.94) -> List[List[Point]]:
+    """
+    Center artwork and scale it by its true radial extent so every point fits
+    inside the circular sand table. This avoids the old square-bounds scaling
+    that could clip diagonal corners after conversion.
+    """
     pts=[p for path in paths for p in path]
-    if not pts: raise ValueError("No usable geometry found")
+    if not pts:
+        raise ValueError("No usable geometry found")
     xs=[p[0] for p in pts]; ys=[p[1] for p in pts]
-    cx=(min(xs)+max(xs))/2; cy=(min(ys)+max(ys))/2
-    scale=max(max(xs)-min(xs), max(ys)-min(ys), 1e-9)
-    k=(2*max(0.1,min(float(fit),0.98)))/scale
+    cx=(min(xs)+max(xs))/2.0
+    cy=(min(ys)+max(ys))/2.0
+    centered=[(x-cx,y-cy) for x,y in pts]
+    max_r=max((math.hypot(x,y) for x,y in centered),default=0.0)
+    if max_r<1e-9:
+        raise ValueError("Artwork geometry has no measurable size")
+    target=max(0.1,min(float(fit),0.98))
+    k=target/max_r
     return [[((x-cx)*k,(y-cy)*k) for x,y in path] for path in paths]
 
 
@@ -57,32 +68,212 @@ def _resample_line(a: Point,b: Point,step=.02):
     return [(a[0]+(b[0]-a[0])*i/n,a[1]+(b[1]-a[1])*i/n) for i in range(n+1)]
 
 
-def _join_clean(paths: List[List[Point]], max_bridge: float=.065) -> Tuple[List[Point],int]:
-    """Join only short gaps. Long disconnected islands are skipped, never crossed."""
-    ordered=_nearest_order(paths)
-    if not ordered: return [],0
-    route=list(ordered[0]); skipped=0
+def _polar(p: Point) -> Tuple[float,float]:
+    return math.atan2(p[1],p[0]), math.hypot(p[0],p[1])
+
+
+def _arc_connector(a: Point, b: Point, lane_radius: float=.985, step: float=.012) -> List[Point]:
+    """
+    Route a long unavoidable travel move around the quiet outer lane instead
+    of cutting a straight line through the artwork.
+
+    Pattern artwork is normally fitted to <= .94 radius, leaving the .985
+    perimeter lane available for disconnected-island travel.
+    """
+    lane=max(.955,min(.997,float(lane_radius)))
+    ta,ra=_polar(a); tb,rb=_polar(b)
+
+    # unwrap the shortest boundary arc
+    while tb-ta>math.pi: tb-=2*math.pi
+    while tb-ta<-math.pi: tb+=2*math.pi
+
+    out=[]
+    # radial outward from a to lane
+    n=max(1,int(math.ceil(abs(lane-ra)/step)))
+    for i in range(n+1):
+        r=ra+(lane-ra)*i/n
+        out.append((math.cos(ta)*r,math.sin(ta)*r))
+
+    # boundary arc
+    arc_len=abs(tb-ta)*lane
+    n=max(1,int(math.ceil(arc_len/step)))
+    for i in range(1,n+1):
+        t=ta+(tb-ta)*i/n
+        out.append((math.cos(t)*lane,math.sin(t)*lane))
+
+    # radial inward from lane to b
+    n=max(1,int(math.ceil(abs(lane-rb)/step)))
+    for i in range(1,n+1):
+        r=lane+(rb-lane)*i/n
+        out.append((math.cos(tb)*r,math.sin(tb)*r))
+
+    if out:
+        out[-1]=b
+    return _dedupe(out)
+
+
+def _route_order(paths: List[List[Point]], start_mode: str="auto") -> List[List[Point]]:
+    """
+    Endpoint-aware route ordering.
+
+    Tests several plausible first islands, then greedily selects the nearest
+    next endpoint while freely reversing open paths. This gives materially
+    shorter travel than a fixed source-file ordering without changing artwork.
+    """
+    paths=[p[:] for p in paths if len(p)>1]
+    if len(paths)<2:
+        return paths
+
+    mode=(start_mode or "auto").lower()
+
+    def center_score(p):
+        return min(math.hypot(*p[0]),math.hypot(*p[-1]))
+
+    def perimeter_score(p):
+        return -max(math.hypot(*p[0]),math.hypot(*p[-1]))
+
+    indices=list(range(len(paths)))
+    if mode=="center":
+        seeds=sorted(indices,key=lambda i:center_score(paths[i]))[:min(6,len(paths))]
+    elif mode=="perimeter":
+        seeds=sorted(indices,key=lambda i:perimeter_score(paths[i]))[:min(6,len(paths))]
+    else:
+        seeds=set()
+        seeds.update(sorted(indices,key=lambda i:center_score(paths[i]))[:3])
+        seeds.update(sorted(indices,key=lambda i:perimeter_score(paths[i]))[:3])
+        # Also include longest paths because starting on dominant artwork often
+        # reduces tiny-island connector churn.
+        seeds.update(sorted(indices,key=lambda i:-len(paths[i]))[:3])
+        seeds=list(seeds)
+
+    best_order=None
+    best_cost=None
+    for seed in seeds:
+        pending=[p[:] for i,p in enumerate(paths) if i!=seed]
+        first=paths[seed][:]
+        # choose orientation based on requested start preference
+        if mode=="center" and math.hypot(*first[-1])<math.hypot(*first[0]):
+            first.reverse()
+        elif mode=="perimeter" and math.hypot(*first[-1])>math.hypot(*first[0]):
+            first.reverse()
+        ordered=[first]
+        cost=0.0
+        while pending:
+            end=ordered[-1][-1]
+            best=None
+            for i,q in enumerate(pending):
+                d0=_dist(end,q[0]); d1=_dist(end,q[-1])
+                cand=(min(d0,d1),i,d1<d0)
+                if best is None or cand<best:
+                    best=cand
+            d,i,rev=best
+            q=pending.pop(i)
+            if rev:q.reverse()
+            cost+=d
+            ordered.append(q)
+        if best_cost is None or cost<best_cost:
+            best_cost=cost
+            best_order=ordered
+    return best_order or paths
+
+
+def _join_clean(paths: List[List[Point]], max_bridge: float=.065,
+                start_mode: str="auto", preserve_all: bool=True,
+                lane_radius: float=.985) -> Tuple[List[Point],dict]:
+    """
+    Produce one physically executable continuous XY route.
+
+    Short gaps use a direct connector. Longer unavoidable gaps are routed
+    around a reserved perimeter travel lane instead of crossing through the
+    design. If preserve_all=False they are skipped (legacy behavior).
+    """
+    ordered=_route_order(paths,start_mode)
+    if not ordered:
+        return [],{"skipped_islands":0,"direct_connectors":0,"perimeter_connectors":0,
+                   "connector_distance":0.0}
+
+    route=list(ordered[0])
+    skipped=0; direct=0; perimeter=0; connector_distance=0.0
     for path in ordered[1:]:
+        if not path: continue
         gap=_dist(route[-1],path[0])
-        if gap>max_bridge:
+        connector_distance+=gap
+        if gap<=max_bridge:
+            bridge=_resample_line(route[-1],path[0],.010)
+            route.extend(bridge[1:])
+            direct+=1
+        elif preserve_all:
+            bridge=_arc_connector(route[-1],path[0],lane_radius=lane_radius,step=.010)
+            route.extend(bridge[1:])
+            perimeter+=1
+        else:
             skipped+=1
             continue
-        route.extend(_resample_line(route[-1],path[0],.012)[1:])
         route.extend(path[1:])
-    return _dedupe(route),skipped
+
+    return _dedupe(route),{
+        "skipped_islands":skipped,
+        "direct_connectors":direct,
+        "perimeter_connectors":perimeter,
+        "connector_distance":round(connector_distance,4),
+    }
+
+
+def _resample_polyline(points: List[Point], max_step: float=.012) -> List[Point]:
+    """Bound XY step length for smoother real-machine motion."""
+    if len(points)<2:return points[:]
+    step=max(.003,min(.035,float(max_step)))
+    out=[points[0]]
+    for a,b in zip(points,points[1:]):
+        d=_dist(a,b)
+        n=max(1,int(math.ceil(d/step)))
+        for i in range(1,n+1):
+            out.append((a[0]+(b[0]-a[0])*i/n,a[1]+(b[1]-a[1])*i/n))
+    return _dedupe(out,1e-7)
 
 
 def _xy_to_thr(points: List[Point]) -> List[Tuple[float,float]]:
-    if len(points)<2: raise ValueError("Generated route is too short")
-    out=[]; last_theta=0.0
+    """
+    Convert normalized XY to machine THR while avoiding meaningless theta
+    whipping at the exact center.
+    """
+    if len(points)<2:
+        raise ValueError("Generated route is too short")
+    out=[]
+    last_theta=0.0
+    center_freeze=.012
     for x,y in points:
-        rho=min(1.0,math.hypot(x,y))
-        theta=math.atan2(y,x) if rho>1e-8 else last_theta
-        # unwrap theta for continuous rotary motion
-        while theta-last_theta>math.pi: theta-=2*math.pi
-        while theta-last_theta<-math.pi: theta+=2*math.pi
-        out.append((theta,rho)); last_theta=theta
+        rho=min(1.0,max(0.0,math.hypot(x,y)))
+        if rho<center_freeze:
+            theta=last_theta
+        else:
+            theta=math.atan2(y,x)
+            while theta-last_theta>math.pi: theta-=2*math.pi
+            while theta-last_theta<-math.pi: theta+=2*math.pi
+        if not (math.isfinite(theta) and math.isfinite(rho)):
+            raise ValueError("Generated route contains a non-finite coordinate")
+        out.append((theta,rho))
+        last_theta=theta
     return out
+
+
+def _validate_thr(points: List[Tuple[float,float]]) -> dict:
+    if len(points)<2:
+        raise ValueError("Generated THR route is too short")
+    max_dt=0.0; max_dr=0.0
+    for i,(t,r) in enumerate(points):
+        if not (math.isfinite(t) and math.isfinite(r)):
+            raise ValueError(f"Invalid THR coordinate at point {i}")
+        if r < -1e-9 or r > 1.000001:
+            raise ValueError(f"Rho outside table boundary at point {i}: {r}")
+        if i:
+            max_dt=max(max_dt,abs(t-points[i-1][0]))
+            max_dr=max(max_dr,abs(r-points[i-1][1]))
+    return {
+        "max_theta_step":round(max_dt,5),
+        "max_rho_step":round(max_dr,5),
+        "validated":1,
+    }
 
 
 def _svg_paths(path: Path) -> List[List[Point]]:
@@ -446,8 +637,8 @@ def _raster_paths(path: Path, threshold=128, invert=False) -> List[List[Point]]:
 
     largest=len(comps[0])
     # Keep substantially more detail than the previous 4% cutoff.
-    min_keep=max(6,int(largest*.0075))
-    selected=[c for c in comps if len(c)>=min_keep][:96]
+    min_keep=max(5,int(largest*.0045))
+    selected=[c for c in comps if len(c)>=min_keep][:192]
 
     paths=[]
     for comp in selected:
@@ -571,7 +762,14 @@ def _rdp(points: List[Point], epsilon: float) -> List[Point]:
 def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fit: float=.94,
                           smoothing: int=1, simplify: float=0.0025,
                           rotation_deg: float=0.0, offset_x: float=0.0, offset_y: float=0.0,
-                          max_bridge: float=0.055, start_mode: str="auto"):
+                          max_bridge: float=0.055, start_mode: str="auto",
+                          preserve_all: bool=True, machine_step: float=0.012):
+    """
+    Professional machine-oriented artwork -> THR pipeline.
+
+    The preview coordinates and saved THR are generated from this exact final
+    route, so preview == saved file == machine path.
+    """
     ext=path.suffix.lower()
     if ext==".thr":
         pts=[]
@@ -580,51 +778,95 @@ def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fi
             if not line or line.startswith("#"): continue
             sp=line.replace(","," ").split()
             if len(sp)>=2:
-                try: pts.append((float(sp[0]),max(0,min(1,float(sp[1])))))
-                except: pass
-        if len(pts)<2: raise ValueError("THR file has too few valid points")
-        return pts,{"source":"thr","skipped_islands":0,"route_points":len(pts)}
-    if ext==".svg": paths=_svg_paths(path)
-    elif ext==".dxf": paths=_dxf_paths(path)
-    elif ext in {".png",".jpg",".jpeg",".webp",".bmp"}: paths=_raster_paths(path,threshold,invert)
-    else: raise ValueError("Supported formats: SVG, DXF, PNG, JPG/JPEG, WEBP, BMP, THR")
-    paths=_normalize(paths,fit)
+                try:
+                    t=float(sp[0]); r=float(sp[1])
+                    if math.isfinite(t) and math.isfinite(r):
+                        pts.append((t,max(0.0,min(1.0,r))))
+                except Exception:
+                    pass
+        if len(pts)<2:
+            raise ValueError("THR file has too few valid points")
+        stats={"source":"thr","route_points":len(pts),"skipped_islands":0}
+        stats.update(_validate_thr(pts))
+        return pts,stats
+
+    if ext==".svg":
+        paths=_svg_paths(path)
+    elif ext==".dxf":
+        paths=_dxf_paths(path)
+    elif ext in {".png",".jpg",".jpeg",".webp",".bmp"}:
+        paths=_raster_paths(path,threshold,invert)
+    else:
+        raise ValueError("Supported formats: SVG, DXF, PNG, JPG/JPEG, WEBP, BMP, THR")
+
+    if not paths:
+        raise ValueError("No usable artwork geometry was detected")
+
+    # Keep artwork inside a reserved travel lane. Even if the user requests
+    # 98%, cap artwork slightly lower when preserving all disconnected islands.
+    requested_fit=max(.55,min(float(fit),.98))
+    effective_fit=min(requested_fit,.94) if preserve_all else requested_fit
+    paths=_normalize(paths,effective_fit)
     paths=_transform_paths(paths,rotation_deg,offset_x,offset_y)
-    paths=[_moving_average_path(p,smoothing) for p in paths]
+
+    smooth=max(0,min(int(smoothing),6))
+    paths=[_moving_average_path(q,smooth) for q in paths]
+
     simp=max(0.0,min(float(simplify),0.025))
     if simp>0:
-        paths=[_rdp(p,simp) if len(p)>3 else p for p in paths]
-    paths=_choose_start_path(paths,start_mode)
+        paths=[_rdp(q,simp) if len(q)>3 else q for q in paths]
 
-    # Trim anything outside circular table radius.
+    # Circular boundary verification after transforms.
     clipped=[]
     clipped_points=0
-    for p in paths:
-        q=[]
-        for x,y in p:
+    for q in paths:
+        clean=[]
+        for x,y in q:
             r=math.hypot(x,y)
-            if r<=1.001:
-                q.append((x,y))
+            if r<=effective_fit+0.015:
+                clean.append((x,y))
             else:
-                clipped_points += 1
-        if len(q)>1:
-            clipped.append(q)
+                clipped_points+=1
+        if len(clean)>1:
+            clipped.append(_dedupe(clean))
 
-    bridge=max(0.0,min(float(max_bridge),0.16))
-    route,skipped=_join_clean(clipped,max_bridge=bridge)
+    if not clipped:
+        raise ValueError("Artwork falls outside the table after positioning")
+
+    bridge=max(0.0,min(float(max_bridge),0.20))
+    route,join_stats=_join_clean(
+        clipped,
+        max_bridge=bridge,
+        start_mode=start_mode,
+        preserve_all=bool(preserve_all),
+        lane_radius=.985,
+    )
+    if len(route)<2:
+        raise ValueError("Could not create a continuous machine route")
+
+    # Real-machine smoothing: cap Cartesian spacing before polar conversion.
+    route=_resample_polyline(route,machine_step)
     thr=_xy_to_thr(route)
+    validation=_validate_thr(thr)
+
     stats={
-        "source":ext.lstrip('.'),
-        "skipped_islands":skipped,
+        "source":ext.lstrip("."),
         "route_points":len(thr),
         "input_paths":len(paths),
+        "retained_paths":len(clipped),
         "clipped_points":clipped_points,
-        "smoothing":int(max(0,min(int(smoothing),6))),
+        "smoothing":smooth,
         "simplify":round(simp,5),
         "rotation_deg":round(float(rotation_deg),2),
         "max_bridge":round(bridge,4),
         "start_mode":start_mode,
+        "preserve_all":1 if preserve_all else 0,
+        "requested_fit":round(requested_fit,3),
+        "effective_fit":round(effective_fit,3),
+        "machine_step":round(max(.003,min(.035,float(machine_step))),4),
     }
+    stats.update(join_stats)
+    stats.update(validation)
     if ext in {".png",".jpg",".jpeg",".webp",".bmp"}:
         stats.update(getattr(_raster_paths,"last_stats",{}) or {})
     return thr,stats

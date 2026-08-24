@@ -34,6 +34,12 @@ import subprocess
 import tempfile
 import uuid
 import shutil
+import socket
+import ipaddress
+import urllib.request
+import urllib.error
+import urllib.parse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Get log level from environment variable, default to INFO
 log_level_str = os.getenv('LOG_LEVEL', 'INFO').upper()
@@ -1153,6 +1159,235 @@ async def verify_security_password(request: SecurityVerifyRequest):
     input_hash = hashlib.sha256(request.password.encode('utf-8')).hexdigest()
     return {"valid": input_hash == state.security_password_hash}
 
+
+# ============================================================================
+# Windows ORYN Remote-Table Auto Discovery
+# ============================================================================
+#
+# This is intentionally backend-only so the locked frontend/UI is unchanged.
+# The existing Sand Tables UI already consumes /api/known-tables.  On Windows,
+# this helper discovers another ORYN backend (normally the Raspberry Pi), adds
+# it to state.known_tables, and the existing UI displays it automatically.
+#
+# Discovery order:
+#   1. Try http://oryn.local
+#   2. If needed, scan the current private IPv4 /24 LAN
+#
+# No machine/control, Theta-Rho, Pattern Forge, calibration, Delete Pattern,
+# theme, branding, or Raspberry-Pi networking code is changed.
+
+_oryn_discovery_cache = {
+    "last_scan": 0.0,
+    "tables": [],
+}
+_ORYN_DISCOVERY_CACHE_SECONDS = 20.0
+
+
+def _oryn_fetch_table_info(base_url: str, timeout: float = 0.55) -> Optional[dict]:
+    """Return ORYN /api/table-info from base_url, or None if not reachable."""
+    base_url = base_url.rstrip("/")
+    try:
+        req = urllib.request.Request(
+            f"{base_url}/api/table-info",
+            headers={"Accept": "application/json", "User-Agent": "ORYN-Windows-Discovery/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            if getattr(response, "status", 200) != 200:
+                return None
+            payload = json.loads(response.read().decode("utf-8", errors="replace"))
+        if not isinstance(payload, dict):
+            return None
+        if not payload.get("id") or not payload.get("name"):
+            return None
+        return payload
+    except Exception:
+        return None
+
+
+def _oryn_local_ipv4_addresses() -> List[str]:
+    """Return this Windows host's useful private IPv4 addresses."""
+    found = set()
+
+    # Hostname lookup can expose multiple adapters.
+    try:
+        for family, _, _, _, sockaddr in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            if family == socket.AF_INET and sockaddr:
+                ip = sockaddr[0]
+                try:
+                    addr = ipaddress.ip_address(ip)
+                    if addr.is_private and not addr.is_loopback and not addr.is_link_local:
+                        found.add(ip)
+                except ValueError:
+                    pass
+    except Exception:
+        pass
+
+    # UDP route selection catches the active adapter on many Windows systems.
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            addr = ipaddress.ip_address(ip)
+            if addr.is_private and not addr.is_loopback and not addr.is_link_local:
+                found.add(ip)
+        finally:
+            s.close()
+    except Exception:
+        pass
+
+    return sorted(found)
+
+
+def _oryn_discover_remote_tables(force: bool = False) -> List[dict]:
+    """Discover remote ORYN instances without altering the locked frontend."""
+    # Only auto-scan from the Windows desktop build. Raspberry Pi behavior stays
+    # exactly as before.
+    if os.name != "nt":
+        return []
+
+    now = time.time()
+    if (
+        not force
+        and _oryn_discovery_cache["tables"]
+        and now - float(_oryn_discovery_cache["last_scan"]) < _ORYN_DISCOVERY_CACHE_SECONDS
+    ):
+        return list(_oryn_discovery_cache["tables"])
+
+    local_ips = set(_oryn_local_ipv4_addresses())
+    candidates = []
+    seen_urls = set()
+
+    def add_candidate(url: str):
+        normalized = url.rstrip("/")
+        if normalized not in seen_urls:
+            seen_urls.add(normalized)
+            candidates.append(normalized)
+
+    # Preferred stable hostname first.
+    add_candidate("http://oryn.local")
+
+    # Also resolve oryn.local. If Bonjour/mDNS is working on Windows this avoids
+    # a subnet scan and still records a directly reachable IP candidate.
+    try:
+        resolved = socket.gethostbyname("oryn.local")
+        if resolved and resolved not in local_ips:
+            add_candidate(f"http://{resolved}")
+    except Exception:
+        pass
+
+    # Scan only the active private /24 network(s). This is intentionally bounded
+    # to avoid touching unrelated networks and keeps discovery fast.
+    for local_ip in local_ips:
+        try:
+            network = ipaddress.ip_network(f"{local_ip}/24", strict=False)
+            for host in network.hosts():
+                ip = str(host)
+                if ip not in local_ips:
+                    add_candidate(f"http://{ip}")
+        except ValueError:
+            continue
+
+    discovered_by_id = {}
+
+    # Probe oryn.local synchronously first because it is the expected target.
+    if candidates and candidates[0] == "http://oryn.local":
+        info = _oryn_fetch_table_info("http://oryn.local", timeout=0.85)
+        if info and info.get("id") != state.table_id:
+            discovered_by_id[info["id"]] = {
+                "id": info["id"],
+                "name": info["name"],
+                "url": "http://oryn.local",
+                "host": "oryn.local",
+                "version": info.get("version"),
+            }
+
+    # If the stable hostname was not enough, scan the LAN in parallel.
+    if not discovered_by_id:
+        ip_candidates = [u for u in candidates if u != "http://oryn.local"]
+        if ip_candidates:
+            max_workers = min(48, max(8, len(ip_candidates)))
+            with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="oryn-discovery") as pool:
+                future_map = {
+                    pool.submit(_oryn_fetch_table_info, url, 0.38): url
+                    for url in ip_candidates
+                }
+                for future in as_completed(future_map):
+                    url = future_map[future]
+                    try:
+                        info = future.result()
+                    except Exception:
+                        info = None
+
+                    if not info or info.get("id") == state.table_id:
+                        continue
+
+                    table_id = info["id"]
+                    if table_id in discovered_by_id:
+                        continue
+
+                    try:
+                        host = urllib.parse.urlparse(url).hostname or ""
+                    except Exception:
+                        host = ""
+
+                    discovered_by_id[table_id] = {
+                        "id": table_id,
+                        "name": info["name"],
+                        "url": url,
+                        "host": host,
+                        "version": info.get("version"),
+                    }
+
+    discovered = list(discovered_by_id.values())
+    _oryn_discovery_cache["last_scan"] = now
+    _oryn_discovery_cache["tables"] = discovered
+
+    if discovered:
+        logger.info(
+            "ORYN Windows auto-discovery found %d remote table(s): %s",
+            len(discovered),
+            ", ".join(f"{t['name']} ({t['url']})" for t in discovered),
+        )
+    else:
+        logger.info("ORYN Windows auto-discovery found no remote tables")
+
+    return discovered
+
+
+def _oryn_merge_discovered_tables_into_state(discovered: List[dict]) -> bool:
+    """Merge discovered tables into existing persisted known tables."""
+    if not discovered:
+        return False
+
+    changed = False
+    by_id = {t.get("id"): t for t in state.known_tables if t.get("id")}
+
+    for table in discovered:
+        table_id = table.get("id")
+        if not table_id or table_id == state.table_id:
+            continue
+
+        existing = by_id.get(table_id)
+        if existing is None:
+            state.known_tables.append(dict(table))
+            by_id[table_id] = state.known_tables[-1]
+            changed = True
+            continue
+
+        # Keep any user-renamed table name. Only refresh connection metadata.
+        for key in ("url", "host", "port", "version"):
+            value = table.get(key)
+            if value is not None and existing.get(key) != value:
+                existing[key] = value
+                changed = True
+
+    if changed:
+        state.save()
+
+    return changed
+
+
 # ============================================================================
 # Multi-Table Identity Endpoints
 # ============================================================================
@@ -1208,9 +1443,18 @@ async def get_known_tables():
     """
     Get list of known remote tables.
 
-    These are tables that have been manually added and are persisted
-    for multi-table management.
+    On Windows, this also performs safe local-network ORYN discovery so the
+    existing locked Sand Tables UI can automatically show the Raspberry Pi.
+    On Raspberry Pi/Linux, behavior remains unchanged.
     """
+    if os.name == "nt":
+        try:
+            discovered = await asyncio.to_thread(_oryn_discover_remote_tables)
+            _oryn_merge_discovered_tables_into_state(discovered)
+        except Exception as e:
+            # Discovery must never break the existing table list/UI.
+            logger.warning(f"ORYN Windows table auto-discovery failed: {e}")
+
     return {"tables": state.known_tables}
 
 @app.post("/api/known-tables", tags=["multi-table"])
@@ -1768,6 +2012,8 @@ async def pattern_generator_preview(
     offset_y: float = Form(0.0),
     max_bridge: float = Form(0.055),
     start_mode: str = Form("auto"),
+    preserve_all: bool = Form(True),
+    machine_step: float = Form(0.012),
 ):
     """Convert artwork to normalized THR preview without touching motion state."""
     from modules.pattern_generator.converter import convert_upload_to_thr, thr_text
@@ -1792,9 +2038,11 @@ async def pattern_generator_preview(
             offset_y,
             max_bridge,
             start_mode,
+            preserve_all,
+            machine_step,
         )
         with open(preview,"w",encoding="utf-8") as fh: fh.write(thr_text(points))
-        step=max(1,len(points)//3500)
+        step=max(1,len(points)//6000)
         coords=[[float(t),float(r)] for t,r in points[::step]]
         if points and (not coords or coords[-1] != [float(points[-1][0]),float(points[-1][1])]):
             coords.append([float(points[-1][0]),float(points[-1][1])])
