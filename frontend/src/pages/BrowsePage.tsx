@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/sheet'
 import { preExecutionOptions } from '@/lib/types'
 import { PatternGeneratorDialog } from '@/components/PatternGeneratorDialog'
-import { Sparkles, Upload, Search, Heart, Play, Trash2, ListStart, ListPlus, Crosshair, CircleDot, MoveDiagonal2, SkipForward, WandSparkles, Flag, Check, Clock3, Gauge } from 'lucide-react'
+import { Sparkles, Upload,Play, Trash2, ListStart, ListPlus, Crosshair, CircleDot, MoveDiagonal2, SkipForward, WandSparkles, Flag, Check, Clock3, Gauge } from 'lucide-react'
 
 // Types
 interface PatternMetadata {
