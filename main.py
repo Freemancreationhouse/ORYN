@@ -1807,7 +1807,7 @@ async def debug_serial_send(request: DebugSerialCommand):
             conn=state.conn
             try:
                 if hasattr(conn,'reset_input_buffer'): await asyncio.to_thread(conn.reset_input_buffer)
-                payload=cmd if cmd in ('?','!','~') else cmd+'\\n'
+                payload=cmd if cmd in ('?','!','~') else cmd+'\n'
                 await asyncio.to_thread(conn.send,payload)
                 responses=[]; started=time.time()
                 while time.time()-started < request.timeout:
@@ -1816,25 +1816,25 @@ async def debug_serial_send(request: DebugSerialCommand):
                         responses.append(line); low=line.lower().strip()
                         if (cmd=='?' and line.startswith('<')) or low=='ok' or low.startswith('error') or low.startswith('alarm'): break
                     else: await asyncio.sleep(0.03)
-                return {"success":True,"command":cmd,"responses":responses,"raw":"\\n".join(responses),"shared":True}
+                return {"success":True,"command":cmd,"responses":responses,"raw":"\n".join(responses),"shared":True}
             except Exception as e: raise HTTPException(status_code=500,detail=str(e))
         ser=target
         try:
-            ser.reset_input_buffer(); payload=cmd if cmd in ('?','!','~') else cmd+'\\n'
+            ser.reset_input_buffer(); payload=cmd if cmd in ('?','!','~') else cmd+'\n'
             await asyncio.to_thread(ser.write,payload.encode()); await asyncio.to_thread(ser.flush)
             responses=[]; buffer=''; started=time.time(); await asyncio.sleep(0.05)
             while time.time()-started < request.timeout:
                 waiting=ser.in_waiting
                 if waiting:
                     buffer+=(await asyncio.to_thread(ser.read,waiting)).decode('utf-8',errors='replace')
-                    while '\\n' in buffer:
-                        line,buffer=buffer.split('\\n',1); line=line.strip()
+                    while '\n' in buffer:
+                        line,buffer=buffer.split('\n',1); line=line.strip()
                         if line:
                             responses.append(line); low=line.lower()
                             if (cmd=='?' and line.startswith('<')) or low=='ok' or low.startswith('error') or low.startswith('alarm'): break
                 else: await asyncio.sleep(0.02)
             if buffer.strip(): responses.append(buffer.strip())
-            return {"success":True,"command":cmd,"responses":responses,"raw":"\\n".join(responses),"shared":False}
+            return {"success":True,"command":cmd,"responses":responses,"raw":"\n".join(responses),"shared":False}
         except Exception as e: raise HTTPException(status_code=500,detail=str(e))
 
 @app.get("/api/debug-serial/status", tags=["debug-serial"])
