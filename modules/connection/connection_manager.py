@@ -998,6 +998,33 @@ def home(timeout=120):
         homing_speed = 400
         if effective_table_type == 'kinetiq_motion_mini':
             homing_speed = 100
+
+        # CALIBRATION-AWARE CRASH HOME:
+        # The physical Center->Perimeter travel can change dramatically with the
+        # motor-driver microstep/jumper configuration. Pattern rho scaling already
+        # uses rho_travel_units; crash homing must use the SAME scale rather than
+        # a fixed -22/-30 controller-unit move.
+        default_crash_travel = 30.0 if effective_table_type == 'kinetiq_motion_mini' else 22.0
+        saved_rho_travel = getattr(state, 'rho_travel_units', None)
+        rho_is_calibrated = bool(getattr(state, 'rho_calibrated', False) and saved_rho_travel)
+        try:
+            calibrated_crash_travel = abs(float(saved_rho_travel)) if rho_is_calibrated else default_crash_travel
+        except (TypeError, ValueError):
+            calibrated_crash_travel = default_crash_travel
+            rho_is_calibrated = False
+
+        # Normalize physical homing speed across very different controller-unit
+        # scales. Aim for roughly 12 seconds for a full calibrated radial stroke,
+        # while keeping conservative bounds for small/full-step configurations.
+        if rho_is_calibrated:
+            crash_homing_speed = max(10.0, min(260.0, calibrated_crash_travel * 5.0))
+        else:
+            crash_homing_speed = homing_speed
+
+        logger.info(
+            f"Crash-home radial plan: travel={calibrated_crash_travel:.4f} controller units, "
+            f"speed={crash_homing_speed:.2f}, source={'saved perimeter calibration' if rho_is_calibrated else 'legacy default'}"
+        )
         try:
             if state.homing == 1:
                 # Mode 1: Sensor-based homing using $H
@@ -1066,19 +1093,19 @@ def home(timeout=120):
                     logger.warning("Sensor homing incomplete (Y failed) - falling back to crash homing")
 
                     # Perform crash homing as fallback
-                    logger.info(f"Executing crash homing fallback at {homing_speed} mm/min")
+                    logger.info(f"Executing calibration-aware crash homing fallback at {crash_homing_speed:.2f} controller-units/min")
 
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
                     try:
                         if effective_table_type == 'kinetiq_motion_mini':
-                            result = loop.run_until_complete(send_grbl_coordinates(0, -30, homing_speed, home=True))
+                            result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel, crash_homing_speed, home=True))
                             if not result:
                                 logger.error("Crash homing fallback failed")
                                 homing_complete.set()
                                 return
                         else:
-                            result = loop.run_until_complete(send_grbl_coordinates(0, -22, homing_speed, home=True))
+                            result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel, crash_homing_speed, home=True))
                             if not result:
                                 logger.error("Crash homing fallback failed")
                                 homing_complete.set()
@@ -1141,26 +1168,26 @@ def home(timeout=120):
                 logger.info(f"Sensor homing completed - theta set to {state.angular_homing_offset_degrees}° ({offset_radians:.3f} rad), rho=0")
 
             else:
-                logger.info(f"Using crash homing mode at {homing_speed} mm/min")
+                logger.info(f"Using calibration-aware crash homing mode at {crash_homing_speed:.2f} controller-units/min")
 
                 # Run async function in new event loop
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 try:
                     if effective_table_type == 'kinetiq_motion_mini':
-                        result = loop.run_until_complete(send_grbl_coordinates(0, -30, homing_speed, home=True))
+                        result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel, crash_homing_speed, home=True))
                         if not result:
                             logger.error("Crash homing failed - send_grbl_coordinates returned False")
                             homing_complete.set()
                             return
-                        state.machine_y -= 30
+                        state.machine_y -= calibrated_crash_travel
                     else:
-                        result = loop.run_until_complete(send_grbl_coordinates(0, -22, homing_speed, home=True))
+                        result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel, crash_homing_speed, home=True))
                         if not result:
                             logger.error("Crash homing failed - send_grbl_coordinates returned False")
                             homing_complete.set()
                             return
-                        state.machine_y -= 22
+                        state.machine_y -= calibrated_crash_travel
                 finally:
                     loop.close()
 
