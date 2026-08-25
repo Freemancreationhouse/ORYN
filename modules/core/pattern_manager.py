@@ -523,8 +523,20 @@ class MotionControlThread:
 
         delta_theta = theta - state.current_theta
         delta_rho = rho - state.current_rho
-        x_increment = delta_theta * 100 / (2 * pi * x_scaling_factor)
-        y_increment = delta_rho * 100 / y_scaling_factor
+
+        # UNIVERSAL CALIBRATION ENGINE:
+        # If learned, one physical revolution and one full radial stroke are the
+        # only geometry constants used. THR remains normalized (theta radians, rho 0..1),
+        # so the same pattern scales automatically to any table size/gearing/microstep setup.
+        if getattr(state, 'theta_calibrated', False) and getattr(state, 'theta_revolution_units', None):
+            x_increment = (delta_theta / (2 * pi)) * float(state.theta_revolution_units)
+        else:
+            x_increment = delta_theta * 100 / (2 * pi * x_scaling_factor)
+
+        if getattr(state, 'rho_calibrated', False) and getattr(state, 'rho_travel_units', None):
+            y_increment = delta_rho * float(state.rho_travel_units) * float(getattr(state, 'rho_direction', 1.0) or 1.0)
+        else:
+            y_increment = delta_rho * 100 / y_scaling_factor
 
         x_total_steps = state.x_steps_per_mm * (100/x_scaling_factor)
         y_total_steps = state.y_steps_per_mm * (100/y_scaling_factor)
@@ -543,7 +555,8 @@ class MotionControlThread:
             'kinetiq_motion_pro_pulley', 'kinetiq_motion_pro',
             'kinetiq_motion'
         }
-        if effective_table_type in known_coupled_profiles:
+        universal_geometry = bool(getattr(state, 'theta_calibrated', False) and getattr(state, 'rho_calibrated', False))
+        if effective_table_type in known_coupled_profiles and not universal_geometry:
             offset = x_increment * (x_total_steps * x_scaling_factor / (state.gear_ratio * y_total_steps * y_scaling_factor))
             if effective_table_type == 'kinetiq_motion_mini' or state.y_steps_per_mm == 546:
                 y_increment -= offset
@@ -585,7 +598,7 @@ class MotionControlThread:
 
         Includes retry logic for serial corruption errors (common on Pi 3B+).
         """
-        gcode = f"$J=G91 G21 Y{y:.2f} F{speed}" if home else f"G1 X{x:.2f} Y{y:.2f} F{speed}"
+        gcode = f"$J=G91 G21 Y{y:.2f} F{speed}" if home else f"G90 G21 G1 X{x:.2f} Y{y:.2f} F{speed}"
         max_wait_time = 120  # Maximum seconds to wait for 'ok' response
         max_corruption_retries = 10  # Max retries for corruption-type errors
         max_timeout_retries = 10  # Max retries for timeout (lost 'ok' response)
@@ -2014,6 +2027,11 @@ def get_status():
         "table_type": state.table_type_override or state.table_type,
         "rho_calibrated": bool(getattr(state, 'rho_calibrated', False)),
         "rho_travel_units": getattr(state, 'rho_travel_units', None),
+        "rho_direction": float(getattr(state, 'rho_direction', 1.0) or 1.0),
+        "theta_calibrated": bool(getattr(state, 'theta_calibrated', False)),
+        "theta_revolution_units": getattr(state, 'theta_revolution_units', None),
+        "rotation_calibration_active": bool(getattr(state, 'rotation_calibration_active', False)),
+        "rotation_calibration_current_units": float(getattr(state, 'rotation_calibration_current_units', 0.0) or 0.0),
         "perimeter_calibration_active": bool(getattr(state, 'perimeter_calibration_active', False)),
         "perimeter_calibration_current_units": float(getattr(state, 'perimeter_calibration_current_units', 0.0) or 0.0)
     }

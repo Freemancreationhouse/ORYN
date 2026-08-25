@@ -56,6 +56,13 @@ class AppState:
         # Positive value => exact controller Y travel for rho 0 -> 1, learned once.
         self.rho_travel_units = None
         self.rho_calibrated = False
+        self.rho_direction = 1.0
+        # Universal angular calibration: exact controller X travel for one physical 360 degree turn.
+        self.theta_revolution_units = None
+        self.theta_calibrated = False
+        self.rotation_calibration_active = False
+        self.rotation_calibration_start_x = None
+        self.rotation_calibration_current_units = 0.0
         self.perimeter_calibration_active = False
         self.perimeter_calibration_start_y = None
         self.perimeter_calibration_current_units = 0.0
@@ -503,6 +510,9 @@ class AppState:
             "gear_ratio": self.gear_ratio,
             "rho_travel_units": self.rho_travel_units,
             "rho_calibrated": self.rho_calibrated,
+            "rho_direction": self.rho_direction,
+            "theta_revolution_units": self.theta_revolution_units,
+            "theta_calibrated": self.theta_calibrated,
             "homing": self.homing,
             "homing_user_override": self.homing_user_override,
             "angular_homing_offset_degrees": self.angular_homing_offset_degrees,
@@ -611,6 +621,9 @@ class AppState:
         self.gear_ratio = data.get('gear_ratio', 10)
         self.rho_travel_units = data.get('rho_travel_units', None)
         self.rho_calibrated = bool(data.get('rho_calibrated', self.rho_travel_units is not None))
+        self.rho_direction = float(data.get('rho_direction', 1.0) or 1.0)
+        self.theta_revolution_units = data.get('theta_revolution_units', None)
+        self.theta_calibrated = bool(data.get('theta_calibrated', self.theta_revolution_units is not None))
         self.homing = data.get('homing', 0)
         self.homing_user_override = data.get('homing_user_override', False)
         self.angular_homing_offset_degrees = data.get('angular_homing_offset_degrees', 0.0)

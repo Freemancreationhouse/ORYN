@@ -43,6 +43,7 @@ export function TableControlPage() {
   const [currentTheta, setCurrentTheta] = useState(0)
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const [perimeterUnitsInput, setPerimeterUnitsInput] = useState('')
+  const [rotationUnitsInput, setRotationUnitsInput] = useState('')
   const [calibrationBusy, setCalibrationBusy] = useState(false)
 
   // Subscribe to shared status WebSocket via store
@@ -53,6 +54,10 @@ export function TableControlPage() {
   const isHoming = useStatusStore((s) => s.status?.is_homing ?? false)
   const rhoCalibrated = useStatusStore((s) => s.status?.rho_calibrated ?? false)
   const rhoTravelUnits = useStatusStore((s) => s.status?.rho_travel_units ?? null)
+  const thetaCalibrated = useStatusStore((s) => s.status?.theta_calibrated ?? false)
+  const thetaRevolutionUnits = useStatusStore((s) => s.status?.theta_revolution_units ?? null)
+  const rotationCalibrationActive = useStatusStore((s) => s.status?.rotation_calibration_active ?? false)
+  const rotationCalibrationCurrentUnits = useStatusStore((s) => s.status?.rotation_calibration_current_units ?? 0)
   const perimeterCalibrationActive = useStatusStore((s) => s.status?.perimeter_calibration_active ?? false)
   const perimeterCalibrationCurrentUnits = useStatusStore((s) => s.status?.perimeter_calibration_current_units ?? 0)
   const currentRho = useStatusStore((s) => s.status?.current_rho ?? 0)
@@ -65,6 +70,10 @@ export function TableControlPage() {
   useEffect(() => {
     if (rhoTravelUnits !== null && !perimeterCalibrationActive) setPerimeterUnitsInput(rhoTravelUnits.toFixed(3))
   }, [rhoTravelUnits, perimeterCalibrationActive])
+
+  useEffect(() => {
+    if (thetaRevolutionUnits !== null && !rotationCalibrationActive) setRotationUnitsInput(thetaRevolutionUnits.toFixed(3))
+  }, [thetaRevolutionUnits, rotationCalibrationActive])
 
   // Serial terminal state
   const [serialPorts, setSerialPorts] = useState<string[]>([])
@@ -206,6 +215,39 @@ export function TableControlPage() {
     } catch {
       toast.error('Failed to rotate')
     }
+  }
+
+  const handleStartRotationCalibration = async () => {
+    if (isPatternRunning || isHoming) return toast.error('Wait until HOME/pattern motion has finished')
+    setCalibrationBusy(true)
+    try { await apiClient.post('/api/rotation-calibration/start'); toast.success('Jog theta until the ball completes exactly one physical 360° turn') }
+    catch (e) { toast.error(e instanceof Error ? e.message : 'Could not start rotation setup') }
+    finally { setCalibrationBusy(false) }
+  }
+  const handleRotationJog = async (units: number) => {
+    setCalibrationBusy(true)
+    try { await apiClient.post('/api/rotation-calibration/jog', { units, speed: 80 }) }
+    catch (e) { toast.error(e instanceof Error ? e.message : 'Rotation jog failed') }
+    finally { setCalibrationBusy(false) }
+  }
+  const handleSaveRotation = async () => {
+    setCalibrationBusy(true)
+    try { const r=await apiClient.post<{theta_revolution_units:number}>('/api/rotation-calibration/save'); setRotationUnitsInput(r.theta_revolution_units.toFixed(3)); toast.success(`Full circle saved: ${r.theta_revolution_units.toFixed(3)} units`) }
+    catch (e) { toast.error(e instanceof Error ? e.message : 'Could not save full circle') }
+    finally { setCalibrationBusy(false) }
+  }
+  const handleSetRotationUnits = async () => {
+    const units=Number(rotationUnitsInput); if(!Number.isFinite(units)||units<=0)return toast.error('Enter valid controller units for one revolution')
+    setCalibrationBusy(true)
+    try { await apiClient.post('/api/rotation-calibration/set',{units}); toast.success('Full-circle calibration updated') }
+    catch(e){toast.error(e instanceof Error?e.message:'Could not update full-circle calibration')}
+    finally{setCalibrationBusy(false)}
+  }
+  const handleResetRotationCalibration = async () => {
+    setCalibrationBusy(true)
+    try { await apiClient.post('/api/rotation-calibration/reset'); setRotationUnitsInput(''); toast.success('Original theta scale restored') }
+    catch { toast.error('Could not reset rotation calibration') }
+    finally { setCalibrationBusy(false) }
   }
 
   const handleStartPerimeterCalibration = async () => {
@@ -666,6 +708,24 @@ export function TableControlPage() {
                 </DialogContent>
                 </Dialog>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Universal Full-Circle Calibration */}
+          <Card className="transition-all duration-200 hover:shadow-md hover:border-primary/20">
+            <CardHeader className="pb-3"><div className="flex items-start justify-between gap-3"><div><CardTitle className="text-lg">Full Circle Calibration</CardTitle><CardDescription>Teach exact controller travel for one physical 360° rotation</CardDescription></div><Badge variant="outline">UNIVERSAL</Badge></div></CardHeader>
+            <CardContent className="space-y-4">
+              <Alert><span className="material-icons-outlined text-base mr-2 shrink-0">360</span><AlertDescription className="text-xs">Table size, motor, gearing and microstepping do not matter. Jog until the ball returns to the exact same angle after one full turn, then Save.</AlertDescription></Alert>
+              {!rotationCalibrationActive ? <div className="space-y-3">
+                <Button onClick={handleStartRotationCalibration} disabled={calibrationBusy||isHoming||isPatternRunning} className="w-full gap-2"><span className="material-icons-outlined">360</span>Start Full-Circle Calibration</Button>
+                <div className="flex gap-2"><Input value={rotationUnitsInput} onChange={(e)=>setRotationUnitsInput(e.target.value)} type="number" step="0.001" min="0.001" placeholder="Controller units / 360°"/><Button variant="secondary" onClick={handleSetRotationUnits} disabled={calibrationBusy||!rotationUnitsInput}>Update</Button></div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground"><span>Saved revolution</span><span className="font-mono">{thetaCalibrated&&thetaRevolutionUnits!==null?`${thetaRevolutionUnits.toFixed(3)} units`:'Original source geometry'}</span></div>
+                {thetaCalibrated&&<Button variant="outline" size="sm" onClick={handleResetRotationCalibration} disabled={calibrationBusy}>Reset to Source Default</Button>}
+              </div> : <div className="space-y-3">
+                <div className="rounded-lg border bg-muted/30 p-3 flex items-center justify-between"><span className="text-sm font-medium">Accumulated turn travel</span><span className="font-mono font-semibold">{rotationCalibrationCurrentUnits.toFixed(3)} units</span></div>
+                <div className="grid grid-cols-3 gap-2"><Button variant="secondary" onClick={()=>handleRotationJog(-1)} disabled={calibrationBusy}>BACK 1</Button><Button variant="secondary" onClick={()=>handleRotationJog(1)} disabled={calibrationBusy}>FWD 1</Button><Button variant="secondary" onClick={()=>handleRotationJog(5)} disabled={calibrationBusy}>FWD 5</Button><Button variant="secondary" onClick={()=>handleRotationJog(-5)} disabled={calibrationBusy}>BACK 5</Button><Button variant="secondary" onClick={()=>handleRotationJog(10)} disabled={calibrationBusy}>FWD 10</Button><Button variant="secondary" onClick={()=>handleRotationJog(25)} disabled={calibrationBusy}>FWD 25</Button></div>
+                <Button onClick={handleSaveRotation} disabled={calibrationBusy||rotationCalibrationCurrentUnits<0.1} className="w-full gap-2"><span className="material-icons-outlined">save</span>Save This as Exactly One Revolution</Button>
+              </div>}
             </CardContent>
           </Card>
 

@@ -2479,6 +2479,72 @@ async def delete_theta_rho_file(request: DeleteFileRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class RotationCalibrationJogRequest(BaseModel):
+    units: float
+    speed: float = 80.0
+
+class RotationCalibrationSetRequest(BaseModel):
+    units: float
+
+@app.get("/api/rotation-calibration", tags=["machine-calibration"])
+async def get_rotation_calibration():
+    original_units=50.0
+    effective=state.theta_revolution_units if state.theta_calibrated and state.theta_revolution_units else original_units
+    return {"calibrated":bool(state.theta_calibrated and state.theta_revolution_units),"theta_revolution_units":state.theta_revolution_units,"effective_units":effective,"active":state.rotation_calibration_active,"current_units":state.rotation_calibration_current_units}
+
+@app.post("/api/rotation-calibration/start", tags=["machine-calibration"])
+async def start_rotation_calibration():
+    if not (state.conn and state.conn.is_connected()): raise HTTPException(status_code=400,detail="Connection not established")
+    check_homing_in_progress()
+    if state.current_playing_file: raise HTTPException(status_code=409,detail="Stop the current pattern first")
+    try: await connection_manager.update_machine_position()
+    except Exception as e: logger.warning(f"Rotation calibration start refresh failed: {e}")
+    state.rotation_calibration_start_x=float(state.machine_x)
+    state.rotation_calibration_current_units=0.0
+    state.rotation_calibration_active=True
+    return {"success":True,"start_x":state.rotation_calibration_start_x}
+
+@app.post("/api/rotation-calibration/jog", tags=["machine-calibration"])
+async def jog_rotation_calibration(request: RotationCalibrationJogRequest):
+    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None: raise HTTPException(status_code=409,detail="Start rotation calibration first")
+    units=float(request.units)
+    if abs(units)>25: raise HTTPException(status_code=400,detail="Jog limited to 25 controller units per click")
+    speed=max(5.0,min(float(request.speed),250.0))
+    before=float(state.machine_x)
+    ok=await connection_manager.send_grbl_coordinates(units,0,speed,timeout=30,home=True)
+    if not ok: raise HTTPException(status_code=500,detail="Controller did not acknowledge rotation jog")
+    await connection_manager.check_idle_async(timeout=60)
+    try: await connection_manager.update_machine_position()
+    except Exception: state.machine_x=before+units
+    state.rotation_calibration_current_units=abs(float(state.machine_x)-float(state.rotation_calibration_start_x))
+    return {"success":True,"current_units":state.rotation_calibration_current_units,"machine_x":state.machine_x}
+
+@app.post("/api/rotation-calibration/save", tags=["machine-calibration"])
+async def save_rotation_calibration():
+    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None: raise HTTPException(status_code=409,detail="Start rotation calibration first")
+    try: await connection_manager.update_machine_position()
+    except Exception: pass
+    signed_units=float(state.machine_x)-float(state.rotation_calibration_start_x)
+    units=abs(signed_units)
+    if units<0.1: raise HTTPException(status_code=400,detail="Jog exactly one physical revolution before Save")
+    state.theta_revolution_units=signed_units; state.theta_calibrated=True
+    state.rotation_calibration_current_units=units; state.rotation_calibration_active=False; state.rotation_calibration_start_x=None
+    state.current_theta = 0.0
+    state.save(); logger.info(f"Universal rotation saved: 2pi = {units:.4f} controller units")
+    return {"success":True,"theta_revolution_units":signed_units}
+
+@app.post("/api/rotation-calibration/set", tags=["machine-calibration"])
+async def set_rotation_calibration(request: RotationCalibrationSetRequest):
+    units=float(request.units)
+    if abs(units)<=0 or units>100000: raise HTTPException(status_code=400,detail="Invalid revolution travel")
+    state.theta_revolution_units=units; state.theta_calibrated=True; state.save()
+    return {"success":True,"theta_revolution_units":units}
+
+@app.post("/api/rotation-calibration/reset", tags=["machine-calibration"])
+async def reset_rotation_calibration():
+    state.theta_revolution_units=None; state.theta_calibrated=False; state.rotation_calibration_active=False; state.rotation_calibration_start_x=None; state.rotation_calibration_current_units=0.0; state.save()
+    return {"success":True}
+
 class PerimeterCalibrationJogRequest(BaseModel):
     units: float
     speed: float = 60.0
@@ -2526,9 +2592,10 @@ async def save_perimeter_calibration():
     if not state.perimeter_calibration_active or state.perimeter_calibration_start_y is None: raise HTTPException(status_code=409,detail="Start perimeter calibration first")
     try: await connection_manager.update_machine_position()
     except Exception: pass
-    units=abs(float(state.machine_y)-float(state.perimeter_calibration_start_y))
+    signed_units=float(state.machine_y)-float(state.perimeter_calibration_start_y)
+    units=abs(signed_units)
     if units<1.0: raise HTTPException(status_code=400,detail="Jog to the real perimeter before Save")
-    state.rho_travel_units=units; state.rho_calibrated=True; state.current_rho=1.0
+    state.rho_travel_units=units; state.rho_direction=(1.0 if signed_units>=0 else -1.0); state.rho_calibrated=True; state.current_rho=1.0
     state.perimeter_calibration_current_units=units; state.perimeter_calibration_active=False; state.perimeter_calibration_start_y=None
     state.save(); logger.info(f"Universal perimeter saved: rho 0->1 = {units:.4f} controller units")
     return {"success":True,"rho_travel_units":units}

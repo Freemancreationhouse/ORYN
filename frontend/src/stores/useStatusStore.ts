@@ -40,6 +40,10 @@ export interface StatusData {
   table_type: string | null
   rho_calibrated?: boolean
   rho_travel_units?: number | null
+  theta_calibrated?: boolean
+  theta_revolution_units?: number | null
+  rotation_calibration_active?: boolean
+  rotation_calibration_current_units?: number
   perimeter_calibration_active?: boolean
   perimeter_calibration_current_units?: number
 }

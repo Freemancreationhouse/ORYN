@@ -496,7 +496,7 @@ async def send_grbl_coordinates(x, y, speed=600, timeout=30, home=False):
             return False
 
         try:
-            gcode = f"$J=G91 G21 Y{y:.2f} F{speed}" if home else f"G1 X{x:.2f} Y{y:.2f} F{speed}"
+            gcode = f"$J=G91 G21 Y{y:.2f} F{speed}" if home else f"G90 G21 G1 X{x:.2f} Y{y:.2f} F{speed}"
             await asyncio.to_thread(state.conn.send, gcode + "\n")
             logger.debug(f"Sent command: {gcode}")
 
@@ -1099,13 +1099,13 @@ def home(timeout=120):
                     asyncio.set_event_loop(loop)
                     try:
                         if effective_table_type == 'kinetiq_motion_mini':
-                            result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel, crash_homing_speed, home=True))
+                            result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel * float(getattr(state, 'rho_direction', 1.0) or 1.0), crash_homing_speed, home=True))
                             if not result:
                                 logger.error("Crash homing fallback failed")
                                 homing_complete.set()
                                 return
                         else:
-                            result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel, crash_homing_speed, home=True))
+                            result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel * float(getattr(state, 'rho_direction', 1.0) or 1.0), crash_homing_speed, home=True))
                             if not result:
                                 logger.error("Crash homing fallback failed")
                                 homing_complete.set()
@@ -1175,14 +1175,14 @@ def home(timeout=120):
                 asyncio.set_event_loop(loop)
                 try:
                     if effective_table_type == 'kinetiq_motion_mini':
-                        result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel, crash_homing_speed, home=True))
+                        result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel * float(getattr(state, 'rho_direction', 1.0) or 1.0), crash_homing_speed, home=True))
                         if not result:
                             logger.error("Crash homing failed - send_grbl_coordinates returned False")
                             homing_complete.set()
                             return
                         state.machine_y -= calibrated_crash_travel
                     else:
-                        result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel, crash_homing_speed, home=True))
+                        result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel * float(getattr(state, 'rho_direction', 1.0) or 1.0), crash_homing_speed, home=True))
                         if not result:
                             logger.error("Crash homing failed - send_grbl_coordinates returned False")
                             homing_complete.set()
