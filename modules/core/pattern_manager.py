@@ -529,12 +529,28 @@ class MotionControlThread:
         x_total_steps = state.x_steps_per_mm * (100/x_scaling_factor)
         y_total_steps = state.y_steps_per_mm * (100/y_scaling_factor)
 
-        offset = x_increment * (x_total_steps * x_scaling_factor / (state.gear_ratio * y_total_steps * y_scaling_factor))
-
-        if state.table_type == 'kinetiq_motion_mini' or state.y_steps_per_mm == 546:
-            y_increment -= offset
+        # Theta->rho coupling compensation is required by the original known
+        # KinetiQ mechanical profiles because rotation mechanically influences
+        # radial position.  A custom/unknown GRBL Theta-Rho table can have
+        # independent theta and rho drives; applying the reference coupling to
+        # such a table causes rho to race toward center/perimeter while theta
+        # rotates.  Preserve the proven compensation for every known profile,
+        # but do not invent coupling for an unknown/custom machine.
+        effective_table_type = getattr(state, 'table_type_override', None) or state.table_type
+        known_coupled_profiles = {
+            'kinetiq_motion_mini', 'kinetiq_motion_mini_pro',
+            'kinetiq_motion_mini_pro_byj', 'kinetiq_motion_gold',
+            'kinetiq_motion_pro_pulley', 'kinetiq_motion_pro',
+            'kinetiq_motion'
+        }
+        if effective_table_type in known_coupled_profiles:
+            offset = x_increment * (x_total_steps * x_scaling_factor / (state.gear_ratio * y_total_steps * y_scaling_factor))
+            if effective_table_type == 'kinetiq_motion_mini' or state.y_steps_per_mm == 546:
+                y_increment -= offset
+            else:
+                y_increment += offset
         else:
-            y_increment += offset
+            offset = 0.0
 
         new_x_abs = state.machine_x + x_increment
         new_y_abs = state.machine_y + y_increment
