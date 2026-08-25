@@ -508,81 +508,35 @@ export function NowPlayingBar({ isLogsOpen = false, logsDrawerHeight = 256, isVi
       })
   }, [status?.current_file, coordinates.length])
 
-  // Get target index from progress percentage
+  // Map the preview directly to backend-reported execution progress.
+  // This deliberately avoids predicting motion with a fixed coordinates/second
+  // value: the physical controller is the source of truth for progress.
   const getTargetIndex = useCallback((coords: Coordinate[]): number => {
     if (coords.length === 0) return 0
-    const progressPercent = status?.progress?.percentage || 0
-    return (progressPercent / 100) * coords.length
-  }, [status?.progress?.percentage])
+    const current = Number(status?.progress?.current ?? 0)
+    const total = Number(status?.progress?.total ?? 0)
+    if (Number.isFinite(current) && Number.isFinite(total) && total > 0) {
+      const ratio = Math.max(0, Math.min(1, current / total))
+      return ratio * coords.length
+    }
+    const progressPercent = Number(status?.progress?.percentage ?? 0)
+    return (Math.max(0, Math.min(100, progressPercent)) / 100) * coords.length
+  }, [status?.progress?.current, status?.progress?.total, status?.progress?.percentage])
 
-  // Track progress updates for smooth interpolation
+  // Draw exactly where the backend says the machine is. This keeps the visual
+  // trace synchronized with the real table at every status update and prevents
+  // the old 4.2-coordinates/second predictor from lagging behind fast runs.
   useEffect(() => {
-    const currentProgress = status?.progress?.percentage || 0
-    if (currentProgress !== lastProgressRef.current) {
-      lastProgressRef.current = currentProgress
-      lastProgressTimeRef.current = performance.now()
-    }
-  }, [status?.progress?.percentage])
+    if (!isExpanded || coordinates.length === 0 || !canvasRef.current) return
+    const ctx = canvasRef.current.getContext('2d')
+    if (!ctx) return
 
-  // Smooth animation loop
-  useEffect(() => {
-    if (!isExpanded || coordinates.length === 0) return
-
-    const isPaused = status?.is_paused || false
-    const coordsPerSecond = 4.2
-
-    const animate = () => {
-      if (!canvasRef.current) return
-
-      const ctx = canvasRef.current.getContext('2d')
-      if (!ctx) return
-
-      const targetIndex = getTargetIndex(coordinates)
-      const now = performance.now()
-      const timeSinceUpdate = (now - lastProgressTimeRef.current) / 1000
-
-      let smoothIndex: number
-      if (isPaused) {
-        // When paused, just use the target index directly
-        smoothIndex = targetIndex
-      } else {
-        // Interpolate: start from where we were at last update, advance based on time
-        const baseIndex = (lastProgressRef.current / 100) * coordinates.length
-        smoothIndex = baseIndex + (timeSinceUpdate * coordsPerSecond)
-        // Don't overshoot the target too much
-        smoothIndex = Math.min(smoothIndex, targetIndex + 2)
-      }
-
-      smoothProgressRef.current = smoothIndex
-      drawPattern(ctx, coordinates, smoothIndex)
-
-      animationFrameRef.current = requestAnimationFrame(animate)
-    }
-
-    // Initial draw with force redraw
-    const timer = setTimeout(() => {
-      if (!canvasRef.current) return
-      const ctx = canvasRef.current.getContext('2d')
-      if (!ctx) return
-
-      lastDrawnIndexRef.current = -1
-      offscreenCanvasRef.current = null
-      smoothProgressRef.current = getTargetIndex(coordinates)
-      lastProgressTimeRef.current = performance.now()
-
-      drawPattern(ctx, coordinates, smoothProgressRef.current, true)
-
-      // Start animation loop
-      animationFrameRef.current = requestAnimationFrame(animate)
-    }, 50)
-
-    return () => {
-      clearTimeout(timer)
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
-    }
-  }, [isExpanded, coordinates, status?.is_paused, drawPattern, getTargetIndex])
+    const targetIndex = getTargetIndex(coordinates)
+    smoothProgressRef.current = targetIndex
+    lastProgressRef.current = Number(status?.progress?.percentage ?? 0)
+    lastProgressTimeRef.current = performance.now()
+    drawPattern(ctx, coordinates, targetIndex, true)
+  }, [isExpanded, coordinates, status?.progress?.current, status?.progress?.total, status?.progress?.percentage, drawPattern, getTargetIndex])
 
   const handlePause = async () => {
     try {
