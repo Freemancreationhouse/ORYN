@@ -307,7 +307,20 @@ deploy_native() {
     # Install dependencies as real user (pip writes to user-owned .venv)
     print_step "Installing Python packages..."
     run_as_user .venv/bin/pip install --upgrade pip
-    run_as_user .venv/bin/pip install -r requirements.txt
+
+    # Raspberry Pi Zero 2 W uses the standard Blinka/NeoPixel backend.
+    # The Pi-5-only PIO package is intentionally excluded on Zero 2 W so a
+    # clean GitHub install cannot fail on an incompatible hardware package.
+    local requirements_file="requirements.txt"
+    if [[ -r /proc/device-tree/model ]]; then
+        local detected_model
+        detected_model=$(tr -d '\0' < /proc/device-tree/model)
+        if [[ "$detected_model" == *"Raspberry Pi Zero 2 W"* ]] && [[ -f "$INSTALL_DIR/requirements-pi-zero2.txt" ]]; then
+            requirements_file="requirements-pi-zero2.txt"
+        fi
+    fi
+    echo "Using Python requirements: $requirements_file"
+    run_as_user .venv/bin/pip install -r "$requirements_file"
 
     # Ensure nginx (www-data) can traverse to static files
     # chmod o+x grants traversal only, not directory listing
