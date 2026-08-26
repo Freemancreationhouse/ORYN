@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect, Request
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
@@ -736,13 +736,38 @@ _FRONTEND_DIST = Path("static") / "dist"
 _FRONTEND_INDEX = _FRONTEND_DIST / "index.html"
 
 def get_frontend_response():
-    """Return the compiled ORYN React shell."""
+    """Return the compiled ORYN React shell with the universal calibration control.
+
+    The calibration launcher is injected by the backend on every request so it
+    cannot disappear because an older static/dist bundle or service-worker copy
+    is present on the client.
+    """
     if not _FRONTEND_INDEX.exists():
         raise HTTPException(
             status_code=503,
             detail=f"ORYN frontend is missing: {_FRONTEND_INDEX}"
         )
-    return FileResponse(_FRONTEND_INDEX, headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache", "Expires": "0"})
+    html = _FRONTEND_INDEX.read_text(encoding="utf-8")
+    # Remove any older/broken universal-calibration inline rollout block.
+    marker = '<script id="oryn-uc-cacheproof">'
+    if marker in html:
+        start = html.find(marker)
+        end = html.find('</script>', start)
+        if end != -1:
+            html = html[:start] + html[end + len('</script>'):]
+    # Always inject a fresh external calibration launcher directly from backend.
+    uc_tag = '<script defer src="/static/custom/oryn-universal-calibration.js?v=UC-FINAL-20260826-2"></script>'
+    if uc_tag not in html:
+        html = html.replace('</body>', uc_tag + '\n</body>')
+    return HTMLResponse(
+        html,
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            "X-ORYN-Universal-Calibration": "UC-FINAL-20260826-2",
+        },
+    )
 
 @app.get("/", include_in_schema=False)
 async def index():
@@ -2199,6 +2224,20 @@ async def run_theta_rho(request: ThetaRhoRequest, background_tasks: BackgroundTa
 
         check_homing_in_progress()
 
+        # UNIVERSAL GEOMETRY SAFETY GATE:
+        # Once either physical calibration has been taught, never allow a
+        # pattern/clear run with only half of the geometry defined.  This is
+        # exactly the state that can make rho reach centre/perimeter in only a
+        # few physical turns while theta still uses the legacy scale.
+        theta_ready = bool(state.theta_calibrated and state.theta_revolution_units)
+        rho_ready = bool(state.rho_calibrated and state.rho_travel_units)
+        if theta_ready != rho_ready:
+            missing = "Full Circle (360°)" if not theta_ready else "Centre → Perimeter"
+            raise HTTPException(
+                status_code=409,
+                detail=f"Universal calibration incomplete. Save {missing} calibration before running patterns or cleaning."
+            )
+
         if pattern_manager.get_pattern_lock().locked():
             logger.info("Another pattern is running, stopping it first...")
             await pattern_manager.stop_actions()
@@ -2478,6 +2517,22 @@ async def delete_theta_rho_file(request: DeleteFileRequest):
         logger.error(f"Failed to delete theta-rho file {request.file_name}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.get("/api/universal-calibration", tags=["machine-calibration"])
+async def get_universal_calibration_status():
+    """Unambiguous runtime proof that the universal calibration build is active."""
+    return {
+        "build": "UC-FINAL-20260826-2",
+        "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
+        "theta_revolution_units": state.theta_revolution_units,
+        "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
+        "rho_travel_units": state.rho_travel_units,
+        "rho_direction": getattr(state, "rho_direction", 1.0),
+        "universal_ready": bool(
+            state.theta_calibrated and state.theta_revolution_units
+            and state.rho_calibrated and state.rho_travel_units
+        ),
+    }
 
 class RotationCalibrationJogRequest(BaseModel):
     units: float
