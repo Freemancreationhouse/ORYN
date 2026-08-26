@@ -1,0 +1,13 @@
+{
+  "profile_schema": 1,
+  "profile_name": "ORYN Custom Theta-Rho / FluidNC",
+  "controller_family": "grbl_fluidnc",
+  "theta_axis": "X",
+  "rho_axis": "Y",
+  "homing_mode": "sensorless_crash",
+  "bootstrap_home_travel_units": 52.0,
+  "bootstrap_home_feed": 120.0,
+  "rho_outward_direction": 1.0,
+  "bootstrap_only": true,
+  "notes": "Bootstrap HOME only. Fresh saved Centre->Perimeter calibration takes priority immediately and is used thereafter."
+}

@@ -1,14 +1,9 @@
-ORYN UNIVERSAL COORDINATED THETA-RHO V3
-Build: UC-COORD-REL-V3-20260827-1
+ORYN UNIVERSAL HOME BOOTSTRAP V4
+Build: UC-HOME-BOOTSTRAP-V4-20260827-1
 
-FIXED IN THIS BUILD:
-- Fresh v3 calibration profile: previous calibration is not treated as active.
-- Sensorless HOME never uses unsafe legacy travel on an uncalibrated custom table.
-- Failed/skipped HOME is reported as failure in backend status, not success.
-- After fresh perimeter value is saved, manual/startup HOME uses that exact value.
-- Universal THR executor does not mix MPos/WPos with G90 work coordinates.
-- Universal THR motion uses one coordinated G91 G1 X/Y delta per THR segment.
-- Relative pattern moves are NEVER blindly resent after uncertain acknowledgement.
-- Theta and rho geometry use only freshly saved full-circle/perimeter calibrations.
-- Calibrated physical speed planner limits theta and rho component speed together.
-- Legacy/reference profile path remains unchanged when universal calibration is not active.
+FIXES:
+- Startup and manual sensorless HOME can run before first exact perimeter calibration
+- Current installed machine profile provides 52-unit bootstrap HOME only
+- Fresh saved perimeter calibration immediately overrides bootstrap
+- Crash HOME sends exactly one relative Y jog; never retries a relative HOME
+- Pattern executor/calibration UI/static assets otherwise unchanged from V3 baseline

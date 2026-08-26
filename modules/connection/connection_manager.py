@@ -968,6 +968,45 @@ def get_machine_steps(timeout=10):
         logger.error(f"Failed to get all machine parameters after {timeout}s. Missing: {', '.join(missing)}")
         return False
 
+
+def _load_installed_machine_profile():
+    """Load the non-calibration hardware bootstrap profile shipped with ORYN.
+
+    Exact theta/rho calibration always has priority.  The bootstrap radial travel
+    exists only to break the first-install sensorless-homing deadlock: a custom
+    table must be able to reach Centre before it can teach Centre->Perimeter.
+    """
+    try:
+        from pathlib import Path
+        import json
+        profile_path = Path(__file__).resolve().parents[2] / "machine_profile.json"
+        if profile_path.exists():
+            data = json.loads(profile_path.read_text(encoding="utf-8"))
+            return data if isinstance(data, dict) else {}
+    except Exception as exc:
+        logger.warning(f"Could not load machine_profile.json: {exc}")
+    return {}
+
+
+def _send_crash_home_jog_once(travel_units, feed, rho_direction=1.0):
+    """Send exactly ONE sensorless radial HOME jog.
+
+    Do not use send_grbl_coordinates(home=True) here: that helper waits for an
+    `ok` and can retry a relative jog if another reader consumes the response.
+    A crash-home command must never be duplicated.  The background/status path
+    is used only to observe Idle after this single command.
+    """
+    try:
+        direction = 1.0 if float(rho_direction or 1.0) >= 0 else -1.0
+        y_delta = -abs(float(travel_units)) * direction
+        gcode = f"$J=G91 G21 Y{y_delta:.5f} F{float(feed):.3f}"
+        state.conn.send(gcode + "\n")
+        logger.info(f"Sent single crash-home jog: {gcode}")
+        return True
+    except Exception as exc:
+        logger.error(f"Failed to send crash-home jog: {exc}")
+        return False
+
 def home(timeout=120):
     """
     Perform homing sequence based on configured mode:
@@ -1017,45 +1056,56 @@ def home(timeout=120):
         default_crash_travel = 30.0 if effective_table_type == 'kinetiq_motion_mini' else 22.0
         saved_rho_travel = getattr(state, 'rho_travel_units', None)
         rho_is_calibrated = bool(getattr(state, 'rho_calibrated', False) and saved_rho_travel)
+        machine_profile = _load_installed_machine_profile()
+        bootstrap_travel = machine_profile.get("bootstrap_home_travel_units")
+        bootstrap_direction = machine_profile.get("rho_outward_direction", 1.0)
+
         try:
-            calibrated_crash_travel = abs(float(saved_rho_travel)) if rho_is_calibrated else default_crash_travel
+            if rho_is_calibrated:
+                calibrated_crash_travel = abs(float(saved_rho_travel))
+                homing_travel_source = "saved perimeter calibration"
+                homing_rho_direction = float(getattr(state, 'rho_direction', 1.0) or 1.0)
+            elif bootstrap_travel is not None and abs(float(bootstrap_travel)) > 0:
+                calibrated_crash_travel = abs(float(bootstrap_travel))
+                homing_travel_source = "installed machine-profile bootstrap"
+                homing_rho_direction = float(bootstrap_direction or 1.0)
+            else:
+                calibrated_crash_travel = default_crash_travel
+                homing_travel_source = "legacy reference default"
+                homing_rho_direction = 1.0
         except (TypeError, ValueError):
             calibrated_crash_travel = default_crash_travel
-            rho_is_calibrated = False
+            homing_travel_source = "legacy reference default"
+            homing_rho_direction = 1.0
 
-        # UNIVERSAL CUSTOM-TABLE SAFETY:
-        # An unknown/custom GRBL table has no trustworthy legacy radial distance.
-        # Never auto-home it with the historical 22-unit fallback: that can stop
-        # halfway (large microstep scale) or crash (small/full-step scale).
-        # Require the user-taught Center->Perimeter value, then HOME uses that
-        # exact value on every startup. Known reference profiles retain legacy
-        # fallback behavior for backward compatibility.
+        # On a custom/unknown table the legacy 22-unit distance is unsafe, but
+        # unlike V3 we do NOT deadlock first-install calibration.  A hardware
+        # machine profile may provide a bootstrap crash-home distance.  It is
+        # used ONLY until the user saves exact Centre->Perimeter calibration.
         known_reference_profiles = {
             'kinetiq_motion', 'kinetiq_motion_mini', 'kinetiq_motion_mini_pro',
             'kinetiq_motion_mini_pro_byj', 'kinetiq_motion_gold',
             'kinetiq_motion_pro_pulley', 'kinetiq_motion_pro'
         }
-        if state.homing == 0 and effective_table_type not in known_reference_profiles and not rho_is_calibrated:
-            state.homing_error = 'perimeter_calibration_required'
+        if (state.homing == 0 and effective_table_type not in known_reference_profiles
+                and not rho_is_calibrated and homing_travel_source == "legacy reference default"):
+            state.homing_error = 'machine_profile_home_travel_required'
             state.last_homing_success = False
-            logger.error(
-                'Crash HOME skipped: custom/unknown table has no freshly saved perimeter calibration. '
-                'Enter/save an approximate perimeter travel first, HOME, then run exact perimeter calibration.'
-            )
+            logger.error('Crash HOME cannot start: no exact rho calibration and no machine-profile bootstrap travel.')
             homing_complete.set()
             return
 
-        # Normalize physical homing speed across very different controller-unit
-        # scales. Aim for roughly 12 seconds for a full calibrated radial stroke,
-        # while keeping conservative bounds for small/full-step configurations.
+        # Keep first HOME deliberately conservative.  Exact calibration replaces
+        # this bootstrap immediately after the user teaches the real radius.
         if rho_is_calibrated:
             crash_homing_speed = max(10.0, min(260.0, calibrated_crash_travel * 5.0))
         else:
-            crash_homing_speed = homing_speed
+            profile_feed = machine_profile.get("bootstrap_home_feed", None)
+            crash_homing_speed = float(profile_feed) if profile_feed else max(10.0, min(180.0, calibrated_crash_travel * 3.0))
 
         logger.info(
             f"Crash-home radial plan: travel={calibrated_crash_travel:.4f} controller units, "
-            f"speed={crash_homing_speed:.2f}, source={'saved perimeter calibration' if rho_is_calibrated else 'legacy default'}"
+            f"speed={crash_homing_speed:.2f}, source={homing_travel_source}"
         )
         try:
             if state.homing == 1:
@@ -1131,13 +1181,13 @@ def home(timeout=120):
                     asyncio.set_event_loop(loop)
                     try:
                         if effective_table_type == 'kinetiq_motion_mini':
-                            result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel * float(getattr(state, 'rho_direction', 1.0) or 1.0), crash_homing_speed, home=True))
+                            result = _send_crash_home_jog_once(calibrated_crash_travel, crash_homing_speed, homing_rho_direction)
                             if not result:
                                 logger.error("Crash homing fallback failed")
                                 homing_complete.set()
                                 return
                         else:
-                            result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel * float(getattr(state, 'rho_direction', 1.0) or 1.0), crash_homing_speed, home=True))
+                            result = _send_crash_home_jog_once(calibrated_crash_travel, crash_homing_speed, homing_rho_direction)
                             if not result:
                                 logger.error("Crash homing fallback failed")
                                 homing_complete.set()
@@ -1207,14 +1257,14 @@ def home(timeout=120):
                 asyncio.set_event_loop(loop)
                 try:
                     if effective_table_type == 'kinetiq_motion_mini':
-                        result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel * float(getattr(state, 'rho_direction', 1.0) or 1.0), crash_homing_speed, home=True))
+                        result = _send_crash_home_jog_once(calibrated_crash_travel, crash_homing_speed, homing_rho_direction)
                         if not result:
                             logger.error("Crash homing failed - send_grbl_coordinates returned False")
                             homing_complete.set()
                             return
                         state.machine_y -= calibrated_crash_travel
                     else:
-                        result = loop.run_until_complete(send_grbl_coordinates(0, -calibrated_crash_travel * float(getattr(state, 'rho_direction', 1.0) or 1.0), crash_homing_speed, home=True))
+                        result = _send_crash_home_jog_once(calibrated_crash_travel, crash_homing_speed, homing_rho_direction)
                         if not result:
                             logger.error("Crash homing failed - send_grbl_coordinates returned False")
                             homing_complete.set()

@@ -2587,7 +2587,7 @@ _restore_machine_calibration_backup()
 async def get_universal_calibration_status():
     """Unambiguous runtime proof that the universal calibration build is active."""
     return {
-        "build": "UC-COORD-REL-V3-20260827-1",
+        "build": "UC-HOME-BOOTSTRAP-V4-20260827-1",
         "executor": "coordinated_relative_g1_no_retry_speed_planner",
         "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
         "theta_revolution_units": state.theta_revolution_units,
