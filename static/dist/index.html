@@ -69,31 +69,7 @@
 </head>
   <body>
 
-<style id="oryn-uc-real-style">
-#oryn-uc-real-btn{position:fixed;right:18px;bottom:88px;z-index:2147483646;background:#d1ad67;color:#111;border:2px solid #ffe0a0;border-radius:12px;padding:12px 16px;font:800 14px system-ui;box-shadow:0 8px 32px #000b;cursor:pointer}
-#oryn-uc-real-modal{display:none;position:fixed;inset:0;z-index:2147483647;background:#000c;align-items:center;justify-content:center;padding:16px}
-#oryn-uc-real-modal.open{display:flex}#oryn-uc-real-card{width:min(760px,96vw);max-height:90vh;overflow:auto;background:#111;color:#eee;border:1px solid #5c4c31;border-radius:16px;padding:18px;font-family:system-ui;box-shadow:0 20px 80px #000}
-#oryn-uc-real-card button{background:#d1ad67;color:#111;border:0;border-radius:8px;padding:10px 12px;font-weight:800;cursor:pointer}#oryn-uc-real-card button.alt{background:#292929;color:#eee;border:1px solid #555}.oryn-uc-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.oryn-uc-section{background:#181818;border:1px solid #333;border-radius:12px;padding:14px;margin-top:14px}#oryn-uc-real-status{white-space:pre-wrap;font:13px ui-monospace,monospace;color:#e5c37d;margin-top:12px}#oryn-uc-real-card input{background:#080808;color:#fff;border:1px solid #555;border-radius:8px;padding:10px;min-width:180px}
-</style>
-<button id="oryn-uc-real-btn" type="button">360° CAL</button>
-<div id="oryn-uc-real-modal"><div id="oryn-uc-real-card">
-<div style="display:flex;justify-content:space-between;gap:12px"><div><h2 style="margin:0">Full Circle Calibration</h2><div style="color:#aaa;margin-top:4px">Teach exact controller travel for ONE physical 360° revolution.</div></div><button id="oryn-uc-real-close" class="alt">✕</button></div>
-<div class="oryn-uc-section"><b>1. START</b><div style="color:#aaa;font-size:12px;margin-top:5px">Mark the starting angle, press Start 360°, then jog until the mechanism returns to exactly that angle after one full turn.</div><div class="oryn-uc-row"><button id="oryn-uc-start">START 360°</button></div></div>
-<div class="oryn-uc-section"><b>2. JOG THETA</b><div class="oryn-uc-row"><button class="alt" data-ucj="-25">BACK 25</button><button class="alt" data-ucj="-5">BACK 5</button><button class="alt" data-ucj="-1">BACK 1</button><button class="alt" data-ucj="1">FWD 1</button><button class="alt" data-ucj="5">FWD 5</button><button class="alt" data-ucj="25">FWD 25</button></div></div>
-<div class="oryn-uc-section"><b>3. SAVE EXACT 360°</b><div class="oryn-uc-row"><button id="oryn-uc-save">SAVE EXACT 360°</button><input id="oryn-uc-value" type="number" step="0.001" placeholder="controller units / 360°"><button id="oryn-uc-set" class="alt">SET VALUE</button></div></div>
-<div class="oryn-uc-section"><b>Radius calibration</b><div style="color:#aaa;font-size:12px;margin-top:5px">Your existing Perimeter Calibration remains unchanged.</div><div id="oryn-uc-real-status">Loading…</div></div>
-<div style="color:#777;font:11px ui-monospace,monospace;margin-top:12px">UC-REAL-FIX-20260826-1</div>
-</div></div>
-<script id="oryn-uc-real-script">
-(function(){
- const B='UC-REAL-FIX-20260826-1',btn=document.getElementById('oryn-uc-real-btn'),modal=document.getElementById('oryn-uc-real-modal'),st=document.getElementById('oryn-uc-real-status'),inp=document.getElementById('oryn-uc-value');
- async function api(p,b){const o={method:b===undefined?'GET':'POST',headers:{'Content-Type':'application/json'}};if(b!==undefined)o.body=JSON.stringify(b);const r=await fetch(p,o);let j={};try{j=await r.json()}catch(e){}if(!r.ok)throw new Error(j.detail||('HTTP '+r.status));return j}
- async function refresh(){try{const a=await api('/api/universal-calibration');if(a.theta_revolution_units!=null)inp.value=Number(a.theta_revolution_units).toFixed(3);st.textContent='Theta 360°: '+(a.theta_calibrated?('SAVED '+Number(a.theta_revolution_units).toFixed(3)):'MISSING')+'\nRadius: '+(a.rho_calibrated?('SAVED '+Number(a.rho_travel_units).toFixed(3)):'MISSING')+'\n'+(a.universal_ready?'UNIVERSAL GEOMETRY READY':'SAVE BOTH BEFORE PLAYBACK');btn.textContent=a.universal_ready?'UNIVERSAL ✓':'360° CAL';}catch(e){st.textContent='ERROR: '+e.message}}
- async function act(p,b){try{st.textContent='Working…';await api(p,b);await refresh()}catch(e){st.textContent='ERROR: '+e.message}}
- btn.onclick=function(){modal.classList.add('open');refresh()};document.getElementById('oryn-uc-real-close').onclick=function(){modal.classList.remove('open')};modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
- document.getElementById('oryn-uc-start').onclick=()=>act('/api/rotation-calibration/start',{});document.querySelectorAll('[data-ucj]').forEach(x=>x.onclick=()=>act('/api/rotation-calibration/jog',{units:Number(x.dataset.ucj),speed:80}));document.getElementById('oryn-uc-save').onclick=()=>act('/api/rotation-calibration/save',{});document.getElementById('oryn-uc-set').onclick=()=>{const n=Number(inp.value);if(!Number.isFinite(n)||n===0){st.textContent='Enter a valid non-zero value.';return}act('/api/rotation-calibration/set',{units:n})};refresh();
-})();
-</script>
+
 
     <div id="root"></div>
 </body>

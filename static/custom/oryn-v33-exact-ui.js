@@ -322,13 +322,14 @@
             <strong id="oryn-rc-current">0.000 units</strong>
           </div>
           <div class="oryn-pc-jogs">
-            <button class="oryn-pc-btn" data-rj="-25">BACK 25</button>
-            <button class="oryn-pc-btn" data-rj="-5">BACK 5</button>
             <button class="oryn-pc-btn" data-rj="-1">BACK 1</button>
+            <button class="oryn-pc-btn" data-rj="-0.1">BACK 0.1</button>
+            <button class="oryn-pc-btn" data-rj="-0.01">BACK 0.01</button>
+            <button class="oryn-pc-btn" data-rj="0.01">FWD 0.01</button>
+            <button class="oryn-pc-btn" data-rj="0.1">FWD 0.1</button>
             <button class="oryn-pc-btn" data-rj="1">FWD 1</button>
-            <button class="oryn-pc-btn" data-rj="5">FWD 5</button>
-            <button class="oryn-pc-btn" data-rj="25">FWD 25</button>
           </div>
+          <div class="oryn-pc-sub" style="margin-top:8px">Use 1 unit for coarse rotation, then 0.1 / 0.01 for exact 360° alignment.</div>
           <button id="oryn-rc-save" class="oryn-pc-btn primary" style="margin-top:10px">
             Save This as Exactly One Revolution
           </button>

@@ -1019,6 +1019,26 @@ def home(timeout=120):
             calibrated_crash_travel = default_crash_travel
             rho_is_calibrated = False
 
+        # UNIVERSAL CUSTOM-TABLE SAFETY:
+        # An unknown/custom GRBL table has no trustworthy legacy radial distance.
+        # Never auto-home it with the historical 22-unit fallback: that can stop
+        # halfway (large microstep scale) or crash (small/full-step scale).
+        # Require the user-taught Center->Perimeter value, then HOME uses that
+        # exact value on every startup. Known reference profiles retain legacy
+        # fallback behavior for backward compatibility.
+        known_reference_profiles = {
+            'kinetiq_motion', 'kinetiq_motion_mini', 'kinetiq_motion_mini_pro',
+            'kinetiq_motion_mini_pro_byj', 'kinetiq_motion_gold',
+            'kinetiq_motion_pro_pulley', 'kinetiq_motion_pro'
+        }
+        if state.homing == 0 and effective_table_type not in known_reference_profiles and not rho_is_calibrated:
+            logger.error(
+                'Crash HOME skipped: custom/unknown table has no saved perimeter calibration. '
+                'Save Center->Perimeter travel first; refusing unsafe legacy 22-unit fallback.'
+            )
+            homing_complete.set()
+            return
+
         # Normalize physical homing speed across very different controller-unit
         # scales. Aim for roughly 12 seconds for a full calibrated radial stroke,
         # while keeping conservative bounds for small/full-step configurations.
