@@ -582,14 +582,17 @@ class AppState:
 
     def from_state_dict(self, data):
         """Update runtime state from a dictionary."""
-        self.stop_requested = data.get("stop_requested", False)
-        self._pause_requested = data.get("pause_requested", False)
-        self._current_playing_file = data.get("current_playing_file", None)
-        self._current_playlist = data.get("current_playlist", None)
-        self._current_playlist_name = data.get("current_playlist_name", None)
-        self.current_playlist_index = data.get("current_playlist_index", None)
-        self.execution_progress = data.get("execution_progress")
-        self.is_clearing = data.get("is_clearing", False)
+        # Playback flags are TRANSIENT runtime state. Never restore them after
+        # a restart/update, otherwise the UI can falsely report that another
+        # pattern is playing even though no execution task exists anymore.
+        self.stop_requested = False
+        self._pause_requested = False
+        self._current_playing_file = None
+        self._current_playlist = None
+        self._current_playlist_name = None
+        self.current_playlist_index = None
+        self.execution_progress = None
+        self.is_clearing = False
         self.current_theta = data.get("current_theta", 0)
         self.current_rho = data.get("current_rho", 0)
         self.machine_x = data.get("machine_x", 0.0)

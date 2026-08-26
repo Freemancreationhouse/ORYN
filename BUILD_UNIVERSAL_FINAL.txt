@@ -1,3 +1,8 @@
-ORYN UNIVERSAL FINAL BUILD
-Build: UC-FINAL-20260826-3-FLATROOT
-IMPORTANT: main.py, static/, modules/, oryn, install-pi-from-github.sh must be at the ROOT of the GitHub repository.
+ORYN UNIVERSAL ACTUAL-SERVE FIX
+Build: UC-ACTUAL-SERVE-20260826-1
+
+VERIFIED FIXES:
+- static/dist/index.html itself loads 360 calibration UI
+- nginx app shell has no-store cache headers
+- stale playback state is never restored after restart
+- universal calibration API build marker matches this build
