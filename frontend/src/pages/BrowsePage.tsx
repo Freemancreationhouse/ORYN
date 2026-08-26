@@ -733,11 +733,7 @@ export function BrowsePage() {
       window.dispatchEvent(new CustomEvent('playback-started'))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to run pattern'
-      if (message.includes('409') || message.includes('already running')) {
-        toast.error('Another pattern is already running')
-      } else {
-        toast.error(message)
-      }
+      toast.error(message)
     } finally {
       setIsRunning(false)
     }

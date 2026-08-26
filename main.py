@@ -756,7 +756,7 @@ def get_frontend_response():
         if end != -1:
             html = html[:start] + html[end + len('</script>'):]
     # Always inject a fresh external calibration launcher directly from backend.
-    uc_tag = '<script defer src="/static/custom/oryn-universal-calibration.js?v=UC-ACTUAL-SERVE-20260826-1"></script>'
+    uc_tag = '<script defer src="/static/custom/oryn-universal-calibration.js?v=UC-EXACT-REPO-20260826-1"></script>'
     if uc_tag not in html:
         html = html.replace('</body>', uc_tag + '\n</body>')
     return HTMLResponse(
@@ -765,7 +765,7 @@ def get_frontend_response():
             "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
             "Pragma": "no-cache",
             "Expires": "0",
-            "X-ORYN-Universal-Calibration": "UC-ACTUAL-SERVE-20260826-1",
+            "X-ORYN-Universal-Calibration": "UC-EXACT-REPO-20260826-1",
         },
     )
 
@@ -2522,7 +2522,7 @@ async def delete_theta_rho_file(request: DeleteFileRequest):
 async def get_universal_calibration_status():
     """Unambiguous runtime proof that the universal calibration build is active."""
     return {
-        "build": "UC-REAL-FIX-20260826-1",
+        "build": "UC-EXACT-REPO-20260826-1",
         "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
         "theta_revolution_units": state.theta_revolution_units,
         "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),

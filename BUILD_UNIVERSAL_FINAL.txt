@@ -1,8 +1,12 @@
-ORYN UNIVERSAL REAL FIX
-Build: UC-REAL-FIX-20260826-1
+ORYN EXACT-REPO UNIVERSAL CALIBRATION FIX
+Build: UC-EXACT-REPO-20260826-1
+
+BASELINE:
+- Built directly from the user's uploaded GitHub repository ZIP.
+- No static logo/image file was changed.
 
 FIXES:
-- literal 360 CAL button is inside static/dist/index.html itself
-- no external calibration JS dependency
-- universal-incomplete returns HTTP 400 with real message, not false another-pattern 409
-- existing perimeter/home behavior preserved
+- Full Circle Calibration is mounted inside the SAME proven Motion-page card that already shows Perimeter Calibration.
+- Saved 360-degree value + saved Center-to-Perimeter value drive universal THR geometry.
+- False 'Another pattern is already running' frontend message removed; actual backend error is shown.
+- Transient playback state remains non-restorable across restart.
