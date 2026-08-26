@@ -196,8 +196,11 @@ export function TableControlPage() {
       })
       toast.success(`Running ${label}...`)
     } catch (error) {
-      const message = error instanceof Error ? error.message : `Failed to run ${label}`
-      toast.error(message)
+      if (error instanceof Error && error.message.includes('409')) {
+        toast.error('Another pattern is already running')
+      } else {
+        toast.error(`Failed to run ${label}`)
+      }
     }
   }
 

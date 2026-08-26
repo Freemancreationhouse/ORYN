@@ -756,7 +756,7 @@ def get_frontend_response():
         if end != -1:
             html = html[:start] + html[end + len('</script>'):]
     # Always inject a fresh external calibration launcher directly from backend.
-    uc_tag = '<script defer src="/static/custom/oryn-universal-calibration.js?v=UC-EXACT-REPO-20260826-1"></script>'
+    uc_tag = '<script defer src="/static/custom/oryn-universal-calibration.js?v=UC-ACTUAL-SERVE-20260826-1"></script>'
     if uc_tag not in html:
         html = html.replace('</body>', uc_tag + '\n</body>')
     return HTMLResponse(
@@ -765,7 +765,7 @@ def get_frontend_response():
             "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
             "Pragma": "no-cache",
             "Expires": "0",
-            "X-ORYN-Universal-Calibration": "UC-EXACT-REPO-20260826-1",
+            "X-ORYN-Universal-Calibration": "UC-ACTUAL-SERVE-20260826-1",
         },
     )
 
@@ -2522,7 +2522,7 @@ async def delete_theta_rho_file(request: DeleteFileRequest):
 async def get_universal_calibration_status():
     """Unambiguous runtime proof that the universal calibration build is active."""
     return {
-        "build": "UC-EXACT-REPO-20260826-1",
+        "build": "UC-REAL-FIX-20260826-1",
         "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
         "theta_revolution_units": state.theta_revolution_units,
         "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
@@ -2561,32 +2561,77 @@ async def start_rotation_calibration():
 
 @app.post("/api/rotation-calibration/jog", tags=["machine-calibration"])
 async def jog_rotation_calibration(request: RotationCalibrationJogRequest):
-    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None: raise HTTPException(status_code=409,detail="Start rotation calibration first")
-    units=float(request.units)
-    if abs(units)>25: raise HTTPException(status_code=400,detail="Jog limited to 25 controller units per click")
-    speed=max(5.0,min(float(request.speed),250.0))
-    before=float(state.machine_x)
-    ok=await connection_manager.send_grbl_coordinates(units,0,speed,timeout=30,home=True)
-    if not ok: raise HTTPException(status_code=500,detail="Controller did not acknowledge rotation jog")
+    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None:
+        raise HTTPException(status_code=409, detail="Start rotation calibration first")
+    if not (state.conn and state.conn.is_connected()):
+        raise HTTPException(status_code=400, detail="Connection not established")
+
+    units = float(request.units)
+    if abs(units) > 25:
+        raise HTTPException(status_code=400, detail="Jog limited to 25 controller units per click")
+    speed = max(5.0, min(float(request.speed), 250.0))
+
+    # IMPORTANT: Full-circle calibration is THETA/X.  The generic
+    # send_grbl_coordinates(..., home=True) helper intentionally creates a
+    # Y-only $J command for radial crash-homing, so it must NOT be used here.
+    gcode = f"$J=G91 G21 X{units:.3f} F{speed:.3f}"
+    try:
+        await asyncio.to_thread(state.conn.send, gcode + "\n")
+    except Exception as exc:
+        logger.error(f"Rotation calibration theta jog send failed: {exc}")
+        raise HTTPException(status_code=500, detail=f"Could not send theta jog: {exc}")
+
+    # Wait for FluidNC/GRBL acknowledgement.
+    acknowledged = False
+    deadline = time.time() + 10.0
+    while time.time() < deadline:
+        response = await asyncio.to_thread(state.conn.readline)
+        if response:
+            text = str(response).strip()
+            if text.lower() == "ok":
+                acknowledged = True
+                break
+            if "error" in text.lower() or "alarm" in text.lower():
+                raise HTTPException(status_code=500, detail=f"Controller rejected theta jog: {text}")
+        else:
+            await asyncio.sleep(0.03)
+    if not acknowledged:
+        raise HTTPException(status_code=500, detail="Controller did not acknowledge theta jog")
+
     await connection_manager.check_idle_async(timeout=60)
-    try: await connection_manager.update_machine_position()
-    except Exception: state.machine_x=before+units
-    state.rotation_calibration_current_units=abs(float(state.machine_x)-float(state.rotation_calibration_start_x))
-    return {"success":True,"current_units":state.rotation_calibration_current_units,"machine_x":state.machine_x}
+    # Accumulate the exact signed controller travel commanded during this
+    # calibration.  Do not depend on absolute machine-position reporting,
+    # which may be stale/offset after jog mode.
+    state.rotation_calibration_current_units = float(state.rotation_calibration_current_units or 0.0) + units
+    try:
+        await connection_manager.update_machine_position()
+    except Exception as exc:
+        logger.debug(f"Rotation calibration position refresh skipped: {exc}")
+
+    return {
+        "success": True,
+        "current_units": state.rotation_calibration_current_units,
+        "machine_x": state.machine_x,
+    }
 
 @app.post("/api/rotation-calibration/save", tags=["machine-calibration"])
 async def save_rotation_calibration():
-    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None: raise HTTPException(status_code=409,detail="Start rotation calibration first")
-    try: await connection_manager.update_machine_position()
-    except Exception: pass
-    signed_units=float(state.machine_x)-float(state.rotation_calibration_start_x)
-    units=abs(signed_units)
-    if units<0.1: raise HTTPException(status_code=400,detail="Jog exactly one physical revolution before Save")
-    state.theta_revolution_units=signed_units; state.theta_calibrated=True
-    state.rotation_calibration_current_units=units; state.rotation_calibration_active=False; state.rotation_calibration_start_x=None
+    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None:
+        raise HTTPException(status_code=409, detail="Start rotation calibration first")
+
+    signed_units = float(state.rotation_calibration_current_units or 0.0)
+    units = abs(signed_units)
+    if units < 0.1:
+        raise HTTPException(status_code=400, detail="Jog exactly one physical revolution before Save")
+
+    state.theta_revolution_units = signed_units
+    state.theta_calibrated = True
+    state.rotation_calibration_active = False
+    state.rotation_calibration_start_x = None
     state.current_theta = 0.0
-    state.save(); logger.info(f"Universal rotation saved: 2pi = {units:.4f} controller units")
-    return {"success":True,"theta_revolution_units":signed_units}
+    state.save()
+    logger.info(f"Universal rotation saved: 2pi = {signed_units:.4f} signed controller units")
+    return {"success": True, "theta_revolution_units": signed_units}
 
 @app.post("/api/rotation-calibration/set", tags=["machine-calibration"])
 async def set_rotation_calibration(request: RotationCalibrationSetRequest):
