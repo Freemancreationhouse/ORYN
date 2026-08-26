@@ -1,11 +1,13 @@
 {
-  "profile_version": 1,
+  "profile_version": 3,
   "controller_family": "grbl_fluidnc",
   "theta_axis": "X",
   "rho_axis": "Y",
-  "executor": "absolute_pattern_origin",
-  "theta_revolution_units": null,
-  "rho_travel_units": null,
-  "rho_direction": 1.0,
-  "notes": "Runtime calibration is stored persistently in ~/.oryn-machine-calibration.json and is not overwritten by Git updates."
+  "executor": "coordinated_relative_g1_no_retry_speed_planner",
+  "theta_revolution_units": "CALIBRATE_IN_UI",
+  "rho_travel_units": "CALIBRATE_IN_UI",
+  "rho_direction": "LEARNED_FROM_PERIMETER_CALIBRATION",
+  "theta_rpm_at_speed_100": 3.0,
+  "rho_strokes_per_min_at_speed_100": 0.12,
+  "notes": "Fresh calibration is stored in ~/.oryn-machine-calibration.json and survives Git updates. No table-specific geometry is hard-coded."
 }

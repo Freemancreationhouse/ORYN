@@ -123,8 +123,9 @@ export function TableControlPage() {
     try {
       await handleAction('home', '/send_home')
       toast.success('Moving to home position...')
-    } catch {
-      toast.error('Failed to move to home position')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to move to home position'
+      toast.error(message)
     }
   }
 

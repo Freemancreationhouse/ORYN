@@ -93,6 +93,7 @@ export function Layout() {
   const connectionAttempts = useStatusStore((s) => s.connectionAttempts)
   const isConnected = useStatusStore((s) => s.status?.connection_status ?? false)
   const isHoming = useStatusStore((s) => s.status?.is_homing ?? false)
+  const homingSuccess = useStatusStore((s) => s.status?.homing_success ?? null)
   const sensorHomingFailed = useStatusStore((s) => s.status?.sensor_homing_failed ?? false)
   const firmwareVersion = useStatusStore((s) => s.status?.firmware_version ?? null)
   const tableType = useStatusStore((s) => s.status?.table_type ?? null)
@@ -263,14 +264,17 @@ export function Layout() {
     }
     // Detect transition from homing to not homing
     if (wasHomingRef.current && !newIsHoming) {
-      if (!sensorHomingFailed) {
+      if (!sensorHomingFailed && homingSuccess === true) {
         setHomingJustCompleted(true)
         setHomingCountdown(5)
         setHomingDismissed(false)
+      } else {
+        setHomingJustCompleted(false)
+        setHomingDismissed(true)
       }
     }
     wasHomingRef.current = newIsHoming
-  }, [isHoming, sensorHomingFailed])
+  }, [isHoming, sensorHomingFailed, homingSuccess])
 
   // Now Playing bar state
   const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false)

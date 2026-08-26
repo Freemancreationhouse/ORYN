@@ -8,6 +8,8 @@ export interface StatusData {
   scheduled_pause: boolean
   is_running: boolean
   is_homing: boolean
+  homing_success?: boolean | null
+  homing_error?: string | null
   is_clearing: boolean
   sensor_homing_failed: boolean
   progress: {

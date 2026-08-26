@@ -1,9 +1,14 @@
-ORYN UNIVERSAL MACHINE PROFILE + SPEED PLANNER V2
-Build: UC-PROFILE-SPEED-V2-20260827-1
+ORYN UNIVERSAL COORDINATED THETA-RHO V3
+Build: UC-COORD-REL-V3-20260827-1
 
-- Old/legacy calibration is intentionally invalidated once.
-- Only calibration saved after this build is persistent.
-- Universal absolute THR executor retained.
-- Coordinated theta/rho feed planner added.
-- Default speed profile at UI speed 100: theta 3 rev/min, rho 0.12 full-strokes/min.
-- Geometry values are never hard-coded; saved 360 and perimeter values are used.
+FIXED IN THIS BUILD:
+- Fresh v3 calibration profile: previous calibration is not treated as active.
+- Sensorless HOME never uses unsafe legacy travel on an uncalibrated custom table.
+- Failed/skipped HOME is reported as failure in backend status, not success.
+- After fresh perimeter value is saved, manual/startup HOME uses that exact value.
+- Universal THR executor does not mix MPos/WPos with G90 work coordinates.
+- Universal THR motion uses one coordinated G91 G1 X/Y delta per THR segment.
+- Relative pattern moves are NEVER blindly resent after uncertain acknowledgement.
+- Theta and rho geometry use only freshly saved full-circle/perimeter calibrations.
+- Calibrated physical speed planner limits theta and rho component speed together.
+- Legacy/reference profile path remains unchanged when universal calibration is not active.

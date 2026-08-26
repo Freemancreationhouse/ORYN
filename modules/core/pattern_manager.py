@@ -579,37 +579,24 @@ class MotionControlThread:
             state.stop_requested = True
             return
 
-        # UNIVERSAL ABSOLUTE PATTERN EXECUTOR.
+        # UNIVERSAL COORDINATED RELATIVE EXECUTOR.
         #
-        # IMPORTANT: never accumulate calibrated rho/theta deltas into the
-        # controller position during a pattern.  If a relative command is
-        # repeated, accepted twice, or state.current_rho drifts, cumulative
-        # motion can send the ball to centre far too early.  Instead each THR
-        # point is converted from the pattern's fixed start point into one
-        # absolute controller target.  Retrying the same G90 target is harmless.
-        if universal_geometry and all(hasattr(state, name) for name in (
-                '_pattern_origin_x', '_pattern_origin_y',
-                '_pattern_origin_theta', '_pattern_origin_rho')):
-            theta_units = float(state.theta_revolution_units)
-            rho_units = float(state.rho_travel_units)
-            rho_dir = float(getattr(state, 'rho_direction', 1.0) or 1.0)
-
-            theta_from_start = theta - float(state._pattern_origin_theta)
-            rho_from_start = rho - float(state._pattern_origin_rho)
-            new_x_abs = float(state._pattern_origin_x) + (theta_from_start / (2 * pi)) * theta_units
-            new_y_abs = float(state._pattern_origin_y) + rho_from_start * rho_units * rho_dir
-
-            # UNIVERSAL THETA-RHO SPEED PLANNER.
-            # The UI speed is treated as a relative pattern-speed request, not raw
-            # Cartesian mm/min.  X and Y are different physical quantities, so a
-            # single raw F value can make one axis finish far ahead of the other.
-            # Derive component limits from the saved machine profile and choose one
-            # coordinated G1 feed that keeps BOTH axis component speeds within their
-            # calibrated physical limits.
-            dx_cmd = new_x_abs - float(state.machine_x)
-            dy_cmd = new_y_abs - float(state.machine_y)
-            planned_feed = self._plan_universal_feed(dx_cmd, dy_cmd, actual_speed)
-            self._send_grbl_coordinates_sync(new_x_abs, new_y_abs, planned_feed)
+        # FluidNC/GRBL G90 targets are expressed in the active work-coordinate
+        # system, while status reports can be MPos or WPos depending on $10.
+        # Mixing those two coordinate spaces caused calibrated rho to jump much
+        # farther than the THR path requested.  Universal mode therefore sends
+        # the mathematically exact THR *delta* directly as one coordinated G91
+        # move.  It never retries a relative move blindly: if acknowledgement is
+        # uncertain we stop the pattern, because replaying a delta can double it.
+        if universal_geometry:
+            planned_feed = self._plan_universal_feed(x_increment, y_increment, actual_speed)
+            ok = self._send_grbl_delta_sync(x_increment, y_increment, planned_feed)
+            if not ok:
+                logger.error("Universal THR move failed/uncertain; stopping to prevent duplicate relative motion")
+                state.stop_requested = True
+                return
+            new_x_abs = float(state.machine_x) + x_increment
+            new_y_abs = float(state.machine_y) + y_increment
         else:
             # Preserve the original absolute path for legacy/reference profiles.
             self._send_grbl_coordinates_sync(round(new_x_abs, 2), round(new_y_abs, 2), actual_speed)
@@ -665,43 +652,58 @@ class MotionControlThread:
             max_x_units_min, max_y_units_min)
         return feed
 
-    def _send_grbl_relative_sync(self, dx: float, dy: float, speed: int = 600):
-        """Send one calibrated universal THR delta using FluidNC jog motion.
+    def _send_grbl_delta_sync(self, dx: float, dy: float, speed: float = 600.0) -> bool:
+        """Send exactly one calibrated THR delta as a coordinated G91 G1 move.
 
-        This deliberately uses the same $J=G91 controller path as the physical
-        360-degree calibration.  The delta values are still derived dynamically
-        from state.theta_revolution_units and state.rho_travel_units; no machine
-        calibration value is hard-coded here.
+        This deliberately avoids $J (jog) mode and avoids separate X/Y moves.
+        Both axes remain synchronized in one planner segment.  The command is
+        NEVER resent after an uncertain timeout, because a relative resend would
+        duplicate physical motion.  The connection lock is held across send and
+        acknowledgement so status/terminal reads cannot steal the response.
         """
         if state.stop_requested:
             return False
-        # Keep enough precision for fine theta increments; 2 decimals was too coarse
-        # for a 9.790-unit/revolution axis.
-        gcode = f"$J=G91 G21 X{dx:.5f} Y{dy:.5f} F{speed}"
-        try:
-            if hasattr(state.conn, 'reset_input_buffer'):
-                state.conn.reset_input_buffer()
-            logger.debug(f"Universal relative motion: {gcode}")
-            state.conn.send(gcode + "\n")
-            time.sleep(0.005)
-            wait_start = time.time()
-            while time.time() - wait_start < 120:
-                if state.stop_requested:
-                    return False
-                if hasattr(state.conn, 'readline'):
-                    raw = state.conn.readline()
-                    if raw:
-                        line = raw.decode(errors='ignore').strip() if isinstance(raw, bytes) else str(raw).strip()
-                        if line.lower() == 'ok':
-                            return True
-                        if line.lower().startswith('error') or line.lower().startswith('alarm'):
-                            logger.error(f"Universal relative motion controller response: {line}")
-                            return False
-                time.sleep(0.002)
-            logger.error(f"Universal relative motion timeout: {gcode}")
+        if abs(dx) < 1e-12 and abs(dy) < 1e-12:
+            return True
+        gcode = f"G91 G21 G1 X{dx:.6f} Y{dy:.6f} F{float(speed):.3f}"
+        conn = state.conn
+        if not conn or not conn.is_connected():
+            logger.error("Universal delta move rejected: controller disconnected")
             return False
-        except Exception as e:
-            logger.error(f"Universal relative motion failed: {e}")
+        lock = getattr(conn, 'lock', None)
+        try:
+            # SerialConnection/WebSocketConnection both expose an RLock.
+            from contextlib import nullcontext
+            context = lock if lock is not None else nullcontext()
+            with context:
+                if hasattr(conn, 'reset_input_buffer'):
+                    try:
+                        conn.reset_input_buffer()
+                    except Exception:
+                        pass
+                logger.debug("Universal coordinated delta: %s", gcode)
+                conn.send(gcode + "\n")
+                started = time.time()
+                # GRBL/FluidNC acknowledges command acceptance quickly.  Do not
+                # wait for physical completion here; the planner/firmware queue
+                # provides continuous motion.  Never resend on timeout.
+                while time.time() - started < 5.0:
+                    if state.stop_requested:
+                        return False
+                    line = conn.readline()
+                    if not line:
+                        time.sleep(0.002)
+                        continue
+                    low = str(line).strip().lower()
+                    if low == 'ok':
+                        return True
+                    if low.startswith('error') or low.startswith('alarm'):
+                        logger.error("Universal delta controller response: %s", line)
+                        return False
+                logger.error("Universal delta acknowledgement timeout (NOT resent): %s", gcode)
+                return False
+        except Exception as exc:
+            logger.error("Universal delta move failed: %s", exc)
             return False
 
     def _send_grbl_coordinates_sync(self, x: float, y: float, speed: int = 600, timeout: int = 2, home: bool = False):
@@ -2161,6 +2163,8 @@ def get_status():
         "scheduled_pause": is_in_scheduled_pause_period(),
         "is_running": bool(state.current_playing_file and not state.stop_requested),
         "is_homing": state.is_homing,
+        "homing_success": getattr(state, "last_homing_success", None),
+        "homing_error": getattr(state, "homing_error", None),
         "sensor_homing_failed": state.sensor_homing_failed,
         "is_clearing": state.is_clearing,
         "progress": None,

@@ -83,6 +83,8 @@ class AppState:
 
         # Homing in progress flag - blocks other movement operations
         self.is_homing = False
+        self.last_homing_success = None
+        self.homing_error = None
 
         # Sensor homing failure flag - set when sensor homing fails
         # This indicates to the UI that sensor homing failed and user action is needed

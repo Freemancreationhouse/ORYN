@@ -989,6 +989,10 @@ def home(timeout=120):
     import threading
     import math
 
+    # Track the outcome explicitly so the UI never reports a failed HOME as complete.
+    state.last_homing_success = None
+    state.homing_error = None
+
     # Check for alarm state before homing and unlock if needed
     if not check_and_unlock_alarm():
         logger.error("Failed to unlock device from alarm state, cannot proceed with homing")
@@ -1032,9 +1036,11 @@ def home(timeout=120):
             'kinetiq_motion_pro_pulley', 'kinetiq_motion_pro'
         }
         if state.homing == 0 and effective_table_type not in known_reference_profiles and not rho_is_calibrated:
+            state.homing_error = 'perimeter_calibration_required'
+            state.last_homing_success = False
             logger.error(
-                'Crash HOME skipped: custom/unknown table has no saved perimeter calibration. '
-                'Save Center->Perimeter travel first; refusing unsafe legacy 22-unit fallback.'
+                'Crash HOME skipped: custom/unknown table has no freshly saved perimeter calibration. '
+                'Enter/save an approximate perimeter travel first, HOME, then run exact perimeter calibration.'
             )
             homing_complete.set()
             return
@@ -1246,6 +1252,8 @@ def home(timeout=120):
                 logger.error(f"Error updating machine position after homing: {e}")
 
             homing_success = True
+            state.last_homing_success = True
+            state.homing_error = None
             # Clear sensor_homing_failed flag on successful homing
             state.sensor_homing_failed = False
             homing_complete.set()
@@ -1273,6 +1281,9 @@ def home(timeout=120):
         return False
 
     if not homing_success:
+        state.last_homing_success = False
+        if not state.homing_error:
+            state.homing_error = "homing_failed"
         logger.error("Homing failed")
         return False
 

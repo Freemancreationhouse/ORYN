@@ -129,7 +129,9 @@ async def lifespan(app: FastAPI):
                     try:
                         success = await asyncio.to_thread(connection_manager.home)
                         if not success:
-                            logger.warning("Background homing failed or was skipped")
+                            logger.warning("Background homing did not complete")
+                            if getattr(state, "homing_error", None) == "perimeter_calibration_required":
+                                logger.warning("Fresh perimeter calibration is required before sensorless HOME; leaving controller connected for setup")
                             # If sensor homing failed, close connection and wait for user action
                             if state.sensor_homing_failed:
                                 logger.error("Sensor homing failed - closing connection. User must check sensor or switch to crash homing.")
@@ -139,7 +141,7 @@ async def lifespan(app: FastAPI):
                                 return  # Don't proceed with auto-play
                     finally:
                         state.is_homing = False
-                        logger.info("Background homing completed")
+                        logger.info("Background homing cycle ended")
 
                 # After homing (or skip), check for auto_play mode
                 if state.auto_play_enabled and state.auto_play_playlist:
@@ -2523,11 +2525,11 @@ CALIBRATION_BACKUP_FILE = os.path.expanduser("~/.oryn-machine-calibration.json")
 def _save_machine_calibration_backup():
     try:
         payload = {
-            "profile_version": 2,
+            "profile_version": 3,
             "controller_family": "grbl_fluidnc",
             "theta_axis": "X",
             "rho_axis": "Y",
-            "executor": "absolute_pattern_origin_speed_planner",
+            "executor": "coordinated_relative_g1_no_retry_speed_planner",
             "theta_rpm_at_speed_100": float(getattr(state, "theta_rpm_at_speed_100", 3.0) or 3.0),
             "rho_strokes_per_min_at_speed_100": float(getattr(state, "rho_strokes_per_min_at_speed_100", 0.12) or 0.12),
             "theta_revolution_units": state.theta_revolution_units,
@@ -2542,9 +2544,9 @@ def _save_machine_calibration_backup():
         logger.warning(f"Could not save machine calibration backup: {exc}")
 
 def _restore_machine_calibration_backup():
-    """Restore only the NEW v2 profile.
+    """Restore only the NEW v3 profile.
 
-    v1/legacy calibration is intentionally invalidated once for this build, per
+    Legacy/v2 calibration is intentionally invalidated once for this build, per
     the requested clean recalibration.  After the user saves new values, the v2
     profile persists across future git updates.
     """
@@ -2553,8 +2555,8 @@ def _restore_machine_calibration_backup():
         if os.path.exists(CALIBRATION_BACKUP_FILE):
             with open(CALIBRATION_BACKUP_FILE, "r", encoding="utf-8") as fh:
                 data = json.load(fh)
-        if int(data.get("profile_version", 0) or 0) != 2:
-            logger.warning("Invalidating legacy machine calibration; fresh v2 calibration required")
+        if int(data.get("profile_version", 0) or 0) != 3:
+            logger.warning("Invalidating previous machine calibration; fresh v3 calibration required")
             state.theta_revolution_units = None
             state.theta_calibrated = False
             state.rho_travel_units = None
@@ -2575,7 +2577,7 @@ def _restore_machine_calibration_backup():
         state.rho_strokes_per_min_at_speed_100 = float(data.get("rho_strokes_per_min_at_speed_100", 0.12) or 0.12)
         if changed:
             state.save()
-            logger.info("Restored universal v2 machine profile from persistent backup")
+            logger.info("Restored universal v3 machine profile from persistent backup")
     except Exception as exc:
         logger.warning(f"Could not restore machine calibration backup: {exc}")
 
@@ -2585,8 +2587,8 @@ _restore_machine_calibration_backup()
 async def get_universal_calibration_status():
     """Unambiguous runtime proof that the universal calibration build is active."""
     return {
-        "build": "UC-PROFILE-SPEED-V2-20260827-1",
-        "executor": "absolute_pattern_origin_speed_planner",
+        "build": "UC-COORD-REL-V3-20260827-1",
+        "executor": "coordinated_relative_g1_no_retry_speed_planner",
         "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
         "theta_revolution_units": state.theta_revolution_units,
         "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
