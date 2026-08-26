@@ -1,8 +1,8 @@
-ORYN UNIVERSAL ACTUAL-SERVE FIX
-Build: UC-ACTUAL-SERVE-20260826-1
+ORYN UNIVERSAL REAL FIX
+Build: UC-REAL-FIX-20260826-1
 
-VERIFIED FIXES:
-- static/dist/index.html itself loads 360 calibration UI
-- nginx app shell has no-store cache headers
-- stale playback state is never restored after restart
-- universal calibration API build marker matches this build
+FIXES:
+- literal 360 CAL button is inside static/dist/index.html itself
+- no external calibration JS dependency
+- universal-incomplete returns HTTP 400 with real message, not false another-pattern 409
+- existing perimeter/home behavior preserved

@@ -2234,7 +2234,7 @@ async def run_theta_rho(request: ThetaRhoRequest, background_tasks: BackgroundTa
         if theta_ready != rho_ready:
             missing = "Full Circle (360°)" if not theta_ready else "Centre → Perimeter"
             raise HTTPException(
-                status_code=409,
+                status_code=400,
                 detail=f"Universal calibration incomplete. Save {missing} calibration before running patterns or cleaning."
             )
 
@@ -2522,7 +2522,7 @@ async def delete_theta_rho_file(request: DeleteFileRequest):
 async def get_universal_calibration_status():
     """Unambiguous runtime proof that the universal calibration build is active."""
     return {
-        "build": "UC-ACTUAL-SERVE-20260826-1",
+        "build": "UC-REAL-FIX-20260826-1",
         "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
         "theta_revolution_units": state.theta_revolution_units,
         "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
