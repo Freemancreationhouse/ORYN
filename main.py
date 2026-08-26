@@ -742,7 +742,7 @@ def get_frontend_response():
             status_code=503,
             detail=f"ORYN frontend is missing: {_FRONTEND_INDEX}"
         )
-    return FileResponse(_FRONTEND_INDEX)
+    return FileResponse(_FRONTEND_INDEX, headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache", "Expires": "0"})
 
 @app.get("/", include_in_schema=False)
 async def index():
