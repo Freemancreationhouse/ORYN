@@ -610,31 +610,49 @@ class MotionControlThread:
             return False
         # Keep enough precision for fine theta increments; 2 decimals was too coarse
         # for a 9.790-unit/revolution axis.
-        gcode = f"$J=G91 G21 X{dx:.5f} Y{dy:.5f} F{speed}"
+        # IMPORTANT: theta and rho are different physical dimensions.  Do not
+        # put them in one Cartesian/vector jog.  Execute each calibrated delta
+        # on its own axis, using the exact same single-axis $J path used by the
+        # successful 360 and perimeter calibration controls.
+        commands = []
+        if abs(dx) > 1e-7:
+            commands.append(f"$J=G91 G21 X{dx:.5f} F{speed}")
+        if abs(dy) > 1e-7:
+            commands.append(f"$J=G91 G21 Y{dy:.5f} F{speed}")
+        if not commands:
+            return True
+
         try:
-            if hasattr(state.conn, 'reset_input_buffer'):
-                state.conn.reset_input_buffer()
-            logger.debug(f"Universal relative motion: {gcode}")
-            state.conn.send(gcode + "\n")
-            time.sleep(0.005)
-            wait_start = time.time()
-            while time.time() - wait_start < 120:
+            for gcode in commands:
                 if state.stop_requested:
                     return False
-                if hasattr(state.conn, 'readline'):
-                    raw = state.conn.readline()
-                    if raw:
-                        line = raw.decode(errors='ignore').strip() if isinstance(raw, bytes) else str(raw).strip()
-                        if line.lower() == 'ok':
-                            return True
-                        if line.lower().startswith('error') or line.lower().startswith('alarm'):
-                            logger.error(f"Universal relative motion controller response: {line}")
-                            return False
-                time.sleep(0.002)
-            logger.error(f"Universal relative motion timeout: {gcode}")
-            return False
+                if hasattr(state.conn, 'reset_input_buffer'):
+                    state.conn.reset_input_buffer()
+                logger.debug(f"Universal independent-axis motion: {gcode}")
+                state.conn.send(gcode + "\n")
+                time.sleep(0.005)
+                wait_start = time.time()
+                accepted = False
+                while time.time() - wait_start < 120:
+                    if state.stop_requested:
+                        return False
+                    if hasattr(state.conn, 'readline'):
+                        raw = state.conn.readline()
+                        if raw:
+                            line = raw.decode(errors='ignore').strip() if isinstance(raw, bytes) else str(raw).strip()
+                            if line.lower() == 'ok':
+                                accepted = True
+                                break
+                            if line.lower().startswith('error') or line.lower().startswith('alarm'):
+                                logger.error(f"Universal independent-axis controller response: {line}")
+                                return False
+                    time.sleep(0.002)
+                if not accepted:
+                    logger.error(f"Universal independent-axis motion timeout: {gcode}")
+                    return False
+            return True
         except Exception as e:
-            logger.error(f"Universal relative motion failed: {e}")
+            logger.error(f"Universal independent-axis motion failed: {e}")
             return False
 
     def _send_grbl_coordinates_sync(self, x: float, y: float, speed: int = 600, timeout: int = 2, home: bool = False):

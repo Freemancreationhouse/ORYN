@@ -1,6 +1,9 @@
-ORYN UNIVERSAL THR JOG EXECUTOR FIX
-Build: UC-THR-JOG-20260826-1
+ORYN UNIVERSAL INDEPENDENT AXIS EXECUTOR FIX
+Build: UC-INDEPENDENT-AXIS-20260826-1
 
-- Universal THR playback uses same FluidNC $J relative path as calibration
-- theta/rho scales remain dynamic saved calibration values
-- no UI/logo/HOME changes
+FIX:
+- universal THR theta and rho deltas are never sent in one Cartesian/vector command
+- theta uses its own X relative jog scaled by saved theta_revolution_units
+- rho uses its own Y relative jog scaled by saved rho_travel_units
+- no calibration value is hard-coded
+- clear_from_out source pattern unchanged (32.985 revolutions, rho 1.0 -> 0.001)
