@@ -1,8 +1,0 @@
-ORYN FULL-CIRCLE THETA JOG FIX
-Build: UC-THETA-JOG-20260826-1
-
-FIXED:
-- 360 calibration FWD/BACK buttons now send real relative X/theta $J commands
-- calibration travel accumulates signed commanded theta units
-- Save Exact One Revolution uses that accumulated theta travel
-- no static image/logo files changed

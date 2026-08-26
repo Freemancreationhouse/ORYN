@@ -1,8 +1,10 @@
-ORYN UNIVERSAL REAL FIX
-Build: UC-REAL-FIX-20260826-1
+ORYN NATIVE UNIVERSAL CALIBRATION FIX
+Build: UC-NATIVE-PERSIST-20260826-1
 
 FIXES:
-- literal 360 CAL button is inside static/dist/index.html itself
-- no external calibration JS dependency
-- universal-incomplete returns HTTP 400 with real message, not false another-pattern 409
-- existing perimeter/home behavior preserved
+- Full Circle Calibration is integrated above Perimeter Calibration in the existing Control card
+- No floating 360 CAL control
+- Theta calibration jog uses relative X through the proven connection manager path
+- Saved theta/rho calibration is backed up outside the Git repo and restored after updates
+- HOME continues to use the saved rho calibration value
+- static image/logo files are preserved from the user's exact repository

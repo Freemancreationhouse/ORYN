@@ -468,7 +468,7 @@ def parse_machine_position(response: str):
     return None
 
 
-async def send_grbl_coordinates(x, y, speed=600, timeout=30, home=False):
+async def send_grbl_coordinates(x, y, speed=600, timeout=30, home=False, jog_axis="y"):
     """
     Send a G-code command to FluidNC and wait for an 'ok' response.
     If no response after set timeout, returns False.
@@ -496,7 +496,13 @@ async def send_grbl_coordinates(x, y, speed=600, timeout=30, home=False):
             return False
 
         try:
-            gcode = f"$J=G91 G21 Y{y:.2f} F{speed}" if home else f"G90 G21 G1 X{x:.2f} Y{y:.2f} F{speed}"
+            if home:
+                if str(jog_axis).lower() == 'x':
+                    gcode = f"$J=G91 G21 X{x:.3f} F{speed}"
+                else:
+                    gcode = f"$J=G91 G21 Y{y:.3f} F{speed}"
+            else:
+                gcode = f"G90 G21 G1 X{x:.2f} Y{y:.2f} F{speed}"
             await asyncio.to_thread(state.conn.send, gcode + "\n")
             logger.debug(f"Sent command: {gcode}")
 

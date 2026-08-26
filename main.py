@@ -2518,11 +2518,47 @@ async def delete_theta_rho_file(request: DeleteFileRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+CALIBRATION_BACKUP_FILE = os.path.expanduser("~/.oryn-machine-calibration.json")
+
+def _save_machine_calibration_backup():
+    try:
+        payload = {
+            "theta_revolution_units": state.theta_revolution_units,
+            "theta_calibrated": bool(state.theta_calibrated),
+            "rho_travel_units": state.rho_travel_units,
+            "rho_calibrated": bool(state.rho_calibrated),
+            "rho_direction": float(getattr(state, "rho_direction", 1.0) or 1.0),
+        }
+        with open(CALIBRATION_BACKUP_FILE, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh, indent=2)
+    except Exception as exc:
+        logger.warning(f"Could not save machine calibration backup: {exc}")
+
+def _restore_machine_calibration_backup():
+    try:
+        if not os.path.exists(CALIBRATION_BACKUP_FILE):
+            return
+        with open(CALIBRATION_BACKUP_FILE, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        changed = False
+        if not (state.rho_calibrated and state.rho_travel_units) and data.get("rho_calibrated") and data.get("rho_travel_units"):
+            state.rho_travel_units = float(data["rho_travel_units"]); state.rho_calibrated = True
+            state.rho_direction = float(data.get("rho_direction", 1.0) or 1.0); changed = True
+        if not (state.theta_calibrated and state.theta_revolution_units) and data.get("theta_calibrated") and data.get("theta_revolution_units"):
+            state.theta_revolution_units = float(data["theta_revolution_units"]); state.theta_calibrated = True; changed = True
+        if changed:
+            state.save()
+            logger.info("Restored universal machine calibration from persistent backup")
+    except Exception as exc:
+        logger.warning(f"Could not restore machine calibration backup: {exc}")
+
+_restore_machine_calibration_backup()
+
 @app.get("/api/universal-calibration", tags=["machine-calibration"])
 async def get_universal_calibration_status():
     """Unambiguous runtime proof that the universal calibration build is active."""
     return {
-        "build": "UC-REAL-FIX-20260826-1",
+        "build": "UC-NATIVE-PERSIST-20260826-1",
         "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
         "theta_revolution_units": state.theta_revolution_units,
         "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
@@ -2561,88 +2597,40 @@ async def start_rotation_calibration():
 
 @app.post("/api/rotation-calibration/jog", tags=["machine-calibration"])
 async def jog_rotation_calibration(request: RotationCalibrationJogRequest):
-    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None:
-        raise HTTPException(status_code=409, detail="Start rotation calibration first")
-    if not (state.conn and state.conn.is_connected()):
-        raise HTTPException(status_code=400, detail="Connection not established")
-
-    units = float(request.units)
-    if abs(units) > 25:
-        raise HTTPException(status_code=400, detail="Jog limited to 25 controller units per click")
-    speed = max(5.0, min(float(request.speed), 250.0))
-
-    # IMPORTANT: Full-circle calibration is THETA/X.  The generic
-    # send_grbl_coordinates(..., home=True) helper intentionally creates a
-    # Y-only $J command for radial crash-homing, so it must NOT be used here.
-    gcode = f"$J=G91 G21 X{units:.3f} F{speed:.3f}"
-    try:
-        await asyncio.to_thread(state.conn.send, gcode + "\n")
-    except Exception as exc:
-        logger.error(f"Rotation calibration theta jog send failed: {exc}")
-        raise HTTPException(status_code=500, detail=f"Could not send theta jog: {exc}")
-
-    # Wait for FluidNC/GRBL acknowledgement.
-    acknowledged = False
-    deadline = time.time() + 10.0
-    while time.time() < deadline:
-        response = await asyncio.to_thread(state.conn.readline)
-        if response:
-            text = str(response).strip()
-            if text.lower() == "ok":
-                acknowledged = True
-                break
-            if "error" in text.lower() or "alarm" in text.lower():
-                raise HTTPException(status_code=500, detail=f"Controller rejected theta jog: {text}")
-        else:
-            await asyncio.sleep(0.03)
-    if not acknowledged:
-        raise HTTPException(status_code=500, detail="Controller did not acknowledge theta jog")
-
+    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None: raise HTTPException(status_code=409,detail="Start rotation calibration first")
+    units=float(request.units)
+    if abs(units)>25: raise HTTPException(status_code=400,detail="Jog limited to 25 controller units per click")
+    speed=max(5.0,min(float(request.speed),250.0))
+    ok=await connection_manager.send_grbl_coordinates(units,0,speed,timeout=30,home=True,jog_axis="x")
+    if not ok: raise HTTPException(status_code=500,detail="Controller did not acknowledge theta/X calibration jog")
     await connection_manager.check_idle_async(timeout=60)
-    # Accumulate the exact signed controller travel commanded during this
-    # calibration.  Do not depend on absolute machine-position reporting,
-    # which may be stale/offset after jog mode.
-    state.rotation_calibration_current_units = float(state.rotation_calibration_current_units or 0.0) + units
-    try:
-        await connection_manager.update_machine_position()
-    except Exception as exc:
-        logger.debug(f"Rotation calibration position refresh skipped: {exc}")
-
-    return {
-        "success": True,
-        "current_units": state.rotation_calibration_current_units,
-        "machine_x": state.machine_x,
-    }
+    state.rotation_calibration_current_units=float(state.rotation_calibration_current_units or 0.0)+units
+    try: await connection_manager.update_machine_position()
+    except Exception: pass
+    return {"success":True,"current_units":state.rotation_calibration_current_units,"machine_x":state.machine_x}
 
 @app.post("/api/rotation-calibration/save", tags=["machine-calibration"])
 async def save_rotation_calibration():
-    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None:
-        raise HTTPException(status_code=409, detail="Start rotation calibration first")
-
-    signed_units = float(state.rotation_calibration_current_units or 0.0)
-    units = abs(signed_units)
-    if units < 0.1:
-        raise HTTPException(status_code=400, detail="Jog exactly one physical revolution before Save")
-
-    state.theta_revolution_units = signed_units
-    state.theta_calibrated = True
-    state.rotation_calibration_active = False
-    state.rotation_calibration_start_x = None
+    if not state.rotation_calibration_active or state.rotation_calibration_start_x is None: raise HTTPException(status_code=409,detail="Start rotation calibration first")
+    signed_units=float(state.rotation_calibration_current_units or 0.0)
+    units=abs(signed_units)
+    if units<0.1: raise HTTPException(status_code=400,detail="Jog exactly one physical revolution before Save")
+    state.theta_revolution_units=signed_units; state.theta_calibrated=True
+    state.rotation_calibration_current_units=units; state.rotation_calibration_active=False; state.rotation_calibration_start_x=None
     state.current_theta = 0.0
-    state.save()
-    logger.info(f"Universal rotation saved: 2pi = {signed_units:.4f} signed controller units")
-    return {"success": True, "theta_revolution_units": signed_units}
+    state.save(); logger.info(f"Universal rotation saved: 2pi = {units:.4f} controller units"); _save_machine_calibration_backup()
+    return {"success":True,"theta_revolution_units":signed_units}
 
 @app.post("/api/rotation-calibration/set", tags=["machine-calibration"])
 async def set_rotation_calibration(request: RotationCalibrationSetRequest):
     units=float(request.units)
     if abs(units)<=0 or units>100000: raise HTTPException(status_code=400,detail="Invalid revolution travel")
-    state.theta_revolution_units=units; state.theta_calibrated=True; state.save()
+    state.theta_revolution_units=units; state.theta_calibrated=True; state.save(); _save_machine_calibration_backup()
     return {"success":True,"theta_revolution_units":units}
 
 @app.post("/api/rotation-calibration/reset", tags=["machine-calibration"])
 async def reset_rotation_calibration():
-    state.theta_revolution_units=None; state.theta_calibrated=False; state.rotation_calibration_active=False; state.rotation_calibration_start_x=None; state.rotation_calibration_current_units=0.0; state.save()
+    state.theta_revolution_units=None; state.theta_calibrated=False; state.rotation_calibration_active=False; state.rotation_calibration_start_x=None; state.rotation_calibration_current_units=0.0; state.save(); _save_machine_calibration_backup()
     return {"success":True}
 
 class PerimeterCalibrationJogRequest(BaseModel):
@@ -2697,19 +2685,19 @@ async def save_perimeter_calibration():
     if units<1.0: raise HTTPException(status_code=400,detail="Jog to the real perimeter before Save")
     state.rho_travel_units=units; state.rho_direction=(1.0 if signed_units>=0 else -1.0); state.rho_calibrated=True; state.current_rho=1.0
     state.perimeter_calibration_current_units=units; state.perimeter_calibration_active=False; state.perimeter_calibration_start_y=None
-    state.save(); logger.info(f"Universal perimeter saved: rho 0->1 = {units:.4f} controller units")
+    state.save(); logger.info(f"Universal perimeter saved: rho 0->1 = {units:.4f} controller units"); _save_machine_calibration_backup()
     return {"success":True,"rho_travel_units":units}
 
 @app.post("/api/perimeter-calibration/set", tags=["machine-calibration"])
 async def set_perimeter_calibration(request: PerimeterCalibrationSetRequest):
     units=float(request.units)
     if units<=0 or units>10000: raise HTTPException(status_code=400,detail="Invalid perimeter travel")
-    state.rho_travel_units=units; state.rho_calibrated=True; state.save()
+    state.rho_travel_units=units; state.rho_calibrated=True; state.save(); _save_machine_calibration_backup()
     return {"success":True,"rho_travel_units":units}
 
 @app.post("/api/perimeter-calibration/reset", tags=["machine-calibration"])
 async def reset_perimeter_calibration():
-    state.rho_travel_units=None; state.rho_calibrated=False; state.perimeter_calibration_active=False; state.perimeter_calibration_start_y=None; state.perimeter_calibration_current_units=0.0; state.save()
+    state.rho_travel_units=None; state.rho_calibrated=False; state.perimeter_calibration_active=False; state.perimeter_calibration_start_y=None; state.perimeter_calibration_current_units=0.0; state.save(); _save_machine_calibration_backup()
     return {"success":True}
 
 @app.post("/api/perimeter-calibration/cancel", tags=["machine-calibration"])
