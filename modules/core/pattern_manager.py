@@ -599,12 +599,18 @@ class MotionControlThread:
 
 
     def _send_grbl_relative_sync(self, dx: float, dy: float, speed: int = 600):
-        """Send one calibrated universal THR delta in relative controller units."""
+        """Send one calibrated universal THR delta using FluidNC jog motion.
+
+        This deliberately uses the same $J=G91 controller path as the physical
+        360-degree calibration.  The delta values are still derived dynamically
+        from state.theta_revolution_units and state.rho_travel_units; no machine
+        calibration value is hard-coded here.
+        """
         if state.stop_requested:
             return False
         # Keep enough precision for fine theta increments; 2 decimals was too coarse
         # for a 9.790-unit/revolution axis.
-        gcode = f"G91 G21 G1 X{dx:.5f} Y{dy:.5f} F{speed}"
+        gcode = f"$J=G91 G21 X{dx:.5f} Y{dy:.5f} F{speed}"
         try:
             if hasattr(state.conn, 'reset_input_buffer'):
                 state.conn.reset_input_buffer()

@@ -1,2 +1,6 @@
-ORYN UNIVERSAL RELATIVE EXECUTOR FIX
-Build: UC-RELATIVE-EXECUTOR-20260826-1
+ORYN UNIVERSAL THR JOG EXECUTOR FIX
+Build: UC-THR-JOG-20260826-1
+
+- Universal THR playback uses same FluidNC $J relative path as calibration
+- theta/rho scales remain dynamic saved calibration values
+- no UI/logo/HOME changes
