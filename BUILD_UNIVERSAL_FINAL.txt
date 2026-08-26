@@ -1,10 +1,2 @@
-ORYN FINE 360 + SAFE AUTO-HOME FIX
-Build: UC-FINE360-SAFEHOME-20260826-1
-
-TARGETED FIXES:
-- Native Full Circle card retained; stale floating 360 CAL removed
-- Fine theta jogs: 1 / 0.1 / 0.01 controller units
-- Custom/unknown table will never auto-home with unsafe legacy 22-unit fallback
-- Once perimeter calibration is saved (e.g. 52 on the current machine), startup HOME uses that exact saved travel
-- Existing persistent machine-calibration backup retained
-- Static logo/image assets untouched
+ORYN UNIVERSAL RELATIVE EXECUTOR FIX
+Build: UC-RELATIVE-EXECUTOR-20260826-1

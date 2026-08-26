@@ -579,15 +579,57 @@ class MotionControlThread:
             state.stop_requested = True
             return
 
-        # Call sync version of send_grbl_coordinates in this thread
-        # Use 2 decimal precision to reduce GRBL parsing overhead
-        self._send_grbl_coordinates_sync(round(new_x_abs, 2), round(new_y_abs, 2), actual_speed)
+        # UNIVERSAL EXECUTOR: use calibrated DELTAS in relative controller units.
+        # Full-circle calibration itself is measured with G91 X jogs; sending the
+        # learned THR deltas through the same coordinate mode guarantees that
+        # 2*pi radians consumes exactly theta_revolution_units and rho 0..1
+        # consumes exactly rho_travel_units.  Do not reinterpret polar axes as
+        # absolute Cartesian X/Y positions.
+        if universal_geometry:
+            self._send_grbl_relative_sync(x_increment, y_increment, actual_speed)
+        else:
+            # Preserve the original absolute path for legacy/reference profiles.
+            self._send_grbl_coordinates_sync(round(new_x_abs, 2), round(new_y_abs, 2), actual_speed)
 
         # Update state
         state.current_theta = theta
         state.current_rho = rho
         state.machine_x = new_x_abs
         state.machine_y = new_y_abs
+
+
+    def _send_grbl_relative_sync(self, dx: float, dy: float, speed: int = 600):
+        """Send one calibrated universal THR delta in relative controller units."""
+        if state.stop_requested:
+            return False
+        # Keep enough precision for fine theta increments; 2 decimals was too coarse
+        # for a 9.790-unit/revolution axis.
+        gcode = f"G91 G21 G1 X{dx:.5f} Y{dy:.5f} F{speed}"
+        try:
+            if hasattr(state.conn, 'reset_input_buffer'):
+                state.conn.reset_input_buffer()
+            logger.debug(f"Universal relative motion: {gcode}")
+            state.conn.send(gcode + "\n")
+            time.sleep(0.005)
+            wait_start = time.time()
+            while time.time() - wait_start < 120:
+                if state.stop_requested:
+                    return False
+                if hasattr(state.conn, 'readline'):
+                    raw = state.conn.readline()
+                    if raw:
+                        line = raw.decode(errors='ignore').strip() if isinstance(raw, bytes) else str(raw).strip()
+                        if line.lower() == 'ok':
+                            return True
+                        if line.lower().startswith('error') or line.lower().startswith('alarm'):
+                            logger.error(f"Universal relative motion controller response: {line}")
+                            return False
+                time.sleep(0.002)
+            logger.error(f"Universal relative motion timeout: {gcode}")
+            return False
+        except Exception as e:
+            logger.error(f"Universal relative motion failed: {e}")
+            return False
 
     def _send_grbl_coordinates_sync(self, x: float, y: float, speed: int = 600, timeout: int = 2, home: bool = False):
         """Synchronous version of send_grbl_coordinates for motion thread.
