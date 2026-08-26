@@ -60,6 +60,10 @@ class AppState:
         # Universal angular calibration: exact controller X travel for one physical 360 degree turn.
         self.theta_revolution_units = None
         self.theta_calibrated = False
+        # Universal machine-profile speed limits. Geometry calibration remains
+        # independent; these normalized physical limits prevent one axis racing.
+        self.theta_rpm_at_speed_100 = 3.0
+        self.rho_strokes_per_min_at_speed_100 = 0.12
         self.rotation_calibration_active = False
         self.rotation_calibration_start_x = None
         self.rotation_calibration_current_units = 0.0
@@ -513,6 +517,8 @@ class AppState:
             "rho_direction": self.rho_direction,
             "theta_revolution_units": self.theta_revolution_units,
             "theta_calibrated": self.theta_calibrated,
+            "theta_rpm_at_speed_100": self.theta_rpm_at_speed_100,
+            "rho_strokes_per_min_at_speed_100": self.rho_strokes_per_min_at_speed_100,
             "homing": self.homing,
             "homing_user_override": self.homing_user_override,
             "angular_homing_offset_degrees": self.angular_homing_offset_degrees,
@@ -627,6 +633,8 @@ class AppState:
         self.rho_direction = float(data.get('rho_direction', 1.0) or 1.0)
         self.theta_revolution_units = data.get('theta_revolution_units', None)
         self.theta_calibrated = bool(data.get('theta_calibrated', self.theta_revolution_units is not None))
+        self.theta_rpm_at_speed_100 = float(data.get('theta_rpm_at_speed_100', 3.0) or 3.0)
+        self.rho_strokes_per_min_at_speed_100 = float(data.get('rho_strokes_per_min_at_speed_100', 0.12) or 0.12)
         self.homing = data.get('homing', 0)
         self.homing_user_override = data.get('homing_user_override', False)
         self.angular_homing_offset_degrees = data.get('angular_homing_offset_degrees', 0.0)

@@ -1,0 +1,11 @@
+{
+  "profile_version": 1,
+  "controller_family": "grbl_fluidnc",
+  "theta_axis": "X",
+  "rho_axis": "Y",
+  "executor": "absolute_pattern_origin",
+  "theta_revolution_units": null,
+  "rho_travel_units": null,
+  "rho_direction": 1.0,
+  "notes": "Runtime calibration is stored persistently in ~/.oryn-machine-calibration.json and is not overwritten by Git updates."
+}

@@ -579,24 +579,91 @@ class MotionControlThread:
             state.stop_requested = True
             return
 
-        # UNIVERSAL EXECUTOR: use calibrated DELTAS in relative controller units.
-        # Full-circle calibration itself is measured with G91 X jogs; sending the
-        # learned THR deltas through the same coordinate mode guarantees that
-        # 2*pi radians consumes exactly theta_revolution_units and rho 0..1
-        # consumes exactly rho_travel_units.  Do not reinterpret polar axes as
-        # absolute Cartesian X/Y positions.
-        if universal_geometry:
-            self._send_grbl_relative_sync(x_increment, y_increment, actual_speed)
+        # UNIVERSAL ABSOLUTE PATTERN EXECUTOR.
+        #
+        # IMPORTANT: never accumulate calibrated rho/theta deltas into the
+        # controller position during a pattern.  If a relative command is
+        # repeated, accepted twice, or state.current_rho drifts, cumulative
+        # motion can send the ball to centre far too early.  Instead each THR
+        # point is converted from the pattern's fixed start point into one
+        # absolute controller target.  Retrying the same G90 target is harmless.
+        if universal_geometry and all(hasattr(state, name) for name in (
+                '_pattern_origin_x', '_pattern_origin_y',
+                '_pattern_origin_theta', '_pattern_origin_rho')):
+            theta_units = float(state.theta_revolution_units)
+            rho_units = float(state.rho_travel_units)
+            rho_dir = float(getattr(state, 'rho_direction', 1.0) or 1.0)
+
+            theta_from_start = theta - float(state._pattern_origin_theta)
+            rho_from_start = rho - float(state._pattern_origin_rho)
+            new_x_abs = float(state._pattern_origin_x) + (theta_from_start / (2 * pi)) * theta_units
+            new_y_abs = float(state._pattern_origin_y) + rho_from_start * rho_units * rho_dir
+
+            # UNIVERSAL THETA-RHO SPEED PLANNER.
+            # The UI speed is treated as a relative pattern-speed request, not raw
+            # Cartesian mm/min.  X and Y are different physical quantities, so a
+            # single raw F value can make one axis finish far ahead of the other.
+            # Derive component limits from the saved machine profile and choose one
+            # coordinated G1 feed that keeps BOTH axis component speeds within their
+            # calibrated physical limits.
+            dx_cmd = new_x_abs - float(state.machine_x)
+            dy_cmd = new_y_abs - float(state.machine_y)
+            planned_feed = self._plan_universal_feed(dx_cmd, dy_cmd, actual_speed)
+            self._send_grbl_coordinates_sync(new_x_abs, new_y_abs, planned_feed)
         else:
             # Preserve the original absolute path for legacy/reference profiles.
             self._send_grbl_coordinates_sync(round(new_x_abs, 2), round(new_y_abs, 2), actual_speed)
 
-        # Update state
+        # Update software position only after issuing the absolute target.
         state.current_theta = theta
         state.current_rho = rho
         state.machine_x = new_x_abs
         state.machine_y = new_y_abs
 
+
+
+    def _plan_universal_feed(self, dx: float, dy: float, requested_speed: float) -> float:
+        """Return a coordinated GRBL feed for a calibrated Theta-Rho segment.
+
+        Geometry calibration and speed calibration are independent.  The saved
+        theta_revolution_units and rho_travel_units describe distance/position.
+        This planner converts the user speed into conservative physical axis
+        limits, then computes one vector feed whose X and Y components cannot
+        exceed those limits.  This preserves synchronization and works for any
+        calibrated table size/gearing because limits scale from the saved units.
+        """
+        theta_units = abs(float(getattr(state, 'theta_revolution_units', 0.0) or 0.0))
+        rho_units = abs(float(getattr(state, 'rho_travel_units', 0.0) or 0.0))
+        if theta_units <= 0 or rho_units <= 0:
+            return max(1.0, float(requested_speed or 1.0))
+
+        # Machine-profile speed constants.  These are physical normalized rates,
+        # NOT controller geometry values.  At UI speed=100 the default custom
+        # profile allows 3 rev/min theta and 0.12 full radial strokes/min.
+        # UI speed scales them proportionally.  Values can later be exposed as
+        # profile settings without changing THR geometry.
+        speed_scale = max(0.05, min(2.0, float(requested_speed or 60.0) / 100.0))
+        theta_rpm_at_100 = float(getattr(state, 'theta_rpm_at_speed_100', 3.0) or 3.0)
+        rho_strokes_per_min_at_100 = float(getattr(state, 'rho_strokes_per_min_at_speed_100', 0.12) or 0.12)
+        max_x_units_min = theta_units * theta_rpm_at_100 * speed_scale
+        max_y_units_min = rho_units * rho_strokes_per_min_at_100 * speed_scale
+
+        length = (dx * dx + dy * dy) ** 0.5
+        if length < 1e-12:
+            return 1.0
+        limits = []
+        if abs(dx) > 1e-12:
+            limits.append(max_x_units_min * length / abs(dx))
+        if abs(dy) > 1e-12:
+            limits.append(max_y_units_min * length / abs(dy))
+        feed = min(limits) if limits else 1.0
+        feed = max(0.5, min(5000.0, feed))
+        logger.debug(
+            "Universal speed plan: req=%.2f scale=%.3f dX=%.5f dY=%.5f F=%.3f "
+            "(theta<=%.3f u/min, rho<=%.3f u/min)",
+            float(requested_speed or 0.0), speed_scale, dx, dy, feed,
+            max_x_units_min, max_y_units_min)
+        return feed
 
     def _send_grbl_relative_sync(self, dx: float, dy: float, speed: int = 600):
         """Send one calibrated universal THR delta using FluidNC jog motion.
@@ -610,49 +677,31 @@ class MotionControlThread:
             return False
         # Keep enough precision for fine theta increments; 2 decimals was too coarse
         # for a 9.790-unit/revolution axis.
-        # IMPORTANT: theta and rho are different physical dimensions.  Do not
-        # put them in one Cartesian/vector jog.  Execute each calibrated delta
-        # on its own axis, using the exact same single-axis $J path used by the
-        # successful 360 and perimeter calibration controls.
-        commands = []
-        if abs(dx) > 1e-7:
-            commands.append(f"$J=G91 G21 X{dx:.5f} F{speed}")
-        if abs(dy) > 1e-7:
-            commands.append(f"$J=G91 G21 Y{dy:.5f} F{speed}")
-        if not commands:
-            return True
-
+        gcode = f"$J=G91 G21 X{dx:.5f} Y{dy:.5f} F{speed}"
         try:
-            for gcode in commands:
+            if hasattr(state.conn, 'reset_input_buffer'):
+                state.conn.reset_input_buffer()
+            logger.debug(f"Universal relative motion: {gcode}")
+            state.conn.send(gcode + "\n")
+            time.sleep(0.005)
+            wait_start = time.time()
+            while time.time() - wait_start < 120:
                 if state.stop_requested:
                     return False
-                if hasattr(state.conn, 'reset_input_buffer'):
-                    state.conn.reset_input_buffer()
-                logger.debug(f"Universal independent-axis motion: {gcode}")
-                state.conn.send(gcode + "\n")
-                time.sleep(0.005)
-                wait_start = time.time()
-                accepted = False
-                while time.time() - wait_start < 120:
-                    if state.stop_requested:
-                        return False
-                    if hasattr(state.conn, 'readline'):
-                        raw = state.conn.readline()
-                        if raw:
-                            line = raw.decode(errors='ignore').strip() if isinstance(raw, bytes) else str(raw).strip()
-                            if line.lower() == 'ok':
-                                accepted = True
-                                break
-                            if line.lower().startswith('error') or line.lower().startswith('alarm'):
-                                logger.error(f"Universal independent-axis controller response: {line}")
-                                return False
-                    time.sleep(0.002)
-                if not accepted:
-                    logger.error(f"Universal independent-axis motion timeout: {gcode}")
-                    return False
-            return True
+                if hasattr(state.conn, 'readline'):
+                    raw = state.conn.readline()
+                    if raw:
+                        line = raw.decode(errors='ignore').strip() if isinstance(raw, bytes) else str(raw).strip()
+                        if line.lower() == 'ok':
+                            return True
+                        if line.lower().startswith('error') or line.lower().startswith('alarm'):
+                            logger.error(f"Universal relative motion controller response: {line}")
+                            return False
+                time.sleep(0.002)
+            logger.error(f"Universal relative motion timeout: {gcode}")
+            return False
         except Exception as e:
-            logger.error(f"Universal independent-axis motion failed: {e}")
+            logger.error(f"Universal relative motion failed: {e}")
             return False
 
     def _send_grbl_coordinates_sync(self, x: float, y: float, speed: int = 600, timeout: int = 2, home: bool = False):
@@ -664,7 +713,7 @@ class MotionControlThread:
 
         Includes retry logic for serial corruption errors (common on Pi 3B+).
         """
-        gcode = f"$J=G91 G21 Y{y:.2f} F{speed}" if home else f"G90 G21 G1 X{x:.2f} Y{y:.2f} F{speed}"
+        gcode = f"$J=G91 G21 Y{y:.3f} F{speed}" if home else f"G90 G21 G1 X{x:.5f} Y{y:.5f} F{speed}"
         max_wait_time = 120  # Maximum seconds to wait for 'ok' response
         max_corruption_retries = 10  # Max retries for corruption-type errors
         max_timeout_retries = 10  # Max retries for timeout (lost 'ok' response)
@@ -1343,6 +1392,31 @@ async def _execute_pattern_internal(file_path):
     logger.info(f"t: {state.current_theta}, r: {state.current_rho}")
     await reset_theta()
 
+    # Universal profile patterns are anchored to the REAL controller position
+    # at the first THR coordinate.  Every later point is an absolute target
+    # from this fixed origin, so theta and rho cannot accumulate incorrectly.
+    if (getattr(state, 'theta_calibrated', False) and getattr(state, 'theta_revolution_units', None)
+            and getattr(state, 'rho_calibrated', False) and getattr(state, 'rho_travel_units', None)):
+        try:
+            await connection_manager.update_machine_position()
+        except Exception as exc:
+            logger.warning(f"Could not refresh controller position before universal pattern: {exc}")
+        if state.machine_x is None or state.machine_y is None:
+            logger.error("Universal pattern cannot start: controller position is unknown")
+            state.stop_requested = True
+            return False
+        state._pattern_origin_x = float(state.machine_x)
+        state._pattern_origin_y = float(state.machine_y)
+        state._pattern_origin_theta = float(coordinates[0][0])
+        state._pattern_origin_rho = float(coordinates[0][1])
+        logger.info(
+            "Universal pattern origin: MPos=(%.5f, %.5f), THR=(%.5f, %.5f), "
+            "theta/rev=%.5f, rho/full=%.5f, rho_dir=%.1f",
+            state._pattern_origin_x, state._pattern_origin_y,
+            state._pattern_origin_theta, state._pattern_origin_rho,
+            float(state.theta_revolution_units), float(state.rho_travel_units),
+            float(getattr(state, 'rho_direction', 1.0) or 1.0))
+
     start_time = time.time()
     total_pause_time = 0  # Track total time spent paused (manual + scheduled)
     completed_weight = 0.0  # Track rho-weighted progress
@@ -1545,6 +1619,14 @@ async def _execute_pattern_internal(file_path):
         return False
 
     await connection_manager.check_idle_async()
+
+    # Pattern-local universal origin must never leak into the next pattern.
+    for _name in ('_pattern_origin_x', '_pattern_origin_y', '_pattern_origin_theta', '_pattern_origin_rho'):
+        if hasattr(state, _name):
+            try:
+                delattr(state, _name)
+            except Exception:
+                pass
 
     # Set LED back to idle when pattern completes normally (not stopped early)
     # This also handles Still Sands: turns off LEDs if in scheduled pause period with LED control

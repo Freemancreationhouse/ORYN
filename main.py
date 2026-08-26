@@ -2523,6 +2523,13 @@ CALIBRATION_BACKUP_FILE = os.path.expanduser("~/.oryn-machine-calibration.json")
 def _save_machine_calibration_backup():
     try:
         payload = {
+            "profile_version": 2,
+            "controller_family": "grbl_fluidnc",
+            "theta_axis": "X",
+            "rho_axis": "Y",
+            "executor": "absolute_pattern_origin_speed_planner",
+            "theta_rpm_at_speed_100": float(getattr(state, "theta_rpm_at_speed_100", 3.0) or 3.0),
+            "rho_strokes_per_min_at_speed_100": float(getattr(state, "rho_strokes_per_min_at_speed_100", 0.12) or 0.12),
             "theta_revolution_units": state.theta_revolution_units,
             "theta_calibrated": bool(state.theta_calibrated),
             "rho_travel_units": state.rho_travel_units,
@@ -2535,20 +2542,40 @@ def _save_machine_calibration_backup():
         logger.warning(f"Could not save machine calibration backup: {exc}")
 
 def _restore_machine_calibration_backup():
+    """Restore only the NEW v2 profile.
+
+    v1/legacy calibration is intentionally invalidated once for this build, per
+    the requested clean recalibration.  After the user saves new values, the v2
+    profile persists across future git updates.
+    """
     try:
-        if not os.path.exists(CALIBRATION_BACKUP_FILE):
+        data = {}
+        if os.path.exists(CALIBRATION_BACKUP_FILE):
+            with open(CALIBRATION_BACKUP_FILE, "r", encoding="utf-8") as fh:
+                data = json.load(fh)
+        if int(data.get("profile_version", 0) or 0) != 2:
+            logger.warning("Invalidating legacy machine calibration; fresh v2 calibration required")
+            state.theta_revolution_units = None
+            state.theta_calibrated = False
+            state.rho_travel_units = None
+            state.rho_calibrated = False
+            state.rho_direction = 1.0
+            state.theta_rpm_at_speed_100 = 3.0
+            state.rho_strokes_per_min_at_speed_100 = 0.12
+            state.save()
+            _save_machine_calibration_backup()
             return
-        with open(CALIBRATION_BACKUP_FILE, "r", encoding="utf-8") as fh:
-            data = json.load(fh)
         changed = False
-        if not (state.rho_calibrated and state.rho_travel_units) and data.get("rho_calibrated") and data.get("rho_travel_units"):
+        if data.get("rho_calibrated") and data.get("rho_travel_units"):
             state.rho_travel_units = float(data["rho_travel_units"]); state.rho_calibrated = True
             state.rho_direction = float(data.get("rho_direction", 1.0) or 1.0); changed = True
-        if not (state.theta_calibrated and state.theta_revolution_units) and data.get("theta_calibrated") and data.get("theta_revolution_units"):
+        if data.get("theta_calibrated") and data.get("theta_revolution_units"):
             state.theta_revolution_units = float(data["theta_revolution_units"]); state.theta_calibrated = True; changed = True
+        state.theta_rpm_at_speed_100 = float(data.get("theta_rpm_at_speed_100", 3.0) or 3.0)
+        state.rho_strokes_per_min_at_speed_100 = float(data.get("rho_strokes_per_min_at_speed_100", 0.12) or 0.12)
         if changed:
             state.save()
-            logger.info("Restored universal machine calibration from persistent backup")
+            logger.info("Restored universal v2 machine profile from persistent backup")
     except Exception as exc:
         logger.warning(f"Could not restore machine calibration backup: {exc}")
 
@@ -2558,7 +2585,8 @@ _restore_machine_calibration_backup()
 async def get_universal_calibration_status():
     """Unambiguous runtime proof that the universal calibration build is active."""
     return {
-        "build": "UC-FINE360-SAFEHOME-20260826-1",
+        "build": "UC-PROFILE-SPEED-V2-20260827-1",
+        "executor": "absolute_pattern_origin_speed_planner",
         "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
         "theta_revolution_units": state.theta_revolution_units,
         "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
