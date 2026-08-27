@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from pathlib import Path
 import os
+import re
 import logging
 from datetime import datetime
 from modules.connection import connection_manager
