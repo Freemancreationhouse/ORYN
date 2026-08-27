@@ -1,13 +1,20 @@
 {
-  "profile_schema": 1,
-  "profile_name": "ORYN Custom Theta-Rho / FluidNC",
+  "profile_schema": 2,
+  "profile_name": "ORYN Universal STEP-DIR Theta-Rho",
   "controller_family": "grbl_fluidnc",
   "theta_axis": "X",
   "rho_axis": "Y",
-  "homing_mode": "sensorless_crash",
-  "bootstrap_home_travel_units": 52.0,
-  "bootstrap_home_feed": 120.0,
-  "rho_outward_direction": 1.0,
-  "bootstrap_only": true,
-  "notes": "Bootstrap HOME only. Fresh saved Centre->Perimeter calibration takes priority immediately and is used thereafter."
+  "driver_profile": "user_selectable",
+  "supported_drivers": [
+    "A4988",
+    "DRV8825",
+    "TMC2208",
+    "TMC2209",
+    "TMC5160",
+    "CUSTOM_STEP_DIR"
+  ],
+  "legacy_reference_microsteps": 16,
+  "hardware_profile_file": "~/.oryn-machine-hardware.json",
+  "geometry_profile_file": "~/.oryn-machine-calibration.json",
+  "notes": "Machine Setup scales FluidNC steps/unit when microstepping changes. Exact 360-degree and center-to-perimeter calibration remains authoritative."
 }

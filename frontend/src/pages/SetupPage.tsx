@@ -555,6 +555,159 @@ function CalibrationWizard() {
   )
 }
 
+
+// ─── Universal Driver / Microstep Profile ───────────────────────────────────
+
+type DriverName = 'A4988' | 'DRV8825' | 'TMC2208' | 'TMC2209' | 'TMC5160' | 'CUSTOM_STEP_DIR'
+interface HardwareAxisProfile { driver: DriverName; microsteps: number }
+interface HardwareProfileResponse {
+  build: string
+  profile: { initialized?: boolean; x?: HardwareAxisProfile; y?: HardwareAxisProfile }
+  controller?: FluidNCConfig | null
+  supported_drivers: Record<string, number[]>
+  geometry: {
+    theta_calibrated: boolean
+    theta_revolution_units: number | null
+    rho_calibrated: boolean
+    rho_travel_units: number | null
+  }
+}
+
+function UniversalHardwareProfile() {
+  const isConnected = useStatusStore((s) => s.status?.connection_status ?? false)
+  const [data, setData] = useState<HardwareProfileResponse | null>(null)
+  const [x, setX] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 16 })
+  const [y, setY] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 16 })
+  const [loading, setLoading] = useState(false)
+  const [applying, setApplying] = useState(false)
+
+  const load = useCallback(async () => {
+    if (!isConnected) return
+    setLoading(true)
+    try {
+      const res = await apiClient.get<HardwareProfileResponse>('/api/machine-hardware-profile')
+      setData(res)
+      if (res.profile?.x) setX(res.profile.x)
+      if (res.profile?.y) setY(res.profile.y)
+    } catch (err) {
+      toast.error(`Machine profile read failed: ${err instanceof Error ? err.message : 'Unknown'}`)
+    } finally {
+      setLoading(false)
+    }
+  }, [isConnected])
+
+  const apply = useCallback(async () => {
+    setApplying(true)
+    try {
+      const res = await apiClient.post<{ success: boolean; changes: Record<string, unknown>; message: string }>(
+        '/api/machine-hardware-profile/apply', { x, y }
+      )
+      if (res.success) {
+        toast.success('Hardware profile applied and saved to FluidNC')
+        await load()
+      }
+    } catch (err) {
+      toast.error(`Apply failed: ${err instanceof Error ? err.message : 'Unknown'}`)
+    } finally {
+      setApplying(false)
+    }
+  }, [x, y, load])
+
+  const drivers = data?.supported_drivers ?? {
+    A4988: [1, 2, 4, 8, 16],
+    DRV8825: [1, 2, 4, 8, 16, 32],
+    TMC2208: [1, 2, 4, 8, 16, 32, 64, 128, 256],
+    TMC2209: [1, 2, 4, 8, 16, 32, 64, 128, 256],
+    TMC5160: [1, 2, 4, 8, 16, 32, 64, 128, 256],
+    CUSTOM_STEP_DIR: [1, 2, 4, 8, 16, 32, 64, 128, 256],
+  }
+
+  const axisEditor = (axis: 'x' | 'y', value: HardwareAxisProfile, setValue: (v: HardwareAxisProfile) => void) => {
+    const microsteps = drivers[value.driver] ?? [1, 2, 4, 8, 16]
+    return (
+      <div className="rounded-lg border p-4 space-y-3">
+        <div>
+          <div className="font-semibold">{axis.toUpperCase()} — {axis === 'x' ? 'Theta / Rotation' : 'Rho / Radial'}</div>
+          <div className="text-xs text-muted-foreground">STEP/DIR driver and physical microstep setting</div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Driver</Label>
+            <select
+              className="w-full h-10 rounded-md border bg-background px-3 text-sm"
+              value={value.driver}
+              onChange={(e) => {
+                const driver = e.target.value as DriverName
+                const allowed = drivers[driver] ?? [1]
+                setValue({ driver, microsteps: allowed.includes(value.microsteps) ? value.microsteps : allowed[0] })
+              }}
+            >
+              {Object.keys(drivers).map((d) => <option key={d} value={d}>{d === 'CUSTOM_STEP_DIR' ? 'Custom STEP/DIR' : d}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Physical microstep</Label>
+            <select
+              className="w-full h-10 rounded-md border bg-background px-3 text-sm"
+              value={value.microsteps}
+              onChange={(e) => setValue({ ...value, microsteps: Number(e.target.value) })}
+            >
+              {microsteps.map((m) => <option key={m} value={m}>{m === 1 ? 'Full step' : `1/${m}`}</option>)}
+            </select>
+          </div>
+        </div>
+        {data?.controller?.axes?.[axis] && (
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className="rounded bg-muted p-2"><div className="text-muted-foreground">Steps/unit</div><div className="font-medium">{data.controller.axes[axis].steps_per_mm ?? '—'}</div></div>
+            <div className="rounded bg-muted p-2"><div className="text-muted-foreground">Max rate</div><div className="font-medium">{data.controller.axes[axis].max_rate_mm_per_min ?? '—'}</div></div>
+            <div className="rounded bg-muted p-2"><div className="text-muted-foreground">Acceleration</div><div className="font-medium">{data.controller.axes[axis].acceleration_mm_per_sec2 ?? '—'}</div></div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <Alert>
+        <span className="material-icons-outlined text-base mr-2 shrink-0">precision_manufacturing</span>
+        <AlertDescription>
+          Select the driver and <strong>physical DIP/jumper microstep</strong> actually fitted on each axis. ORYN scales FluidNC steps/unit when microstepping changes, so changing A4988 → TMC/DRV8825 does not require code changes. Max rate and acceleration stay as firmware safety limits. Exact 360° and Centre→Perimeter calibration remains the physical geometry authority.
+        </AlertDescription>
+      </Alert>
+      {!isConnected ? (
+        <Alert><AlertDescription>Connect the controller before applying a machine profile.</AlertDescription></Alert>
+      ) : (
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={load} disabled={loading}>{loading ? 'Reading...' : 'Read Machine Profile'}</Button>
+          <Button onClick={apply} disabled={applying || !data}>{applying ? 'Applying...' : 'Apply Driver / Microstep'}</Button>
+          {data?.profile?.initialized && <Badge variant="outline">PROFILE SAVED</Badge>}
+        </div>
+      )}
+      {data && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {axisEditor('x', x, setX)}
+            {axisEditor('y', y, setY)}
+          </div>
+          <div className="rounded-lg border p-3 text-sm grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>360° geometry: <strong>{data.geometry.theta_calibrated ? `${data.geometry.theta_revolution_units?.toFixed(4)} units` : 'Not calibrated'}</strong></div>
+            <div>Centre → Perimeter: <strong>{data.geometry.rho_calibrated ? `${data.geometry.rho_travel_units?.toFixed(4)} units` : 'Not calibrated'}</strong></div>
+          </div>
+          {!data.profile?.initialized && (
+            <Alert>
+              <span className="material-icons-outlined text-base mr-2 shrink-0">warning</span>
+              <AlertDescription>
+                First setup uses ORYN's legacy reference of A4988 at 1/16 microstep. If you have now removed all three A4988 jumpers, select <strong>Full step</strong> for X and Y and Apply. ORYN will scale the current FluidNC steps/unit by 1/16, preserving the same physical controller-unit scale instead of making both motors run ~16× farther.
+              </AlertDescription>
+            </Alert>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 // ─── FluidNC Config Editor ───────────────────────────────────────────────────
 
 const MOVEMENT_FIELDS: { key: keyof AxisConfig; label: string; unit: string }[] = [
@@ -868,7 +1021,7 @@ export function SetupPage() {
       </Alert>
 
       {/* Main content */}
-      <Accordion type="multiple" defaultValue={['calibration', 'config']}>
+      <Accordion type="multiple" defaultValue={['machine-profile', 'calibration', 'config']}>
         <AccordionItem value="calibration" className="border rounded-lg px-4 bg-card">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-3">
@@ -883,6 +1036,23 @@ export function SetupPage() {
           </AccordionTrigger>
           <AccordionContent className="pt-4 pb-6">
             <CalibrationWizard />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="machine-profile" className="border rounded-lg px-4 mt-2 bg-card">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-3">
+              <span className="material-icons-outlined text-muted-foreground">precision_manufacturing</span>
+              <div className="text-left">
+                <div className="font-semibold">Universal Machine Profile</div>
+                <div className="text-sm text-muted-foreground font-normal">
+                  Driver, microstepping, firmware scale and physical calibration
+                </div>
+              </div>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pt-4 pb-6">
+            <UniversalHardwareProfile />
           </AccordionContent>
         </AccordionItem>
 

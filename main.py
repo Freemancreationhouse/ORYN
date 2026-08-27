@@ -2587,7 +2587,7 @@ _restore_machine_calibration_backup()
 async def get_universal_calibration_status():
     """Unambiguous runtime proof that the universal calibration build is active."""
     return {
-        "build": "UC-HOME-BOOTSTRAP-V4-20260827-1",
+        "build": "UC-DRIVER-PROFILE-V7-20260827-1",
         "executor": "coordinated_relative_g1_no_retry_speed_planner",
         "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
         "theta_revolution_units": state.theta_revolution_units,
@@ -4670,6 +4670,169 @@ async def restart_system():
 ###############################################################################
 # FluidNC Config Endpoints
 ###############################################################################
+
+
+# ─── ORYN Universal Hardware / Driver Profile ────────────────────────────────
+# This layer keeps controller units stable when the user changes STEP/DIR
+# drivers or microstepping.  Geometry is still learned physically by the 360°
+# and Centre→Perimeter calibrations.  No driver-specific values are hard-coded
+# into pattern mathematics.
+HARDWARE_PROFILE_FILE = os.path.expanduser("~/.oryn-machine-hardware.json")
+
+_DRIVER_MICROSTEPS = {
+    "A4988": [1, 2, 4, 8, 16],
+    "DRV8825": [1, 2, 4, 8, 16, 32],
+    "TMC2208": [1, 2, 4, 8, 16, 32, 64, 128, 256],
+    "TMC2209": [1, 2, 4, 8, 16, 32, 64, 128, 256],
+    "TMC5160": [1, 2, 4, 8, 16, 32, 64, 128, 256],
+    "CUSTOM_STEP_DIR": [1, 2, 4, 8, 16, 32, 64, 128, 256],
+}
+
+
+def _load_hardware_profile():
+    try:
+        if os.path.exists(HARDWARE_PROFILE_FILE):
+            with open(HARDWARE_PROFILE_FILE, "r", encoding="utf-8") as fh:
+                data = json.load(fh)
+            if isinstance(data, dict):
+                return data
+    except Exception as exc:
+        logger.warning("Could not read hardware profile: %s", exc)
+    # Legacy ORYN tables were normally operated with all three A4988
+    # microstep jumpers fitted (1/16).  This is only a *profile reference* used
+    # to scale FluidNC steps/unit if the user selects a different physical
+    # microstep. It never enters THR geometry directly.
+    return {
+        "schema": 1,
+        "initialized": False,
+        "x": {"driver": "A4988", "microsteps": 16},
+        "y": {"driver": "A4988", "microsteps": 16},
+        "notes": "Select the physical driver/microstep configuration and Apply once.",
+    }
+
+
+def _save_hardware_profile(data):
+    try:
+        with open(HARDWARE_PROFILE_FILE, "w", encoding="utf-8") as fh:
+            json.dump(data, fh, indent=2)
+        return True
+    except Exception as exc:
+        logger.warning("Could not save hardware profile: %s", exc)
+        return False
+
+
+class HardwareAxisProfile(BaseModel):
+    driver: str
+    microsteps: int
+
+
+class HardwareProfileApplyRequest(BaseModel):
+    x: HardwareAxisProfile
+    y: HardwareAxisProfile
+
+
+@app.get("/api/machine-hardware-profile", tags=["machine-setup"])
+async def get_machine_hardware_profile():
+    profile = _load_hardware_profile()
+    controller = None
+    if state.conn and state.conn.is_connected():
+        try:
+            from modules.connection import fluidnc_config
+            controller = await asyncio.to_thread(fluidnc_config.read_all_settings)
+            try:
+                state.x_max_rate_mm_per_min = float(controller.get("axes", {}).get("x", {}).get("max_rate_mm_per_min") or 0.0)
+                state.y_max_rate_mm_per_min = float(controller.get("axes", {}).get("y", {}).get("max_rate_mm_per_min") or 0.0)
+            except Exception:
+                pass
+        except Exception as exc:
+            logger.warning("Hardware profile controller read failed: %s", exc)
+    return {
+        "build": "UC-DRIVER-PROFILE-V7-20260827-1",
+        "profile": profile,
+        "controller": controller,
+        "supported_drivers": _DRIVER_MICROSTEPS,
+        "geometry": {
+            "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
+            "theta_revolution_units": state.theta_revolution_units,
+            "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
+            "rho_travel_units": state.rho_travel_units,
+        },
+    }
+
+
+@app.post("/api/machine-hardware-profile/apply", tags=["machine-setup"])
+async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
+    """Adopt a new STEP/DIR driver/microstep setup without changing ORYN math.
+
+    FluidNC steps/unit are scaled by new_microsteps / old_microsteps, keeping
+    one controller unit approximately the same physical movement after a DIP or
+    driver change.  Max rate and acceleration remain in the same controller
+    units and are therefore preserved.  Exact 360° and radius calibration stays
+    the final physical authority.
+    """
+    if not state.conn or not state.conn.is_connected():
+        raise HTTPException(status_code=400, detail="Connect to the FluidNC controller first")
+    if state.current_playing_file and not state.pause_requested:
+        raise HTTPException(status_code=409, detail="Stop the current pattern before changing hardware profile")
+
+    for axis_name, axis_req in (("x", request.x), ("y", request.y)):
+        drv = axis_req.driver.upper()
+        if drv not in _DRIVER_MICROSTEPS:
+            raise HTTPException(status_code=400, detail=f"Unsupported {axis_name.upper()} driver: {axis_req.driver}")
+        if int(axis_req.microsteps) not in _DRIVER_MICROSTEPS[drv]:
+            raise HTTPException(status_code=400, detail=f"{drv} does not support selected {axis_req.microsteps} microstep profile")
+
+    from modules.connection import fluidnc_config
+    current_cfg = await asyncio.to_thread(fluidnc_config.read_all_settings)
+    old = _load_hardware_profile()
+
+    changes = {}
+    new_profile = {"schema": 1, "initialized": True, "x": {}, "y": {}, "last_applied": datetime.now().isoformat()}
+    for axis_name, axis_req in (("x", request.x), ("y", request.y)):
+        axis_cfg = (current_cfg.get("axes") or {}).get(axis_name) or {}
+        current_steps = axis_cfg.get("steps_per_mm")
+        if current_steps is None:
+            raise HTTPException(status_code=500, detail=f"Could not read {axis_name.upper()} steps_per_mm from FluidNC")
+        old_axis = (old.get(axis_name) or {})
+        old_micro = int(old_axis.get("microsteps", 16) or 16)
+        new_micro = int(axis_req.microsteps)
+        # Preserve controller-unit physical scale when the physical microstep
+        # changes: steps/unit follows microstep ratio.
+        new_steps = float(current_steps) * (float(new_micro) / float(old_micro))
+        if abs(new_steps - float(current_steps)) > 1e-9:
+            path = f"axes/{axis_name}/steps_per_mm"
+            ok = await asyncio.to_thread(fluidnc_config.write_setting, path, f"{new_steps:.6f}")
+            if not ok:
+                raise HTTPException(status_code=500, detail=f"FluidNC rejected {axis_name.upper()} steps_per_mm update")
+            changes[path] = {"from": float(current_steps), "to": new_steps}
+        new_profile[axis_name] = {
+            "driver": axis_req.driver.upper(),
+            "microsteps": new_micro,
+            "steps_per_mm": new_steps,
+            "max_rate_mm_per_min": axis_cfg.get("max_rate_mm_per_min"),
+            "acceleration_mm_per_sec2": axis_cfg.get("acceleration_mm_per_sec2"),
+        }
+
+    if changes:
+        saved = await asyncio.to_thread(fluidnc_config.save_config)
+        if not saved:
+            logger.warning("FluidNC settings changed but save_config did not confirm persistence")
+    else:
+        saved = True
+
+    _save_hardware_profile(new_profile)
+    state.x_steps_per_mm = float(new_profile["x"]["steps_per_mm"])
+    state.y_steps_per_mm = float(new_profile["y"]["steps_per_mm"])
+    state.x_max_rate_mm_per_min = float(new_profile["x"].get("max_rate_mm_per_min") or 0.0)
+    state.y_max_rate_mm_per_min = float(new_profile["y"].get("max_rate_mm_per_min") or 0.0)
+    state.save()
+    return {
+        "success": True,
+        "saved": saved,
+        "profile": new_profile,
+        "changes": changes,
+        "message": "Hardware profile applied. Exact 360° and perimeter calibration remain the physical geometry authority.",
+    }
 
 class FluidNCCommandRequest(BaseModel):
     command: str

@@ -1,9 +1,18 @@
-ORYN UNIVERSAL HOME BOOTSTRAP V4
-Build: UC-HOME-BOOTSTRAP-V4-20260827-1
+ORYN UNIVERSAL DRIVER PROFILE UI READ FIX
+Build: UC-DRIVER-PROFILE-V7.2-20260827-1
 
-FIXES:
-- Startup and manual sensorless HOME can run before first exact perimeter calibration
-- Current installed machine profile provides 52-unit bootstrap HOME only
-- Fresh saved perimeter calibration immediately overrides bootstrap
-- Crash HOME sends exactly one relative Y jog; never retries a relative HOME
-- Pattern executor/calibration UI/static assets otherwise unchanged from V3 baseline
+VERIFIED FIXES:
+- Universal Machine Profile Read no longer dereferences missing .umstatus
+- Read now reaches /api/machine-hardware-profile and renders X/Y driver + microstep controls
+- Existing V7 pattern timeout correction retained
+- Existing HOME/pattern/calibration behavior otherwise unchanged
+
+ORYN UNIVERSAL DRIVER PROFILE V7.1 — HARDWARE SETUP VISIBILITY FIX
+Build: UC-DRIVER-PROFILE-V7.1-20260827-1
+
+FIXED:
+- Universal Machine Profile reliably mounts on the actually served Hardware Setup page
+- X/Y Driver and Physical Microstep selectors visible above existing setup controls
+- Existing V7 driver/microstep API retained
+- Existing V7 dynamic pattern timeout fix retained
+- No static image/logo changes

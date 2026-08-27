@@ -634,6 +634,14 @@ class MotionControlThread:
         rho_strokes_per_min_at_100 = float(getattr(state, 'rho_strokes_per_min_at_speed_100', 0.12) or 0.12)
         max_x_units_min = theta_units * theta_rpm_at_100 * speed_scale
         max_y_units_min = rho_units * rho_strokes_per_min_at_100 * speed_scale
+        # Firmware limits are the hardware ceiling.  If available from Machine
+        # Setup, never ask either vector component to exceed FluidNC max_rate.
+        fw_x = float(getattr(state, 'x_max_rate_mm_per_min', 0.0) or 0.0)
+        fw_y = float(getattr(state, 'y_max_rate_mm_per_min', 0.0) or 0.0)
+        if fw_x > 0:
+            max_x_units_min = min(max_x_units_min, fw_x)
+        if fw_y > 0:
+            max_y_units_min = min(max_y_units_min, fw_y)
 
         length = (dx * dx + dy * dy) ** 0.5
         if length < 1e-12:
@@ -684,10 +692,16 @@ class MotionControlThread:
                 logger.debug("Universal coordinated delta: %s", gcode)
                 conn.send(gcode + "\n")
                 started = time.time()
-                # GRBL/FluidNC acknowledges command acceptance quickly.  Do not
-                # wait for physical completion here; the planner/firmware queue
-                # provides continuous motion.  Never resend on timeout.
-                while time.time() - started < 5.0:
+                # When the FluidNC planner buffer fills, "ok" is delayed until
+                # room is available.  Slow normalized Theta-Rho segments can be
+                # longer than the old fixed 5 s timeout, which made clearing
+                # stop after roughly one revolution.  Derive the acknowledgement
+                # window from the segment's planned duration and NEVER resend a
+                # relative move.
+                vector_len = (dx * dx + dy * dy) ** 0.5
+                expected_segment_s = (60.0 * vector_len / max(float(speed), 1e-6))
+                ack_timeout = max(15.0, min(120.0, expected_segment_s * 3.0 + 10.0))
+                while time.time() - started < ack_timeout:
                     if state.stop_requested:
                         return False
                     line = conn.readline()
@@ -700,7 +714,7 @@ class MotionControlThread:
                     if low.startswith('error') or low.startswith('alarm'):
                         logger.error("Universal delta controller response: %s", line)
                         return False
-                logger.error("Universal delta acknowledgement timeout (NOT resent): %s", gcode)
+                logger.error("Universal delta acknowledgement timeout %.1fs (NOT resent): %s", ack_timeout, gcode)
                 return False
         except Exception as exc:
             logger.error("Universal delta move failed: %s", exc)
