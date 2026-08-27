@@ -62,7 +62,7 @@ find_install_dir() {
 INSTALL_DIR=$(find_install_dir)
 
 # Run a command as the real (non-root) user when invoked via sudo.
-# For dw commands that are not typically run with sudo, this is a no-op.
+# For ORYN commands that are not typically run with sudo, this is a no-op.
 run_as_user() {
     if [[ $EUID -eq 0 && -n "$SUDO_USER" ]]; then
         sudo -u "$SUDO_USER" -- "$@"
@@ -147,8 +147,8 @@ cmd_update() {
         run_as_user git reset --hard "origin/$branch"
         fix_repo_ownership
 
-        # Update dw CLI
-        echo "Updating dw command..."
+        # Update ORYN CLI
+        echo "Updating ORYN command..."
         sudo cp "$INSTALL_DIR/oryn" /usr/local/bin/oryn
         sudo chmod +x /usr/local/bin/oryn
 
@@ -333,7 +333,7 @@ cmd_touch() {
         help|*)
             echo -e "${GREEN}Touch App Commands${NC}"
             echo ""
-            echo "Usage: dw touch <command>"
+            echo "Usage: oryn touch <command>"
             echo ""
             echo "Commands:"
             echo "  install     Install touch app (clone, setup, enable service)"
@@ -352,11 +352,11 @@ cmd_checkout() {
     local branch="$1"
 
     if [[ -z "$branch" ]]; then
-        echo -e "${RED}Usage: dw checkout <branch>${NC}"
+        echo -e "${RED}Usage: oryn checkout <branch>${NC}"
         echo ""
         echo "Examples:"
-        echo "  dw checkout main"
-        echo "  dw checkout feature/security-settings-split"
+        echo "  oryn checkout main"
+        echo "  oryn checkout feature/security-settings-split"
         echo ""
         echo "Current branch: $(git -C "$INSTALL_DIR" rev-parse --abbrev-ref HEAD)"
         exit 1
@@ -387,7 +387,7 @@ cmd_checkout() {
     source .venv/bin/activate
     run_as_user .venv/bin/pip install -r requirements.txt
 
-    # Update dw CLI from the new branch
+    # Update ORYN CLI from the new branch
     sudo cp "$INSTALL_DIR/oryn" /usr/local/bin/oryn
     sudo chmod +x /usr/local/bin/oryn
 
@@ -510,7 +510,7 @@ cmd_wifi() {
 cmd_help() {
     echo -e "${GREEN}ORYN CLI${NC}"
     echo ""
-    echo "Usage: dw <command>"
+    echo "Usage: oryn <command>"
     echo ""
     echo "Commands:"
     echo "  install     Run initial setup"
@@ -522,7 +522,7 @@ cmd_help() {
     echo "  logs [N]    View logs (N=number of lines, or follow if omitted)"
     echo "  status      Show service status"
     echo "  shell       Open a shell with the venv activated"
-    echo "  touch       Manage touch screen app (run 'dw touch help')"
+    echo "  touch       Manage touch screen app (run 'oryn touch help')"
     echo "  wifi        Manage WiFi and hotspot (run 'oryn wifi help')"
     echo "  help        Show this help message"
     echo ""

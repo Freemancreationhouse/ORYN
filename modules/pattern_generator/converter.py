@@ -5,7 +5,7 @@ It only turns artwork into normalized theta/rho coordinates and writes .thr text
 """
 from __future__ import annotations
 from pathlib import Path
-import math, re, xml.etree.ElementTree as ET
+import math, re, heapq, xml.etree.ElementTree as ET
 from typing import Iterable, List, Tuple
 
 Point = Tuple[float, float]
@@ -190,9 +190,476 @@ def _route_order(paths: List[List[Point]], start_mode: str="auto") -> List[List[
             best_cost=cost; best_order=ordered
     return best_order or paths
 
+def _build_artwork_grid(paths: List[List[Point]], size: int=151, clearance: int=2):
+    """Rasterize normalized artwork into a small collision grid.
+
+    The grid is used only for disconnected-island travel planning.  A connector
+    is not allowed to cut across existing artwork; it must travel through free
+    sand.  This avoids the diagonal passing lines seen in V10.2.
+    """
+    size=max(81,min(201,int(size)))
+    occ=set()
+    def cell(p):
+        x,y=p
+        ix=int(round((x+1.0)*0.5*(size-1)))
+        iy=int(round((y+1.0)*0.5*(size-1)))
+        return max(0,min(size-1,ix)),max(0,min(size-1,iy))
+    cell_step=2.0/(size-1)
+    for path in paths:
+        for a,b in zip(path,path[1:]):
+            d=_dist(a,b); n=max(1,int(math.ceil(d/max(cell_step*.45,1e-6))))
+            for i in range(n+1):
+                t=i/n
+                occ.add(cell((a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t)))
+    if clearance>0:
+        base=list(occ)
+        for x,y in base:
+            for dx in range(-clearance,clearance+1):
+                for dy in range(-clearance,clearance+1):
+                    if dx*dx+dy*dy<=clearance*clearance:
+                        xx=x+dx; yy=y+dy
+                        if 0<=xx<size and 0<=yy<size: occ.add((xx,yy))
+    return {"size":size,"occ":occ,"cell_step":cell_step}
+
+
+def _safe_free_connector(a: Point,b: Point,grid, table_r: float=.992) -> List[Point]:
+    """A* connector through free sand that never crosses existing artwork."""
+    size=grid["size"]; occ=set(grid["occ"])
+    def to_cell(p):
+        return (max(0,min(size-1,int(round((p[0]+1)*.5*(size-1))))),
+                max(0,min(size-1,int(round((p[1]+1)*.5*(size-1))))))
+    def to_xy(c):
+        return (c[0]*2.0/(size-1)-1.0,c[1]*2.0/(size-1)-1.0)
+    start=to_cell(a); goal=to_cell(b)
+    # Let the route leave/enter its source and target strokes locally.
+    for c in (start,goal):
+        for dx in range(-3,4):
+            for dy in range(-3,4):
+                if dx*dx+dy*dy<=9: occ.discard((c[0]+dx,c[1]+dy))
+
+    def allowed(c):
+        if not (0<=c[0]<size and 0<=c[1]<size): return False
+        if c in occ: return False
+        x,y=to_xy(c)
+        return x*x+y*y <= table_r*table_r
+
+    # First try the true shortest straight connector when it stays in free sand.
+    def clear_segment(p0,p1):
+        d=_dist(p0,p1); step=grid["cell_step"]*.35
+        n=max(2,int(math.ceil(d/max(step,1e-6))))
+        for i in range(1,n):
+            t=i/n; c=to_cell((p0[0]+(p1[0]-p0[0])*t,p0[1]+(p1[1]-p0[1])*t))
+            if c in occ: return False
+        return True
+    if clear_segment(a,b):
+        return _resample_line(a,b,.010)
+
+    moves=[(-1,0,1.0),(1,0,1.0),(0,-1,1.0),(0,1,1.0),
+           (-1,-1,1.4142),(-1,1,1.4142),(1,-1,1.4142),(1,1,1.4142)]
+    pq=[(0.0,start)]; came={}; g={start:0.0}; seen=set()
+    def h(c): return math.hypot(c[0]-goal[0],c[1]-goal[1])
+    found=False
+    while pq:
+        _,cur=heapq.heappop(pq)
+        if cur in seen: continue
+        seen.add(cur)
+        if cur==goal: found=True; break
+        for dx,dy,cost in moves:
+            nb=(cur[0]+dx,cur[1]+dy)
+            if not allowed(nb) and nb!=goal: continue
+            ng=g[cur]+cost
+            if ng<g.get(nb,1e99):
+                g[nb]=ng; came[nb]=cur; heapq.heappush(pq,(ng+h(nb),nb))
+    if not found:
+        return []
+    cells=[goal]
+    while cells[-1]!=start:
+        cells.append(came[cells[-1]])
+    cells.reverse()
+    pts=[a]+[to_xy(c) for c in cells[1:-1]]+[b]
+
+    # Visibility simplify the staircase without allowing a shortcut through ink.
+    simp=[pts[0]]; i=0
+    while i<len(pts)-1:
+        j=len(pts)-1
+        while j>i+1 and not clear_segment(pts[i],pts[j]): j-=1
+        simp.append(pts[j]); i=j
+    out=[]
+    for p0,p1 in zip(simp,simp[1:]):
+        seg=_resample_line(p0,p1,.010)
+        out.extend(seg if not out else seg[1:])
+    return _dedupe(out)
+
+
+def _sample_path(path: List[Point], limit: int=56):
+    if len(path)<=limit: return list(enumerate(path))
+    step=(len(path)-1)/(limit-1)
+    idxs=sorted(set(int(round(i*step)) for i in range(limit)))
+    return [(i,path[i]) for i in idxs]
+
+
+def _nearest_path_points(a: List[Point],b: List[Point]):
+    sa=_sample_path(a); sb=_sample_path(b)
+    best=(1e99,0,0)
+    for ia,pa in sa:
+        for ib,pb in sb:
+            d=_dist(pa,pb)
+            if d<best[0]: best=(d,ia,ib)
+    # Refine locally around the sampled vertices.
+    _,ia0,ib0=best
+    ra=range(max(0,ia0-5),min(len(a),ia0+6)); rb=range(max(0,ib0-5),min(len(b),ib0+6))
+    for ia in ra:
+        for ib in rb:
+            d=_dist(a[ia],b[ib])
+            if d<best[0]: best=(d,ia,ib)
+    return best
+
+
+def _closed_segment(path: List[Point], anchor: Point, target: Point) -> List[Point]:
+    """Shortest on-art path from anchor to target along an existing component."""
+    if not path: return []
+    closed=_path_is_closed(path)
+    core=path[:-1] if closed and _dist(path[0],path[-1])<0.02 else path[:]
+    ia=min(range(len(core)),key=lambda i:_dist(core[i],anchor))
+    it=min(range(len(core)),key=lambda i:_dist(core[i],target))
+    if not closed:
+        if ia<=it: return core[ia:it+1]
+        return list(reversed(core[it:ia+1]))
+    n=len(core)
+    f=[]; i=ia
+    while True:
+        f.append(core[i])
+        if i==it: break
+        i=(i+1)%n
+    r=[]; i=ia
+    while True:
+        r.append(core[i])
+        if i==it: break
+        i=(i-1)%n
+    return f if sum(_dist(x,y) for x,y in zip(f,f[1:])) <= sum(_dist(x,y) for x,y in zip(r,r[1:])) else r
+
+
+def _join_safe_tree(paths: List[List[Point]], start_mode: str="auto") -> Tuple[List[Point],dict]:
+    """Connect disconnected artwork without drawing arbitrary passing lines.
+
+    Components are linked as a minimum bridge tree. Every bridge is planned
+    through free sand and then reused in reverse when returning from a child,
+    while movement between bridge attachment points stays on existing artwork.
+    The only new visible strokes are the minimum unavoidable component bridges.
+    """
+    paths=[p[:] for p in paths if len(p)>1]
+    n=len(paths)
+    if not n: return [],{"skipped_islands":0,"direct_connectors":0,"safe_connectors":0,"perimeter_connectors":0,"connector_distance":0.0}
+    if n==1: return paths[0],{"skipped_islands":0,"direct_connectors":0,"safe_connectors":0,"perimeter_connectors":0,"connector_distance":0.0}
+    grid=_build_artwork_grid(paths,size=151,clearance=2)
+    # Candidate graph: nearest bbox neighbours keeps large drawings fast on Pi.
+    boxes=[]
+    for p in paths:
+        xs=[x for x,y in p]; ys=[y for x,y in p]
+        boxes.append((min(xs),min(ys),max(xs),max(ys),(min(xs)+max(xs))/2,(min(ys)+max(ys))/2))
+    def bbox_gap(i,j):
+        a=boxes[i]; b=boxes[j]
+        dx=max(0.0,a[0]-b[2],b[0]-a[2]); dy=max(0.0,a[1]-b[3],b[1]-a[3])
+        return math.hypot(dx,dy)
+    candidates=set()
+    k=min(n-1,12)
+    for i in range(n):
+        near=sorted((bbox_gap(i,j),j) for j in range(n) if j!=i)[:k]
+        for _,j in near: candidates.add((min(i,j),max(i,j)))
+    edges=[]
+    for i,j in candidates:
+        d,ia,ib=_nearest_path_points(paths[i],paths[j])
+        edges.append((d,i,j,ia,ib))
+    edges.sort(key=lambda e:e[0])
+    parent=list(range(n))
+    def find(x):
+        while parent[x]!=x:
+            parent[x]=parent[parent[x]]; x=parent[x]
+        return x
+    def union(a,b):
+        a=find(a); b=find(b)
+        if a==b:return False
+        parent[b]=a; return True
+    chosen=[]; total=0.0; unsafe_fallback=0
+    # Prefer bridge segments that can be routed through free space.
+    for d,i,j,ia,ib in edges:
+        if find(i)==find(j): continue
+        conn=_safe_free_connector(paths[i][ia],paths[j][ib],grid)
+        if not conn: continue
+        union(i,j); chosen.append((i,j,ia,ib,conn)); total+=sum(_dist(a,b) for a,b in zip(conn,conn[1:]))
+        if len(chosen)==n-1: break
+    # If topological enclosures prevented a purely free-space tree, connect the
+    # remaining groups by the shortest component-to-component bridge. This is
+    # still far cleaner than V10.2's perimeter spokes/diagonal transits.
+    if len(chosen)<n-1:
+        for d,i,j,ia,ib in edges:
+            if find(i)==find(j): continue
+            conn=_resample_line(paths[i][ia],paths[j][ib],.010)
+            union(i,j); chosen.append((i,j,ia,ib,conn)); total+=d; unsafe_fallback+=1
+            if len(chosen)==n-1: break
+    # Absolute fallback only for an unusually disconnected candidate graph.
+    while len(chosen)<n-1:
+        groups={find(i) for i in range(n)}
+        best=None
+        for i in range(n):
+            for j in range(i+1,n):
+                if find(i)==find(j): continue
+                d,ia,ib=_nearest_path_points(paths[i],paths[j])
+                if best is None or d<best[0]: best=(d,i,j,ia,ib)
+        if not best: break
+        d,i,j,ia,ib=best; conn=_resample_line(paths[i][ia],paths[j][ib],.010)
+        union(i,j); chosen.append((i,j,ia,ib,conn)); total+=d; unsafe_fallback+=1
+
+    adj=[[] for _ in range(n)]
+    for i,j,ia,ib,conn in chosen:
+        adj[i].append((j,paths[i][ia],paths[j][ib],conn))
+        adj[j].append((i,paths[j][ib],paths[i][ia],list(reversed(conn))))
+    # Pick a root that respects the requested start preference.
+    if start_mode=="center": root=min(range(n),key=lambda i:min(math.hypot(x,y) for x,y in paths[i]))
+    elif start_mode=="perimeter": root=max(range(n),key=lambda i:max(math.hypot(x,y) for x,y in paths[i]))
+    else: root=max(range(n),key=lambda i:len(paths[i]))
+    route=[]
+    def append(seq):
+        nonlocal route
+        if not seq:return
+        route.extend(seq if not route else seq[1:] if _dist(route[-1],seq[0])<.02 else seq)
+    def visit(node,par,anchor):
+        p=paths[node]
+        # Draw this component itself, returning to its anchor whenever possible.
+        if _path_is_closed(p):
+            q,_=_orient_path_for_entry(p,anchor)
+            append(q); local_anchor=q[0]
+        else:
+            q,_=_orient_path_for_entry(p,anchor)
+            append(q); append(list(reversed(q))); local_anchor=q[0]
+        for child,attach_here,attach_child,conn in adj[node]:
+            if child==par: continue
+            along=_closed_segment(p,local_anchor,attach_here)
+            append(along); append(conn)
+            visit(child,node,attach_child)
+            append(list(reversed(conn))); append(list(reversed(along)))
+    root_anchor=paths[root][0]
+    visit(root,-1,root_anchor)
+    return _dedupe(route),{
+        "skipped_islands":0,"direct_connectors":unsafe_fallback,"safe_connectors":max(0,len(chosen)-unsafe_fallback),
+        "perimeter_connectors":0,"connector_distance":round(total,4),"connector_tree":1,
+        "connector_fallbacks":unsafe_fallback,
+    }
+
+
+def _join_safe_euler(paths: List[List[Point]], start_mode: str="auto") -> Tuple[List[Point],dict]:
+    """Professional continuous route for disconnected artwork.
+
+    1. Add the minimum set of short, artwork-safe bridges between components.
+    2. Treat original artwork + those bridges as one graph.
+    3. Eulerize that graph by retracing existing lines only where required.
+
+    Therefore there are no arbitrary transit strokes between islands: every
+    movement is either source artwork or one of the explicitly minimized safe
+    bridges used to make the artwork physically drawable by a non-lifting ball.
+    """
+    paths=[_dedupe(p,1e-8) for p in paths if len(p)>1]
+    n=len(paths)
+    if not n:
+        return [],{"skipped_islands":0,"direct_connectors":0,"safe_connectors":0,"perimeter_connectors":0,"connector_distance":0.0}
+    if n==1:
+        return paths[0],{"skipped_islands":0,"direct_connectors":0,"safe_connectors":0,"perimeter_connectors":0,"connector_distance":0.0,"connector_euler":1}
+
+    # Candidate component pairs from bbox proximity.
+    boxes=[]
+    for pth in paths:
+        xs=[x for x,y in pth]; ys=[y for x,y in pth]
+        boxes.append((min(xs),min(ys),max(xs),max(ys)))
+    def bgap(i,j):
+        a=boxes[i]; b=boxes[j]
+        dx=max(0.0,a[0]-b[2],b[0]-a[2]); dy=max(0.0,a[1]-b[3],b[1]-a[3])
+        return math.hypot(dx,dy)
+    cand=set(); k=min(n-1,14)
+    for i in range(n):
+        for _,j in sorted((bgap(i,j),j) for j in range(n) if j!=i)[:k]:
+            cand.add((min(i,j),max(i,j)))
+    edges=[]
+    for i,j in cand:
+        d,ia,ib=_nearest_path_points(paths[i],paths[j])
+        edges.append((d,i,j,ia,ib))
+    edges.sort(key=lambda z:z[0])
+
+    parent=list(range(n))
+    def find(x):
+        while parent[x]!=x:
+            parent[x]=parent[parent[x]]; x=parent[x]
+        return x
+    def union(a,b):
+        a=find(a); b=find(b)
+        if a==b:return False
+        parent[b]=a; return True
+
+    grid=_build_artwork_grid(paths,size=151,clearance=1)
+    bridges=[]; bridge_total=0.0; fallback=0
+    # Kruskal with free-space bridge preference.
+    for d,i,j,ia,ib in edges:
+        if find(i)==find(j): continue
+        conn=_safe_free_connector(paths[i][ia],paths[j][ib],grid)
+        if not conn: continue
+        union(i,j); bridges.append(conn); bridge_total+=sum(_dist(a,b) for a,b in zip(conn,conn[1:]))
+        if len(bridges)==n-1: break
+    # Rare enclosure fallback: nearest bridge between remaining component sets.
+    if len(bridges)<n-1:
+        for d,i,j,ia,ib in edges:
+            if find(i)==find(j): continue
+            conn=_resample_line(paths[i][ia],paths[j][ib],.010)
+            union(i,j); bridges.append(conn); bridge_total+=d; fallback+=1
+            if len(bridges)==n-1: break
+    while len(bridges)<n-1:
+        best=None
+        for i in range(n):
+            for j in range(i+1,n):
+                if find(i)==find(j): continue
+                d,ia,ib=_nearest_path_points(paths[i],paths[j])
+                if best is None or d<best[0]: best=(d,i,j,ia,ib)
+        if best is None: break
+        d,i,j,ia,ib=best; conn=_resample_line(paths[i][ia],paths[j][ib],.010)
+        union(i,j); bridges.append(conn); bridge_total+=d; fallback+=1
+
+    # Build an undirected geometric graph. Every original polyline edge is
+    # preserved; bridge endpoints are exact source vertices selected above.
+    node_index={}; coords=[]; base_edges=[]
+    def node(pt):
+        key=(round(float(pt[0]),7),round(float(pt[1]),7))
+        if key not in node_index:
+            node_index[key]=len(coords); coords.append((float(pt[0]),float(pt[1])))
+        return node_index[key]
+    def add_polyline(seq):
+        for a,b in zip(seq,seq[1:]):
+            if _dist(a,b)<1e-8: continue
+            u=node(a); v=node(b)
+            if u!=v: base_edges.append((u,v,_dist(coords[u],coords[v])))
+    for pth in paths: add_polyline(pth)
+    for conn in bridges: add_polyline(conn)
+    if not base_edges:
+        raise ValueError("Artwork graph contains no drawable edges")
+
+    adj=[[] for _ in coords]
+    for eid,(u,v,w) in enumerate(base_edges):
+        adj[u].append((v,eid,w)); adj[v].append((u,eid,w))
+    degree=[len(a) for a in adj]
+    odds={i for i,d in enumerate(degree) if d%2==1}
+
+    # Pair odd vertices along the already-drawn graph. Duplicated motion is
+    # therefore retracing existing artwork/bridges, never inventing new lines.
+    duplicate_eids=[]
+    while len(odds)>=2:
+        start=min(odds)
+        dist={start:0.0}; prev={}; pq=[(0.0,start)]; target=None
+        while pq:
+            d,u=heapq.heappop(pq)
+            if d!=dist.get(u): continue
+            if u!=start and u in odds:
+                target=u; break
+            for v,eid,w in adj[u]:
+                nd=d+w
+                if nd<dist.get(v,1e99):
+                    dist[v]=nd; prev[v]=(u,eid); heapq.heappush(pq,(nd,v))
+        if target is None: break
+        cur=target; trail=[]
+        while cur!=start:
+            pu,eid=prev[cur]; trail.append(eid); cur=pu
+        duplicate_eids.extend(trail)
+        odds.remove(start); odds.remove(target)
+
+    # Expand into a multigraph and run Hierholzer.
+    multi=[]
+    for u,v,w in base_edges: multi.append((u,v))
+    for eid in duplicate_eids:
+        u,v,_=base_edges[eid]; multi.append((u,v))
+    madj=[[] for _ in coords]
+    for eid,(u,v) in enumerate(multi):
+        madj[u].append((v,eid)); madj[v].append((u,eid))
+    odd_now=[i for i,a in enumerate(madj) if len(a)%2==1]
+    if odd_now:
+        if (start_mode or '').lower()=="center": start=min(odd_now,key=lambda i:math.hypot(*coords[i]))
+        elif (start_mode or '').lower()=="perimeter": start=max(odd_now,key=lambda i:math.hypot(*coords[i]))
+        else: start=odd_now[0]
+    else:
+        active=[i for i,a in enumerate(madj) if a]
+        if (start_mode or '').lower()=="center": start=min(active,key=lambda i:math.hypot(*coords[i]))
+        elif (start_mode or '').lower()=="perimeter": start=max(active,key=lambda i:math.hypot(*coords[i]))
+        else: start=max(active,key=lambda i:len(madj[i]))
+    used=[False]*len(multi); cursor=[0]*len(madj); stack=[start]; circuit=[]
+    while stack:
+        u=stack[-1]
+        while cursor[u]<len(madj[u]) and used[madj[u][cursor[u]][1]]: cursor[u]+=1
+        if cursor[u]>=len(madj[u]): circuit.append(stack.pop()); continue
+        v,eid=madj[u][cursor[u]]; cursor[u]+=1
+        if used[eid]: continue
+        used[eid]=True; stack.append(v)
+    circuit.reverse()
+    route=[coords[i] for i in circuit]
+    return _dedupe(route,1e-9),{
+        "skipped_islands":0,"direct_connectors":fallback,"safe_connectors":max(0,len(bridges)-fallback),
+        "perimeter_connectors":0,"connector_distance":round(bridge_total,4),"connector_euler":1,
+        "connector_fallbacks":fallback,"retrace_graph_edges":len(duplicate_eids),
+    }
+
+
+def _join_safe_sequential(paths: List[List[Point]], start_mode: str="auto") -> Tuple[List[Point],dict]:
+    """Efficient no-cross-first ordering for production playback.
+
+    At each island, try the nearest candidate islands through free sand first.
+    Only when no nearby free-space route exists (a true topological enclosure)
+    is the shortest direct bridge used. No perimeter spokes are generated.
+    """
+    pending=[p[:] for p in paths if len(p)>1]
+    if not pending:
+        return [],{"skipped_islands":0,"direct_connectors":0,"safe_connectors":0,"perimeter_connectors":0,"connector_distance":0.0}
+    mode=(start_mode or "auto").lower()
+    if mode=="center":
+        seed=min(range(len(pending)),key=lambda i:min(math.hypot(x,y) for x,y in pending[i]))
+    elif mode=="perimeter":
+        seed=max(range(len(pending)),key=lambda i:max(math.hypot(x,y) for x,y in pending[i]))
+    else:
+        seed=max(range(len(pending)),key=lambda i:len(pending[i]))
+    first=pending.pop(seed)
+    if _path_is_closed(first): first,_=_orient_path_for_entry(first,first[0])
+    route=list(first)
+    grid=_build_artwork_grid(paths,size=151,clearance=2)
+    safe_count=0; direct=0; total=0.0
+    while pending:
+        end=route[-1]
+        candidates=[]
+        for i,p0 in enumerate(pending):
+            q,d=_orient_path_for_entry(p0,end)
+            candidates.append((d,i,q))
+        candidates.sort(key=lambda z:z[0])
+        chosen=None
+        # Trying only the nearest few keeps Pi conversion time bounded while
+        # still avoiding virtually all crossing connectors in normal artwork.
+        for d,i,q in candidates[:min(7,len(candidates))]:
+            conn=_safe_free_connector(end,q[0],grid)
+            if conn:
+                cost=sum(_dist(a,b) for a,b in zip(conn,conn[1:]))
+                cand=(cost,d,i,q,conn)
+                if chosen is None or cand[0]<chosen[0]: chosen=cand
+        if chosen is not None:
+            cost,d,i,q,conn=chosen
+            pending.pop(i); route.extend(conn[1:]); route.extend(q[1:])
+            safe_count+=1; total+=cost
+        else:
+            # Unavoidable enclosure: use the minimum local bridge, never a
+            # giant radial/perimeter transit across the entire composition.
+            d,i,q=candidates[0]
+            pending.pop(i); conn=_resample_line(end,q[0],.010)
+            route.extend(conn[1:]); route.extend(q[1:])
+            direct+=1; total+=d
+    return _dedupe(route),{
+        "skipped_islands":0,"direct_connectors":direct,"safe_connectors":safe_count,
+        "perimeter_connectors":0,"connector_distance":round(total,4),"connector_no_cross_first":1,
+    }
+
+
 def _join_clean(paths: List[List[Point]], max_bridge: float=.065,
                 start_mode: str="auto", preserve_all: bool=True,
-                lane_radius: float=.985, connector_mode: str="shortest") -> Tuple[List[Point],dict]:
+                lane_radius: float=.985, connector_mode: str="safe") -> Tuple[List[Point],dict]:
     """
     Produce one physically executable continuous XY route.
 
@@ -200,28 +667,47 @@ def _join_clean(paths: List[List[Point]], max_bridge: float=.065,
     around a reserved perimeter travel lane instead of crossing through the
     design. If preserve_all=False they are skipped (legacy behavior).
     """
+    if (connector_mode or "safe").lower()=="safe":
+        return _join_safe_euler(paths,start_mode=start_mode)
+
     ordered=_route_order(paths,start_mode)
     if not ordered:
-        return [],{"skipped_islands":0,"direct_connectors":0,"perimeter_connectors":0,
+        return [],{"skipped_islands":0,"direct_connectors":0,"safe_connectors":0,"perimeter_connectors":0,
                    "connector_distance":0.0}
 
+    safety_grid=_build_artwork_grid(ordered,size=151,clearance=2)
     route=list(ordered[0])
-    skipped=0; direct=0; perimeter=0; connector_distance=0.0
+    skipped=0; direct=0; safe_count=0; perimeter=0; connector_distance=0.0
     for path in ordered[1:]:
         if not path: continue
         gap=_dist(route[-1],path[0])
         connector_distance+=gap
-        mode=(connector_mode or "shortest").lower()
-        use_direct = (mode=="shortest") or (mode=="auto" and gap<=max_bridge)
-        if use_direct:
+        mode=(connector_mode or "safe").lower()
+        if mode=="shortest":
             bridge=_resample_line(route[-1],path[0],.010)
             route.extend(bridge[1:]); direct+=1
-        elif preserve_all and mode in {"auto","perimeter"}:
+        elif preserve_all and mode in {"safe","auto"}:
+            # Default production mode: shortest route through free sand.  It
+            # may pass through blank areas, but never through existing artwork.
+            bridge=_safe_free_connector(route[-1],path[0],safety_grid)
+            if bridge:
+                route.extend(bridge[1:]); safe_count+=1
+            elif mode=="auto" and gap<=max_bridge:
+                bridge=_resample_line(route[-1],path[0],.010)
+                route.extend(bridge[1:]); direct+=1
+            else:
+                bridge=_arc_connector(route[-1],path[0],lane_radius=lane_radius,step=.010)
+                route.extend(bridge[1:]); perimeter+=1
+        elif preserve_all and mode=="perimeter":
             bridge=_arc_connector(route[-1],path[0],lane_radius=lane_radius,step=.010)
             route.extend(bridge[1:]); perimeter+=1
         elif preserve_all:
-            bridge=_resample_line(route[-1],path[0],.010)
-            route.extend(bridge[1:]); direct+=1
+            bridge=_safe_free_connector(route[-1],path[0],safety_grid)
+            if bridge:
+                route.extend(bridge[1:]); safe_count+=1
+            else:
+                bridge=_resample_line(route[-1],path[0],.010)
+                route.extend(bridge[1:]); direct+=1
         else:
             skipped+=1; continue
         route.extend(path[1:])
@@ -229,6 +715,7 @@ def _join_clean(paths: List[List[Point]], max_bridge: float=.065,
     return _dedupe(route),{
         "skipped_islands":skipped,
         "direct_connectors":direct,
+        "safe_connectors":safe_count,
         "perimeter_connectors":perimeter,
         "connector_distance":round(connector_distance,4),
     }
@@ -845,13 +1332,27 @@ def _sobel_edges(arr):
 
 
 def _looks_like_line_art(arr):
-    """Heuristic separating scans/sketches/logos from tonal photos/paintings."""
+    """Heuristic separating graphic/line artwork from tonal photographs.
+
+    High-contrast logos, mandalas and filled ornamental drawings are still
+    graphic artwork even when the black area is large.  V10.2 classified some
+    of those as photos, which created swollen double-edge traces.
+    """
     import numpy as np
     a=np.asarray(arr,dtype=np.uint8)
     white=float((a>220).mean())
     dark=float((a<90).mean())
     mid=float(((a>=90)&(a<=220)).mean())
-    return (white>0.54 and dark<0.30 and mid<0.43), {"white_fraction":round(white,4),"dark_fraction":round(dark,4),"midtone_fraction":round(mid,4)}
+    extremes=float(((a<70)|(a>225)).mean())
+    # Graphic art: most pixels live near black/white, with relatively little
+    # continuous tonal information.  Keep a second conservative rule for
+    # ordinary white-paper line drawings.
+    graphic=(extremes>0.72 and mid<0.30 and white>0.28 and dark>0.004)
+    classic=(white>0.54 and dark<0.34 and mid<0.43)
+    return (graphic or classic), {
+        "white_fraction":round(white,4),"dark_fraction":round(dark,4),
+        "midtone_fraction":round(mid,4),"extreme_fraction":round(extremes,4)
+    }
 
 
 def _prepare_raster_mask(path: Path, threshold=128, invert=False, raster_mode="auto", detail=3):
@@ -891,29 +1392,53 @@ def _prepare_raster_mask(path: Path, threshold=128, invert=False, raster_mode="a
         mode="line" if is_line else "photo"
 
     if mode=="line":
-        raw = arr>manual if invert else arr<manual
         radius=max(7.0,min(im.size)/30.0)
         bg=np.asarray(im.filter(ImageFilter.GaussianBlur(radius=radius)),dtype=np.float32)
         a=arr.astype(np.float32)
-        signal=(a-bg) if invert else (bg-a)
-        ink=np.clip(signal,0,255).astype(np.uint8)
-        ot=_otsu_threshold(ink)
-        sensitivity=1.42-(manual/255.0)*0.82
-        local_cut=max(3,int(max(ot,6)*sensitivity))
-        adaptive=ink>=local_cut
-        pos=ink[ink>2]
-        faint=ink>=max(3,min(local_cut,int(np.percentile(pos,56)))) if pos.size else adaptive
-        candidates=[("line-adaptive",adaptive),("line-faint",faint),("line-global",raw)]
-        trace_mode,mask=max(candidates,key=lambda item:_mask_quality(item[1]))
+
+        def polarity_candidates(inv):
+            raw = arr>manual if inv else arr<manual
+            signal=(a-bg) if inv else (bg-a)
+            ink=np.clip(signal,0,255).astype(np.uint8)
+            ot=_otsu_threshold(ink)
+            sensitivity=1.42-(manual/255.0)*0.82
+            local_cut=max(3,int(max(ot,6)*sensitivity))
+            adaptive=ink>=local_cut
+            pos=ink[ink>2]
+            faint=ink>=max(3,min(local_cut,int(np.percentile(pos,56)))) if pos.size else adaptive
+            return [
+                (("line-invert-" if inv else "line-")+"adaptive",adaptive,local_cut,ot),
+                (("line-invert-" if inv else "line-")+"faint",faint,local_cut,ot),
+                (("line-invert-" if inv else "line-")+"global",raw,local_cut,ot),
+            ]
+
+        # Treat Invert as a preference, not permission to turn the whole white
+        # page into ink.  Evaluate both polarities and only honour the requested
+        # one when its mask is genuinely plausible.
+        normal=polarity_candidates(False)
+        inverse=polarity_candidates(True)
+        preferred=inverse if invert else normal
+        alternate=normal if invert else inverse
+        best_pref=max(preferred,key=lambda item:_mask_quality(item[1]))
+        best_alt=max(alternate,key=lambda item:_mask_quality(item[1]))
+        qp=_mask_quality(best_pref[1]); qa=_mask_quality(best_alt[1])
+        corrected=False
+        if qp < -1e8 or (qa > qp + 0.60):
+            trace_mode,mask,local_cut,ot=best_alt
+            corrected=True
+        else:
+            trace_mode,mask,local_cut,ot=best_pref
+
         source_coverage=float(mask.mean())
         if source_coverage>0.28:
             er=_binary_erode(mask)
             mask=mask & ~er
             trace_mode += "-outline"
-        # Close only one-pixel antialias breaks; do not fatten artwork heavily.
+        # Close one-pixel JPEG/antialias breaks only.  Skeletonization below
+        # returns the center line, so thick source strokes do not become bulges.
         mask=_binary_dilate(mask)
         mask=_binary_erode(mask)
-        extra={"local_threshold":local_cut,"otsu_detail":ot}
+        extra={"local_threshold":local_cut,"otsu_detail":ot,"invert_auto_corrected":1 if corrected else 0}
     else:
         # Photo/painting -> line interpretation using meaningful tonal edges.
         # A light blur removes JPEG grain before gradient extraction.
@@ -1127,14 +1652,26 @@ def _gcode_paths(path: Path) -> List[List[Point]]:
     return paths
 
 def _moving_average_path(path: List[Point], passes: int=0) -> List[Point]:
-    """Corner-preserving jitter smoothing.
-
-    Pixel centerlines need de-jagging, but averaging sharp turns makes geometric
-    artwork look saggy. Only near-straight/noisy vertices are smoothed; strong
-    corners are preserved.
-    """
+    """Corner-preserving de-jagging without swelling closed raster loops."""
     pts=list(path)
     passes=max(0,min(int(passes),5))
+    closed=_path_is_closed(pts)
+    if closed and len(pts)>3:
+        core=pts[:-1] if _dist(pts[0],pts[-1])<0.02 else pts[:]
+        for _ in range(passes):
+            n=len(core); nxt=[]
+            for i,b in enumerate(core):
+                a=core[(i-1)%n]; c=core[(i+1)%n]
+                v1=(b[0]-a[0],b[1]-a[1]); v2=(c[0]-b[0],c[1]-b[1])
+                l1=math.hypot(*v1); l2=math.hypot(*v2)
+                if l1<1e-9 or l2<1e-9: nxt.append(b); continue
+                cosang=max(-1.0,min(1.0,(v1[0]*v2[0]+v1[1]*v2[1])/(l1*l2)))
+                # Much lighter than V10.2: only remove pixel stair-step jitter.
+                if cosang>0.90:
+                    nxt.append(((a[0]+6*b[0]+c[0])/8.0,(a[1]+6*b[1]+c[1])/8.0))
+                else: nxt.append(b)
+            core=nxt
+        return core+[core[0]]
     for _ in range(passes):
         if len(pts)<3: break
         nxt=[pts[0]]
@@ -1142,14 +1679,11 @@ def _moving_average_path(path: List[Point], passes: int=0) -> List[Point]:
             a,b,c=pts[i-1],pts[i],pts[i+1]
             v1=(b[0]-a[0],b[1]-a[1]); v2=(c[0]-b[0],c[1]-b[1])
             l1=math.hypot(*v1); l2=math.hypot(*v2)
-            if l1<1e-9 or l2<1e-9:
-                nxt.append(b); continue
+            if l1<1e-9 or l2<1e-9: nxt.append(b); continue
             cosang=max(-1.0,min(1.0,(v1[0]*v2[0]+v1[1]*v2[1])/(l1*l2)))
-            # Smooth only if direction changes less than about 38 degrees.
-            if cosang>0.79:
-                nxt.append(((a[0]+2*b[0]+c[0])/4.0,(a[1]+2*b[1]+c[1])/4.0))
-            else:
-                nxt.append(b)
+            if cosang>0.90:
+                nxt.append(((a[0]+6*b[0]+c[0])/8.0,(a[1]+6*b[1]+c[1])/8.0))
+            else: nxt.append(b)
         nxt.append(pts[-1]); pts=nxt
     return pts
 
@@ -1214,8 +1748,8 @@ def _choose_start_path(paths: List[List[Point]], start_mode: str="auto") -> List
     return [paths[idx]]+[p for j,p in enumerate(paths) if j!=idx]
 
 
-def _rdp(points: List[Point], epsilon: float) -> List[Point]:
-    """Ramer-Douglas-Peucker simplification."""
+def _rdp_open(points: List[Point], epsilon: float) -> List[Point]:
+    """Ramer-Douglas-Peucker simplification for an open polyline."""
     if len(points)<3 or epsilon<=0:
         return points[:]
     a,b=points[0],points[-1]
@@ -1230,10 +1764,30 @@ def _rdp(points: List[Point], epsilon: float) -> List[Point]:
         if d>best_d:
             best_d=d;best_i=i
     if best_d>epsilon:
-        left=_rdp(points[:best_i+1],epsilon)
-        right=_rdp(points[best_i:],epsilon)
+        left=_rdp_open(points[:best_i+1],epsilon)
+        right=_rdp_open(points[best_i:],epsilon)
         return left[:-1]+right
     return [a,b]
+
+
+def _rdp(points: List[Point], epsilon: float) -> List[Point]:
+    """RDP that preserves closed loops without a swollen/kinked seam."""
+    if len(points)<4 or epsilon<=0:
+        return points[:]
+    if not _path_is_closed(points):
+        return _rdp_open(points,epsilon)
+    core=points[:-1] if _dist(points[0],points[-1])<0.02 else points[:]
+    if len(core)<4: return points[:]
+    # Split the ring at two far-apart vertices, simplify each open arc, rejoin.
+    i0=0
+    i1=max(range(1,len(core)),key=lambda i:_dist(core[i0],core[i]))
+    if i1<i0: i0,i1=i1,i0
+    arc1=core[i0:i1+1]
+    arc2=core[i1:]+core[:i0+1]
+    q1=_rdp_open(arc1,epsilon); q2=_rdp_open(arc2,epsilon)
+    out=_dedupe(q1+q2[1:-1])
+    if out and _dist(out[0],out[-1])>1e-9: out.append(out[0])
+    return out
 
 
 def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fit: float=.94,
@@ -1241,7 +1795,7 @@ def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fi
                           rotation_deg: float=0.0, offset_x: float=0.0, offset_y: float=0.0,
                           max_bridge: float=0.055, start_mode: str="auto",
                           preserve_all: bool=True, machine_step: float=0.012,
-                          raster_mode: str="auto", detail: int=3, connector_mode: str="shortest"):
+                          raster_mode: str="auto", detail: int=3, connector_mode: str="safe"):
     """
     Professional machine-oriented artwork -> THR pipeline.
 
@@ -1293,6 +1847,11 @@ def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fi
     paths=[_moving_average_path(q,smooth) for q in paths]
 
     simp=max(0.0,min(float(simplify),0.025))
+    # Raster centerlines need slightly stronger de-jagging than native vectors.
+    # This removes the swollen/wavy pixel trace while preserving real corners.
+    if ext in {".png",".jpg",".jpeg",".webp",".bmp"}:
+        floor={1:.0048,2:.0042,3:.0036,4:.0030,5:.0025}[max(1,min(5,int(detail)))]
+        simp=max(simp,floor)
     if simp>0:
         paths=[_rdp(q,simp) if len(q)>3 else q for q in paths]
 

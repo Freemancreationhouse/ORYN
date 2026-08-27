@@ -4,5 +4,5 @@
 - Pattern Forge Pro V10 conversion engine remains unchanged.
 - ORYN CLI now detects the active systemd WorkingDirectory first.
 - Adds /home/oryn/oryn fallback explicitly.
-- Removes obsolete tuanchris/oryn and dw install help text.
+- Removes obsolete Freemancreationhouse/ORYN and oryn install help text.
 - Official repo help now points to Freemancreationhouse/ORYN.

@@ -27,8 +27,8 @@ if FORCE_UPDATE_AVAILABLE or FAKE_LATEST_VERSION:
 
 class VersionManager:
     def __init__(self):
-        self.repo_owner = "tuanchris"
-        self.repo_name = "kinetiq-motion"
+        self.repo_owner = "Freemancreationhouse"
+        self.repo_name = "ORYN"
         self.github_api_url = f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}"
         self._current_version = None
 

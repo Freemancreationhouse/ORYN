@@ -141,11 +141,12 @@ function forgeHtml(){
           <div class="oryn-forge-field">
             <label>Disconnected-detail travel</label>
             <select id="oryn-forge-connector_mode" class="oryn-forge-select">
-              <option value="shortest">Shortest clean connector — recommended</option>
-              <option value="auto">Auto — short direct / long perimeter</option>
+              <option value="safe" selected>Artwork-safe connector — recommended</option>
+              <option value="shortest">Shortest direct connector</option>
+              <option value="auto">Auto safe / perimeter fallback</option>
               <option value="perimeter">Perimeter travel lane</option>
             </select>
-            <small class="oryn-forge-help">A sand ball cannot lift. For disconnected shapes, Shortest adds the least unavoidable travel; Perimeter keeps long travel away from the artwork but may add radial entry/exit lines.</small>
+            <small class="oryn-forge-help">Artwork-safe routing searches through empty sand and will not cut across existing pattern lines. A sand ball cannot lift, so disconnected islands still require a visible connecting stroke.</small>
           </div>
 
           <div class="oryn-forge-field">
@@ -170,14 +171,14 @@ function forgeHtml(){
             <input id="oryn-forge-preserve_all" type="checkbox" checked>
             <div>
               <b>Keep disconnected details</b>
-              <small>Routes unavoidable travel around the quiet outer lane instead of across the artwork</small>
+              <small>Uses artwork-safe free-space routing so unavoidable travel does not cross existing design lines</small>
             </div>
           </label>
 
           <div class="oryn-forge-note">
             <b>Production conversion</b> uses separate pipelines: line/sketch raster centerlines, photo/painting edge contours,
             native SVG/DXF vectors, modal G-code geometry and existing THR. Disconnected artwork cannot physically be
-            drawn without travel; short gaps are connected directly and longer unavoidable travel uses the outer quiet lane.
+            drawn without travel; the default connector plans through empty sand and does not cross existing artwork.
             The route preview is exactly what is saved to the library.
           </div>
 
@@ -237,11 +238,17 @@ function showSourcePreview(file){
   if(!box||!name)return;
 
   name.textContent=file?.name||'Nothing selected';
-
   if(forge.sourceUrl){
     try{URL.revokeObjectURL(forge.sourceUrl)}catch(_){}
     forge.sourceUrl=null;
   }
+  // Reset all image state explicitly; do not depend on global <img> CSS from
+  // the main application.  V10.2 could still be cropped by inherited rules.
+  box.replaceChildren();
+  box.style.backgroundImage='none';
+  box.style.backgroundSize='contain';
+  box.style.backgroundRepeat='no-repeat';
+  box.style.backgroundPosition='center center';
 
   if(!file){
     box.innerHTML='<div class="oryn-forge-source-placeholder">Select raster or SVG artwork to preview the complete original here.</div>';
@@ -250,21 +257,23 @@ function showSourcePreview(file){
 
   const ext=(file.name.split('.').pop()||'').toLowerCase();
   const previewable=file.type.startsWith('image/') || ['png','jpg','jpeg','webp','bmp','svg'].includes(ext);
-
   if(previewable){
     forge.sourceUrl=URL.createObjectURL(file);
-    const img=document.createElement('img');
-    img.alt='Uploaded source artwork';
-    img.className='oryn-forge-source-image';
-    img.src=forge.sourceUrl;
-    img.onload=()=>{box.classList.add('has-image')};
-    img.onerror=()=>{box.innerHTML='<div class="oryn-forge-source-placeholder">Source preview could not be displayed, but the file can still be generated.</div>'};
-    box.replaceChildren(img);
+    // Preload only to detect invalid images. The visible preview itself is a
+    // contain-sized background, which cannot be vertically clipped by img CSS.
+    const probe=new Image();
+    probe.onload=()=>{
+      box.classList.add('has-image');
+      box.style.backgroundImage=`url("${forge.sourceUrl}")`;
+      box.setAttribute('aria-label',`Complete source artwork: ${file.name}`);
+    };
+    probe.onerror=()=>{
+      box.style.backgroundImage='none';
+      box.innerHTML='<div class="oryn-forge-source-placeholder">Source preview could not be displayed, but the file can still be generated.</div>';
+    };
+    probe.src=forge.sourceUrl;
   }else{
-    box.innerHTML=`<div class="oryn-forge-source-placeholder">
-      <b>${file.name}</b><br><br>
-      ${ext.toUpperCase()} geometry will appear in the route preview after Generate.
-    </div>`;
+    box.innerHTML=`<div class="oryn-forge-source-placeholder"><b>${file.name}</b><br><br>${ext.toUpperCase()} geometry will appear in the route preview after Generate.</div>`;
   }
 }
 
@@ -333,7 +342,7 @@ async function generateForge(){
     fd.append('start_mode',q('#oryn-forge-start_mode').value);
     fd.append('preserve_all',String(q('#oryn-forge-preserve_all')?.checked ?? true));
     fd.append('raster_mode',q('#oryn-forge-raster_mode')?.value||'auto');
-    fd.append('connector_mode',q('#oryn-forge-connector_mode')?.value||'shortest');
+    fd.append('connector_mode',q('#oryn-forge-connector_mode')?.value||'safe');
 
     const started=await jsonReq('/api/v2/pattern-generator/preview-start',{method:'POST',body:fd});
     if(!started.job_id)throw new Error('Pattern Forge could not start the generation job.');

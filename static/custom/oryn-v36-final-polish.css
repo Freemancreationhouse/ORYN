@@ -274,3 +274,15 @@ main #oryn-v36-footer {
 @media(max-width:800px){
   .oryn-forge-source-box{height:200px !important;min-height:200px !important;}
 }
+
+/* ORYN Pattern Forge Pro V10.3 final visual corrections */
+.oryn-forge-source-box{
+  height:320px !important; min-height:320px !important;
+  padding:12px !important; overflow:hidden !important;
+  background-size:contain !important; background-repeat:no-repeat !important;
+  background-position:center center !important;
+}
+.oryn-forge-source-box.has-image{
+  background-color:#F3EEE5 !important;
+}
+@media(max-width:800px){.oryn-forge-source-box{height:250px !important;min-height:250px !important;}}

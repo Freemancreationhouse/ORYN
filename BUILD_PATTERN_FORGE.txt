@@ -1,21 +1,16 @@
-Pattern Forge Build: PF-PRO-V10.2-20260828-1
+Pattern Forge Build: PF-PRO-V10.3-20260828-1
 Motion Baseline: UC-DUNE-MOTION-V9-20260827-1 (LOCKED / unchanged)
-Release: ORYN Pi — Pattern Forge Pro Production Fix V10.2
+Release: ORYN Pi — Pattern Forge Pro Final Route/Preview Fix V10.3
 
-Production fixes:
-- full uncropped source-artwork preview (contain/fit)
-- asynchronous generation jobs so long conversions do not hit nginx/browser 504 timeouts
-- clean JSON/user-facing failure handling; raw gateway HTML is never dumped into the UI
-- raster Auto / Line Art / Photo-Painting conversion modes
-- higher-quality corner-preserving raster cleanup and line extraction
-- native SVG parser (svgpathtools)
-- native DXF parser (ezdxf)
-- modal G-code parser: G0/G1/G2/G3, G90/G91, G20/G21, I/J/R arcs
-- existing THR cleanup/import path
-- continuous machine-ready THR output with bounded theta/rho steps
-- disconnected-detail travel strategy (Shortest / Auto / Perimeter)
-- Pattern Forge preview coordinates are the exact coordinates written to saved THR
-- machine-setup/config reads are serial-safe during playback; $CD/$$/config I/O is blocked at backend level
-- machine profile page uses cached read-only values while a pattern/clear is active
+Corrections over V10.2:
+- source artwork preview uses CSS background contain so the complete image is always visible
+- improved high-contrast raster auto-detection so graphic/line art does not fall into swollen photo-edge tracing
+- invert polarity is sanity-checked automatically to prevent white-page inversion from corrupting the trace
+- lighter corner-preserving de-jagging plus closed-loop-safe RDP simplification
+- new Artwork-safe connector mode is the default and routes through free sand without crossing existing artwork
+- Shortest / Auto / Perimeter connector modes remain available
+- all release/update repository references now point to Freemancreationhouse/ORYN
+- updater help uses the ORYN installer command
 
-Locked V9 motion/calibration/HOME/controller playback mathematics are not modified by this Pattern Forge release.
+All V10.2 async generation, 504 handling, SVG/DXF/G-code/THR parsing and Settings/playback serial-safety protections are retained.
+Locked V9 motion/calibration/HOME/controller playback mathematics are not modified.
