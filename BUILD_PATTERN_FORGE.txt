@@ -1,0 +1,4 @@
+Pattern Forge Build: PF-PRO-V10-20260828-1
+Motion Baseline: UC-DUNE-MOTION-V9-20260827-1 (LOCKED / unchanged)
+Engine: photo-aware continuous route generator
+Formats: PNG JPG JPEG WEBP BMP SVG DXF GCODE NC NGC TAP THR
