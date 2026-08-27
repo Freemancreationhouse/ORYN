@@ -2529,7 +2529,7 @@ def _save_machine_calibration_backup():
             "controller_family": "grbl_fluidnc",
             "theta_axis": "X",
             "rho_axis": "Y",
-            "executor": "coordinated_relative_g1_no_retry_speed_planner",
+            "executor": "dune_compatible_coupled_theta_rho_g1",
             "theta_rpm_at_speed_100": float(getattr(state, "theta_rpm_at_speed_100", 3.0) or 3.0),
             "rho_strokes_per_min_at_speed_100": float(getattr(state, "rho_strokes_per_min_at_speed_100", 0.12) or 0.12),
             "theta_revolution_units": state.theta_revolution_units,
@@ -2587,8 +2587,8 @@ _restore_machine_calibration_backup()
 async def get_universal_calibration_status():
     """Unambiguous runtime proof that the universal calibration build is active."""
     return {
-        "build": "UC-DRIVER-PROFILE-V7-20260827-1",
-        "executor": "coordinated_relative_g1_no_retry_speed_planner",
+        "build": "UC-DUNE-MOTION-V9-20260827-1",
+        "executor": "dune_compatible_coupled_theta_rho_g1",
         "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
         "theta_revolution_units": state.theta_revolution_units,
         "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
@@ -4695,6 +4695,7 @@ def _load_hardware_profile():
             with open(HARDWARE_PROFILE_FILE, "r", encoding="utf-8") as fh:
                 data = json.load(fh)
             if isinstance(data, dict):
+                data.setdefault("kinematics", "dune_weaver_coupled")
                 return data
     except Exception as exc:
         logger.warning("Could not read hardware profile: %s", exc)
@@ -4703,11 +4704,12 @@ def _load_hardware_profile():
     # to scale FluidNC steps/unit if the user selects a different physical
     # microstep. It never enters THR geometry directly.
     return {
-        "schema": 1,
+        "schema": 2,
         "initialized": False,
+        "kinematics": "dune_weaver_coupled",
         "x": {"driver": "A4988", "microsteps": 16},
         "y": {"driver": "A4988", "microsteps": 16},
-        "notes": "Select the physical driver/microstep configuration and Apply once.",
+        "notes": "Coupled Theta-Rho mechanism. Driver/microstep can change; physical calibration remains authoritative.",
     }
 
 
@@ -4747,7 +4749,7 @@ async def get_machine_hardware_profile():
         except Exception as exc:
             logger.warning("Hardware profile controller read failed: %s", exc)
     return {
-        "build": "UC-DRIVER-PROFILE-V7-20260827-1",
+        "build": "UC-DUNE-MOTION-V9-20260827-1",
         "profile": profile,
         "controller": controller,
         "supported_drivers": _DRIVER_MICROSTEPS,
@@ -4787,7 +4789,11 @@ async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
     old = _load_hardware_profile()
 
     changes = {}
-    new_profile = {"schema": 1, "initialized": True, "x": {}, "y": {}, "last_applied": datetime.now().isoformat()}
+    new_profile = {
+        "schema": 2, "initialized": True,
+        "kinematics": old.get("kinematics", "dune_weaver_coupled"),
+        "x": {}, "y": {}, "last_applied": datetime.now().isoformat()
+    }
     for axis_name, axis_req in (("x", request.x), ("y", request.y)):
         axis_cfg = (current_cfg.get("axes") or {}).get(axis_name) or {}
         current_steps = axis_cfg.get("steps_per_mm")

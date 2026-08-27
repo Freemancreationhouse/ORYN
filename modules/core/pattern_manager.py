@@ -496,23 +496,22 @@ class MotionControlThread:
                 )
 
     def _move_polar_sync(self, theta: float, rho: float, speed: Optional[float] = None):
-        """Synchronous version of move_polar for use in motion thread."""
-        # Legacy/reference profiles need a reported controller position.
-        # Universal calibrated profiles do not: they run in an explicit G92
-        # work-coordinate frame derived only from logical Theta/Rho geometry.
-        _has_universal_geometry = bool(
-            getattr(state, 'theta_calibrated', False)
-            and getattr(state, 'theta_revolution_units', None)
-            and getattr(state, 'rho_calibrated', False)
-            and getattr(state, 'rho_travel_units', None)
-        )
-        if not _has_universal_geometry and (state.machine_x is None or state.machine_y is None):
-            logger.error("Cannot execute move: machine position unknown (homing may have failed)")
-            logger.error("Please home the machine before running patterns")
+        """Execute one THR point using the proven coupled Theta-Rho motor transform.
+
+        ORYN V9 restores the mechanical coupling term inherited from the original
+        Dune Weaver motion core.  Theta and rho are *logical* coordinates; the
+        motor Y command must also compensate for radial motion mechanically
+        induced by the theta drive.  Driver/microstep changes are handled by the
+        live FluidNC steps/unit values, while the user's 360° and perimeter
+        calibrations remain the physical geometry scale.
+        """
+        if state.machine_x is None or state.machine_y is None:
+            logger.error("Cannot execute move: machine position unknown (home the table first)")
             state.stop_requested = True
             return
 
-        # This is the original sync logic but running in dedicated thread
+        # Original source scaling fallback. These values are only used when a
+        # physical calibration has not been saved.
         if state.table_type == 'kinetiq_motion_mini':
             x_scaling_factor = 2
             original_y_scaling_factor = 3.7
@@ -520,178 +519,189 @@ class MotionControlThread:
             x_scaling_factor = 2
             original_y_scaling_factor = 5
 
-        # SOURCE-LOCKED MOTION: theta conversion, step math, gear ratio and
-        # coupling compensation below are untouched. A saved physical perimeter
-        # changes ONLY the rho 0->1 scale term.
-        if getattr(state, 'rho_calibrated', False) and getattr(state, 'rho_travel_units', None):
-            _rho_units = float(state.rho_travel_units)
-            y_scaling_factor = (100.0 / _rho_units) if _rho_units > 0 else original_y_scaling_factor
+        delta_theta = float(theta) - float(state.current_theta)
+        delta_rho = float(rho) - float(state.current_rho)
+
+        theta_cal = bool(getattr(state, 'theta_calibrated', False) and getattr(state, 'theta_revolution_units', None))
+        rho_cal = bool(getattr(state, 'rho_calibrated', False) and getattr(state, 'rho_travel_units', None))
+        universal_geometry = bool(theta_cal and rho_cal)
+
+        # Geometry scale: learned values always win. Nothing is hard-coded to a
+        # particular table, driver, pulley or microstep configuration.
+        if theta_cal:
+            x_increment = (delta_theta / (2.0 * pi)) * float(state.theta_revolution_units)
         else:
-            y_scaling_factor = original_y_scaling_factor
+            x_increment = delta_theta * 100.0 / (2.0 * pi * x_scaling_factor)
 
-        delta_theta = theta - state.current_theta
-        delta_rho = rho - state.current_rho
-
-        # UNIVERSAL CALIBRATION ENGINE:
-        # If learned, one physical revolution and one full radial stroke are the
-        # only geometry constants used. THR remains normalized (theta radians, rho 0..1),
-        # so the same pattern scales automatically to any table size/gearing/microstep setup.
-        if getattr(state, 'theta_calibrated', False) and getattr(state, 'theta_revolution_units', None):
-            x_increment = (delta_theta / (2 * pi)) * float(state.theta_revolution_units)
+        if rho_cal:
+            rho_dir = float(getattr(state, 'rho_direction', 1.0) or 1.0)
+            y_geometry_increment = delta_rho * float(state.rho_travel_units) * rho_dir
         else:
-            x_increment = delta_theta * 100 / (2 * pi * x_scaling_factor)
+            rho_dir = 1.0
+            y_geometry_increment = delta_rho * 100.0 / original_y_scaling_factor
 
-        if getattr(state, 'rho_calibrated', False) and getattr(state, 'rho_travel_units', None):
-            y_increment = delta_rho * float(state.rho_travel_units) * float(getattr(state, 'rho_direction', 1.0) or 1.0)
-        else:
-            y_increment = delta_rho * 100 / y_scaling_factor
+        # DUNE-WEAVER / ORYN COUPLED THETA-RHO KINEMATICS
+        # -------------------------------------------------
+        # Rotating theta mechanically changes the radial carriage on this
+        # mechanism. The original source compensates that motion according to
+        # motor step scales and the gear ratio. Disabling this term is what made
+        # rho physically consume the radius in only a few revolutions.
+        x_steps = abs(float(getattr(state, 'x_steps_per_mm', 0.0) or 0.0))
+        y_steps = abs(float(getattr(state, 'y_steps_per_mm', 0.0) or 0.0))
+        gear_ratio = abs(float(getattr(state, 'gear_ratio', 10.0) or 10.0))
 
-        x_total_steps = state.x_steps_per_mm * (100/x_scaling_factor)
-        y_total_steps = state.y_steps_per_mm * (100/y_scaling_factor)
+        # Current ORYN is a coupled Theta-Rho mechanism by default. A future
+        # independent mechanism can opt out by setting ORYN_KINEMATICS=independent.
+        kinematics_mode = str(os.getenv('ORYN_KINEMATICS', 'dune_weaver_coupled')).strip().lower()
+        coupling_enabled = kinematics_mode not in ('independent', 'independent_theta_rho', 'none', 'off', '0', 'false')
 
-        # Theta->rho coupling compensation is required by the original known
-        # KinetiQ mechanical profiles because rotation mechanically influences
-        # radial position.  A custom/unknown GRBL Theta-Rho table can have
-        # independent theta and rho drives; applying the reference coupling to
-        # such a table causes rho to race toward center/perimeter while theta
-        # rotates.  Preserve the proven compensation for every known profile,
-        # but do not invent coupling for an unknown/custom machine.
-        effective_table_type = getattr(state, 'table_type_override', None) or state.table_type
-        known_coupled_profiles = {
-            'kinetiq_motion_mini', 'kinetiq_motion_mini_pro',
-            'kinetiq_motion_mini_pro_byj', 'kinetiq_motion_gold',
-            'kinetiq_motion_pro_pulley', 'kinetiq_motion_pro',
-            'kinetiq_motion'
-        }
-        universal_geometry = bool(getattr(state, 'theta_calibrated', False) and getattr(state, 'rho_calibrated', False))
-        if effective_table_type in known_coupled_profiles and not universal_geometry:
-            offset = x_increment * (x_total_steps * x_scaling_factor / (state.gear_ratio * y_total_steps * y_scaling_factor))
-            if effective_table_type == 'kinetiq_motion_mini' or state.y_steps_per_mm == 546:
-                y_increment -= offset
-            else:
-                y_increment += offset
-        else:
-            offset = 0.0
+        coupling_offset = 0.0
+        if coupling_enabled and x_steps > 0 and y_steps > 0 and gear_ratio > 0:
+            effective_table_type = getattr(state, 'table_type_override', None) or state.table_type
+            # The Mini reference mechanism has the opposite mechanical winding.
+            source_sign = -1.0 if (effective_table_type == 'kinetiq_motion_mini' or abs(y_steps - 546.0) <= 5.0) else 1.0
+            # rho_dir makes the compensation follow whichever controller Y sign
+            # was learned by Centre -> Perimeter calibration.
+            coupling_offset = x_increment * (x_steps / (gear_ratio * y_steps)) * source_sign * rho_dir
 
-        # Legacy absolute target placeholders. Universal mode below does not
-        # derive geometry from MPos/WPos at all.
-        new_x_abs = (float(state.machine_x) + x_increment) if state.machine_x is not None else 0.0
-        new_y_abs = (float(state.machine_y) + y_increment) if state.machine_y is not None else 0.0
+        y_increment = y_geometry_increment + coupling_offset
+        new_x_abs = float(state.machine_x) + x_increment
+        new_y_abs = float(state.machine_y) + y_increment
 
-        # Use provided speed or fall back to state.speed
-        actual_speed = speed if speed is not None else state.speed
-
-        # Validate coordinates before sending to prevent GRBL error:2
-        if isnan(new_x_abs) or isnan(new_y_abs) or isinf(new_x_abs) or isinf(new_y_abs):
-            logger.error(f"Motion thread: Invalid coordinates detected - X:{new_x_abs}, Y:{new_y_abs}")
-            logger.error(f"  theta:{theta}, rho:{rho}, current_theta:{state.current_theta}, current_rho:{state.current_rho}")
-            logger.error(f"  x_steps_per_mm:{state.x_steps_per_mm}, y_steps_per_mm:{state.y_steps_per_mm}, gear_ratio:{state.gear_ratio}")
+        actual_speed = float(speed if speed is not None else state.speed)
+        if any((isnan(new_x_abs), isnan(new_y_abs), isinf(new_x_abs), isinf(new_y_abs))):
+            logger.error("Invalid THR motor target X=%s Y=%s", new_x_abs, new_y_abs)
             state.stop_requested = True
             return
 
-        # UNIVERSAL ABSOLUTE THETA-RHO EXECUTOR (V8).
-        #
-        # The previous relative executor could accumulate a wrong rho move if
-        # host/controller acknowledgements became uncertain, and per-segment
-        # completion waits caused visible step/start jerking.  The earlier
-        # absolute attempt mixed MPos status reports with G90 work coordinates.
-        #
-        # V8 fixes both problems by creating an explicit GRBL work-coordinate
-        # frame (G92) from the *logical calibrated* Theta/Rho position.  Pattern
-        # targets are then absolute normalized Theta/Rho coordinates:
-        #   X = theta/(2*pi) * learned_units_per_revolution
-        #   Y = rho * learned_full_radial_units * learned_direction
-        # No raw MPos/WPos value participates in the geometry.  Retrying an
-        # absolute target is safe because it cannot double the radial travel.
         if universal_geometry:
-            theta_units = float(state.theta_revolution_units)
-            rho_units = float(state.rho_travel_units)
-            rho_dir = float(getattr(state, 'rho_direction', 1.0) or 1.0)
-            target_x = (float(theta) / (2.0 * pi)) * theta_units
-            target_y = float(rho) * rho_units * rho_dir
-
-            if not getattr(state, '_universal_work_frame_ready', False):
-                if not self._set_universal_work_frame_sync():
-                    logger.error("Could not establish calibrated Theta-Rho work frame")
-                    state.stop_requested = True
-                    return
-
-            # Speed planning still uses the physical delta between logical THR
-            # points, while the controller receives an absolute G90 target.
+            # One smooth coordinated relative G1 block, like the original
+            # motion core.  No per-point Idle wait and no $J streaming.
             planned_feed = self._plan_universal_feed(x_increment, y_increment, actual_speed)
-            ok = self._send_grbl_absolute_universal_sync(target_x, target_y, planned_feed)
+            ok = self._send_grbl_coupled_delta_sync(x_increment, y_increment, planned_feed)
             if not ok:
-                logger.error("Universal absolute THR move failed; stopping pattern safely")
+                logger.error("Coupled THR move failed; stopping pattern safely")
                 state.stop_requested = True
                 return
-            new_x_abs = target_x
-            new_y_abs = target_y
         else:
-            # Preserve the original absolute path for legacy/reference profiles.
+            # Preserve the proven original absolute path for legacy profiles.
             self._send_grbl_coordinates_sync(round(new_x_abs, 2), round(new_y_abs, 2), actual_speed)
 
-        # Update software position only after issuing the absolute target.
-        state.current_theta = theta
-        state.current_rho = rho
-        if universal_geometry:
-            state._universal_work_x = new_x_abs
-            state._universal_work_y = new_y_abs
-        else:
-            state.machine_x = new_x_abs
-            state.machine_y = new_y_abs
+        state.current_theta = float(theta)
+        state.current_rho = float(rho)
+        state.machine_x = new_x_abs
+        state.machine_y = new_y_abs
 
-
+        logger.debug(
+            "THR motor delta: dtheta=%.6f drho=%.6f -> dX=%.6f dYgeom=%.6f coupling=%.6f dYmotor=%.6f F=%.3f",
+            delta_theta, delta_rho, x_increment, y_geometry_increment,
+            coupling_offset, y_increment, planned_feed if universal_geometry else actual_speed)
 
     def _plan_universal_feed(self, dx: float, dy: float, requested_speed: float) -> float:
-        """Return a coordinated GRBL feed for a calibrated Theta-Rho segment.
+        """Use the user speed as the feed ceiling; never amplify it.
 
-        Geometry calibration and speed calibration are independent.  The saved
-        theta_revolution_units and rho_travel_units describe distance/position.
-        This planner converts the user speed into conservative physical axis
-        limits, then computes one vector feed whose X and Y components cannot
-        exceed those limits.  This preserves synchronization and works for any
-        calibrated table size/gearing because limits scale from the saved units.
+        Dune Weaver's proven motion path treats the selected pattern speed as a
+        motor feed. Previous ORYN planners could turn UI speed 60 into F140+
+        on theta-only segments. V9 keeps F <= requested_speed and only reduces
+        it if a FluidNC axis max-rate would otherwise be exceeded.
         """
-        theta_units = abs(float(getattr(state, 'theta_revolution_units', 0.0) or 0.0))
-        rho_units = abs(float(getattr(state, 'rho_travel_units', 0.0) or 0.0))
-        if theta_units <= 0 or rho_units <= 0:
-            return max(1.0, float(requested_speed or 1.0))
-
-        # Machine-profile speed constants.  These are physical normalized rates,
-        # NOT controller geometry values.  At UI speed=100 the default custom
-        # profile allows 3 rev/min theta and 0.12 full radial strokes/min.
-        # UI speed scales them proportionally.  Values can later be exposed as
-        # profile settings without changing THR geometry.
-        speed_scale = max(0.05, min(2.0, float(requested_speed or 60.0) / 100.0))
-        theta_rpm_at_100 = float(getattr(state, 'theta_rpm_at_speed_100', 3.0) or 3.0)
-        rho_strokes_per_min_at_100 = float(getattr(state, 'rho_strokes_per_min_at_speed_100', 0.12) or 0.12)
-        max_x_units_min = theta_units * theta_rpm_at_100 * speed_scale
-        max_y_units_min = rho_units * rho_strokes_per_min_at_100 * speed_scale
-        # Firmware limits are the hardware ceiling.  If available from Machine
-        # Setup, never ask either vector component to exceed FluidNC max_rate.
-        fw_x = float(getattr(state, 'x_max_rate_mm_per_min', 0.0) or 0.0)
-        fw_y = float(getattr(state, 'y_max_rate_mm_per_min', 0.0) or 0.0)
-        if fw_x > 0:
-            max_x_units_min = min(max_x_units_min, fw_x)
-        if fw_y > 0:
-            max_y_units_min = min(max_y_units_min, fw_y)
-
-        length = (dx * dx + dy * dy) ** 0.5
+        feed = max(0.5, float(requested_speed or 1.0))
+        length = (float(dx) * float(dx) + float(dy) * float(dy)) ** 0.5
         if length < 1e-12:
-            return 1.0
-        limits = []
-        if abs(dx) > 1e-12:
-            limits.append(max_x_units_min * length / abs(dx))
-        if abs(dy) > 1e-12:
-            limits.append(max_y_units_min * length / abs(dy))
-        feed = min(limits) if limits else 1.0
-        feed = max(0.5, min(5000.0, feed))
-        logger.debug(
-            "Universal speed plan: req=%.2f scale=%.3f dX=%.5f dY=%.5f F=%.3f "
-            "(theta<=%.3f u/min, rho<=%.3f u/min)",
-            float(requested_speed or 0.0), speed_scale, dx, dy, feed,
-            max_x_units_min, max_y_units_min)
+            return 0.5
+
+        fw_x = abs(float(getattr(state, 'x_max_rate_mm_per_min', 0.0) or 0.0))
+        fw_y = abs(float(getattr(state, 'y_max_rate_mm_per_min', 0.0) or 0.0))
+        vx = feed * abs(float(dx)) / length
+        vy = feed * abs(float(dy)) / length
+        scale = 1.0
+        if fw_x > 0 and vx > fw_x:
+            scale = min(scale, fw_x / vx)
+        if fw_y > 0 and vy > fw_y:
+            scale = min(scale, fw_y / vy)
+        feed = max(0.5, feed * scale)
         return feed
+
+    def _send_grbl_coupled_delta_sync(self, dx: float, dy: float, speed: float) -> bool:
+        """Queue one coupled relative G1 segment without stop/start jerking.
+
+        The whole send+ack transaction owns the connection's existing RLock, so
+        UI/status readers cannot steal FluidNC's `ok`. GRBL/FluidNC acknowledges
+        planner acceptance, not physical completion, which lets the planner
+        buffer consecutive segments smoothly. The relative move is NEVER resent
+        on an uncertain acknowledgement.
+        """
+        if state.stop_requested or not state.conn or not state.conn.is_connected():
+            return False
+        gcode = f"G91 G21 G1 X{float(dx):.6f} Y{float(dy):.6f} F{float(speed):.3f}"
+        lock = getattr(state.conn, 'lock', None)
+        import contextlib
+        ctx = lock if lock is not None else contextlib.nullcontext()
+        try:
+            with ctx:
+                state.conn.send(gcode + "\n")
+                start = time.time()
+                timeout = 30.0
+                while time.time() - start < timeout:
+                    if state.stop_requested:
+                        return False
+                    response = state.conn.readline()
+                    if not response:
+                        continue
+                    text = str(response).strip()
+                    low = text.lower()
+                    if low == 'ok':
+                        return True
+                    if low.startswith('error') or 'alarm' in low:
+                        logger.error("FluidNC rejected coupled move %s: %s", gcode, text)
+                        return False
+                    # Ignore command echoes and asynchronous status/messages.
+                    if text.startswith(('G0', 'G1', 'G2', 'G3', '$J', 'M', '<', '[MSG:')):
+                        continue
+
+                # Do not resend a relative move. Query live state while we still
+                # own the connection transaction. Run/Idle means the line was
+                # accepted or completed; Alarm/error is handled above.
+                state.conn.send("?\n")
+                status_deadline = time.time() + 2.0
+                while time.time() < status_deadline:
+                    response = state.conn.readline()
+                    if not response:
+                        continue
+                    text = str(response).strip()
+                    low = text.lower()
+                    if '<run' in low or '<jog' in low or '<hold' in low or '<idle' in low:
+                        logger.warning("No visible ok for coupled move; live state confirms controller active/idle. Not resending.")
+                        return True
+                    if 'alarm' in low or low.startswith('error'):
+                        return False
+                logger.error("No acknowledgement or live state for coupled move: %s", gcode)
+                return False
+        except Exception as exc:
+            logger.error("Coupled G1 transaction failed: %s", exc)
+            return False
+
+    def _restore_absolute_mode_sync(self):
+        """Restore G90 after a pattern that used explicit G91 delta blocks."""
+        if not state.conn or not state.conn.is_connected():
+            return
+        lock = getattr(state.conn, 'lock', None)
+        import contextlib
+        ctx = lock if lock is not None else contextlib.nullcontext()
+        try:
+            with ctx:
+                state.conn.send("G90\n")
+                # Consume the mode-change acknowledgement so it cannot leak into
+                # the next operation. It is safe to proceed if no ack is visible.
+                deadline = time.time() + 2.0
+                while time.time() < deadline:
+                    r = state.conn.readline()
+                    if not r:
+                        continue
+                    if str(r).strip().lower() == 'ok':
+                        break
+        except Exception as exc:
+            logger.warning("Could not restore G90 after pattern: %s", exc)
 
     def _set_universal_work_frame_sync(self) -> bool:
         """Declare the current physical point as the current logical THR point.
@@ -1616,19 +1626,14 @@ async def _execute_pattern_internal(file_path):
     logger.info(f"t: {state.current_theta}, r: {state.current_rho}")
     await reset_theta()
 
-    # Universal V8 owns an explicit work-coordinate frame.  Do not use raw
-    # MPos/WPos as pattern geometry; reset the frame flag so the motion thread
-    # declares the current physical point from logical current_theta/current_rho
-    # before the first target is sent.
     if (getattr(state, 'theta_calibrated', False) and getattr(state, 'theta_revolution_units', None)
             and getattr(state, 'rho_calibrated', False) and getattr(state, 'rho_travel_units', None)):
-        state._universal_work_frame_ready = False
         logger.info(
-            "Universal V8 pattern geometry: logical THR start=(%.5f, %.5f), "
-            "theta/rev=%.5f, rho/full=%.5f, rho_dir=%.1f",
+            "Universal V9 Dune-compatible coupled THR: start=(%.5f, %.5f), theta/rev=%.5f, rho/full=%.5f, rho_dir=%.1f, gear=%.4f",
             float(state.current_theta), float(state.current_rho),
             float(state.theta_revolution_units), float(state.rho_travel_units),
-            float(getattr(state, 'rho_direction', 1.0) or 1.0))
+            float(getattr(state, 'rho_direction', 1.0) or 1.0),
+            float(getattr(state, 'gear_ratio', 10.0) or 10.0))
 
     start_time = time.time()
     total_pause_time = 0  # Track total time spent paused (manual + scheduled)
@@ -1773,6 +1778,13 @@ async def _execute_pattern_internal(file_path):
 
             await move_polar(theta, rho, current_speed)
 
+            # The first THR point is the physical entry position (for
+            # clear_from_out this is rho=1/perimeter). Wait for that positioning
+            # move to actually finish before preview/progress begins. Subsequent
+            # points are planner-buffered for smooth motion.
+            if i == 0:
+                await connection_manager.check_idle_async()
+
             # Update progress for all coordinates including the first one
             pbar.update(1)
             elapsed_time = time.time() - start_time
@@ -1832,6 +1844,7 @@ async def _execute_pattern_internal(file_path):
         return False
 
     await connection_manager.check_idle_async()
+    await asyncio.to_thread(motion_controller._restore_absolute_mode_sync)
 
     # Pattern-local universal origin must never leak into the next pattern.
     for _name in ('_pattern_origin_x', '_pattern_origin_y', '_pattern_origin_theta', '_pattern_origin_rho'):

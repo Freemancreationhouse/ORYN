@@ -17,28 +17,75 @@ logger = logging.getLogger(__name__)
 # Curated settings exposed in the Setup UI.
 # Keys are FluidNC config tree paths queried via $/path.
 
-# GRBL-compatible fallback for boards that expose core axis settings through
-# $100/$101/$110/$111/$120/$121 rather than FluidNC config-tree paths.
-_GRBL_FALLBACK = {
+
+# GRBL-compatible aliases exposed by FluidNC for core motion settings.
+# These are the same settings visible through the controller's $$ command.
+LEGACY_GRBL_ALIASES = {
     "axes/x/steps_per_mm": "$100",
     "axes/y/steps_per_mm": "$101",
     "axes/x/max_rate_mm_per_min": "$110",
     "axes/y/max_rate_mm_per_min": "$111",
     "axes/x/acceleration_mm_per_sec2": "$120",
     "axes/y/acceleration_mm_per_sec2": "$121",
+    "axes/x/max_travel_mm": "$130",
+    "axes/y/max_travel_mm": "$131",
 }
 
-def _read_grbl_fallback(code: str) -> str | None:
+def _read_legacy_grbl_settings() -> dict:
+    """Read core motion settings using the GRBL-compatible $$ interface.
+
+    FluidNC exposes $100/$101/$110/$111/$120/$121 on many boards even when
+    config-tree queries are unavailable or use a different schema.
+    """
+    result = {"axes": {"x": {}, "y": {}}, "start": {}}
     try:
-        lines = send_command("$$", timeout=4.0, silence=0.5)
-    except Exception:
-        return None
-    prefix = code + "="
-    for line in lines:
-        text = str(line).strip()
-        if text.startswith(prefix):
-            return text.split("=", 1)[1].strip()
-    return None
+        lines = send_command("$$", timeout=6.0, silence=1.0)
+    except Exception as exc:
+        logger.warning("GRBL-compatible $$ read failed: %s", exc)
+        return result
+
+    values = {}
+    for raw in lines:
+        for line in str(raw).splitlines():
+            line = line.strip()
+            if not line.startswith("$") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            try:
+                values[key] = float(value.strip())
+            except ValueError:
+                values[key] = value.strip()
+
+    mapping = {
+        "$100": ("x", "steps_per_mm"),
+        "$101": ("y", "steps_per_mm"),
+        "$110": ("x", "max_rate_mm_per_min"),
+        "$111": ("y", "max_rate_mm_per_min"),
+        "$120": ("x", "acceleration_mm_per_sec2"),
+        "$121": ("y", "acceleration_mm_per_sec2"),
+        "$130": ("x", "max_travel_mm"),
+        "$131": ("y", "max_travel_mm"),
+    }
+    for code, (axis, key) in mapping.items():
+        if code in values:
+            result["axes"][axis][key] = values[code]
+
+    # The connection manager may already have successfully read $100/$101
+    # during connection. Use that proven state as a final fallback.
+    if not result["axes"]["x"].get("steps_per_mm") and getattr(state, "x_steps_per_mm", 0):
+        result["axes"]["x"]["steps_per_mm"] = float(state.x_steps_per_mm)
+    if not result["axes"]["y"].get("steps_per_mm") and getattr(state, "y_steps_per_mm", 0):
+        result["axes"]["y"]["steps_per_mm"] = float(state.y_steps_per_mm)
+    return result
+
+def _merge_core_legacy_settings(result: dict) -> dict:
+    legacy = _read_legacy_grbl_settings()
+    for axis in ("x", "y"):
+        dst = result.setdefault("axes", {}).setdefault(axis, {})
+        for key, value in legacy.get("axes", {}).get(axis, {}).items():
+            if dst.get(key) is None:
+                dst[key] = value
+    return result
 
 CURATED_SETTINGS = {
     "x": [
@@ -148,10 +195,7 @@ def read_setting(path: str) -> str | None:
         if "=" in line and leaf in line:
             return line.split("=", 1)[1].strip()
         if line.lower().startswith("error"):
-            break
-    code = _GRBL_FALLBACK.get(path)
-    if code:
-        return _read_grbl_fallback(code)
+            return None
     return None
 
 
@@ -285,7 +329,7 @@ def read_all_settings() -> dict:
         return _read_all_settings_individual()
 
     logger.info(f"$CD resolved {resolved_count}/{len(CURATED_SETTINGS['x']) * 2 + len(CURATED_SETTINGS['global'])} settings")
-    return result
+    return _merge_core_legacy_settings(result)
 
 
 def _read_all_settings_individual() -> dict:
@@ -310,25 +354,30 @@ def _read_all_settings_individual() -> dict:
         key = "_".join(parts[1:])
         result["start"][key] = _parse_value(raw, path)
 
-    return result
+    return _merge_core_legacy_settings(result)
 
 
 def write_setting(path: str, value: str) -> bool:
-    """Write a setting via FluidNC tree, with GRBL core-axis fallback."""
+    """Write a FluidNC setting, with GRBL-compatible fallback for core motion values."""
+    alias = LEGACY_GRBL_ALIASES.get(path)
+
+    # For core motion settings prefer the GRBL-compatible aliases because they
+    # are proven to exist on ORYN's target FluidNC boards ($$ exposes them).
+    if alias:
+        try:
+            responses = send_command(f"{alias}={value}", timeout=4.0)
+            if any("ok" in str(r).lower() for r in responses):
+                return True
+        except ConnectionError:
+            return False
+        except Exception as exc:
+            logger.warning("Legacy write %s failed, trying config tree: %s", alias, exc)
+
     try:
         responses = send_command(f"$/{path}={value}")
     except ConnectionError:
-        responses = []
-    if any("ok" in str(r).lower() for r in responses):
-        return True
-    code = _GRBL_FALLBACK.get(path)
-    if code:
-        try:
-            responses = send_command(f"{code}={value}", timeout=4.0, silence=0.5)
-        except ConnectionError:
-            return False
-        return any("ok" in str(r).lower() for r in responses)
-    return False
+        return False
+    return any("ok" in str(r).lower() for r in responses)
 
 
 def get_config_filename() -> str:
