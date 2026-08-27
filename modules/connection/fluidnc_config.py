@@ -16,6 +16,30 @@ logger = logging.getLogger(__name__)
 
 # Curated settings exposed in the Setup UI.
 # Keys are FluidNC config tree paths queried via $/path.
+
+# GRBL-compatible fallback for boards that expose core axis settings through
+# $100/$101/$110/$111/$120/$121 rather than FluidNC config-tree paths.
+_GRBL_FALLBACK = {
+    "axes/x/steps_per_mm": "$100",
+    "axes/y/steps_per_mm": "$101",
+    "axes/x/max_rate_mm_per_min": "$110",
+    "axes/y/max_rate_mm_per_min": "$111",
+    "axes/x/acceleration_mm_per_sec2": "$120",
+    "axes/y/acceleration_mm_per_sec2": "$121",
+}
+
+def _read_grbl_fallback(code: str) -> str | None:
+    try:
+        lines = send_command("$$", timeout=4.0, silence=0.5)
+    except Exception:
+        return None
+    prefix = code + "="
+    for line in lines:
+        text = str(line).strip()
+        if text.startswith(prefix):
+            return text.split("=", 1)[1].strip()
+    return None
+
 CURATED_SETTINGS = {
     "x": [
         "axes/x/steps_per_mm",
@@ -124,7 +148,10 @@ def read_setting(path: str) -> str | None:
         if "=" in line and leaf in line:
             return line.split("=", 1)[1].strip()
         if line.lower().startswith("error"):
-            return None
+            break
+    code = _GRBL_FALLBACK.get(path)
+    if code:
+        return _read_grbl_fallback(code)
     return None
 
 
@@ -287,12 +314,21 @@ def _read_all_settings_individual() -> dict:
 
 
 def write_setting(path: str, value: str) -> bool:
-    """Write a single FluidNC setting. Returns True on success."""
+    """Write a setting via FluidNC tree, with GRBL core-axis fallback."""
     try:
         responses = send_command(f"$/{path}={value}")
     except ConnectionError:
-        return False
-    return any("ok" in r.lower() for r in responses)
+        responses = []
+    if any("ok" in str(r).lower() for r in responses):
+        return True
+    code = _GRBL_FALLBACK.get(path)
+    if code:
+        try:
+            responses = send_command(f"{code}={value}", timeout=4.0, silence=0.5)
+        except ConnectionError:
+            return False
+        return any("ok" in str(r).lower() for r in responses)
+    return False
 
 
 def get_config_filename() -> str:

@@ -1,18 +1,12 @@
-ORYN UNIVERSAL DRIVER PROFILE UI READ FIX
-Build: UC-DRIVER-PROFILE-V7.2-20260827-1
+ORYN UNIVERSAL DRIVER PROFILE V8 — ABSOLUTE THETA-RHO STREAM FIX
+Build: UC-DRIVER-PROFILE-V8-ABS-THR-20260827-1
 
-VERIFIED FIXES:
-- Universal Machine Profile Read no longer dereferences missing .umstatus
-- Read now reaches /api/machine-hardware-profile and renders X/Y driver + microstep controls
-- Existing V7 pattern timeout correction retained
-- Existing HOME/pattern/calibration behavior otherwise unchanged
-
-ORYN UNIVERSAL DRIVER PROFILE V7.1 — HARDWARE SETUP VISIBILITY FIX
-Build: UC-DRIVER-PROFILE-V7.1-20260827-1
-
-FIXED:
-- Universal Machine Profile reliably mounts on the actually served Hardware Setup page
-- X/Y Driver and Physical Microstep selectors visible above existing setup controls
-- Existing V7 driver/microstep API retained
-- Existing V7 dynamic pattern timeout fix retained
-- No static image/logo changes
+CORE FIXES:
+- Universal pattern geometry no longer uses raw MPos/WPos as origin
+- Explicit G92 logical Theta-Rho work frame at each universal pattern start
+- Absolute G90 targets derived directly from saved 360 and perimeter calibration
+- Absolute target retries cannot double radial travel
+- No per-point Idle wait; planner can blend continuously to remove jerking
+- Lost/consumed ok uses live FluidNC status fallback without stopping valid motion
+- Machine Profile keeps FluidNC config-tree + GRBL $100/$101/$110/$111/$120/$121 fallback
+- Existing UI, HOME, driver profile, calibration controls and static images preserved

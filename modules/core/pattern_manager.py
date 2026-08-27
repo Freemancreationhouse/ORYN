@@ -497,8 +497,16 @@ class MotionControlThread:
 
     def _move_polar_sync(self, theta: float, rho: float, speed: Optional[float] = None):
         """Synchronous version of move_polar for use in motion thread."""
-        # Check for valid machine position (can be None if homing failed)
-        if state.machine_x is None or state.machine_y is None:
+        # Legacy/reference profiles need a reported controller position.
+        # Universal calibrated profiles do not: they run in an explicit G92
+        # work-coordinate frame derived only from logical Theta/Rho geometry.
+        _has_universal_geometry = bool(
+            getattr(state, 'theta_calibrated', False)
+            and getattr(state, 'theta_revolution_units', None)
+            and getattr(state, 'rho_calibrated', False)
+            and getattr(state, 'rho_travel_units', None)
+        )
+        if not _has_universal_geometry and (state.machine_x is None or state.machine_y is None):
             logger.error("Cannot execute move: machine position unknown (homing may have failed)")
             logger.error("Please home the machine before running patterns")
             state.stop_requested = True
@@ -565,8 +573,10 @@ class MotionControlThread:
         else:
             offset = 0.0
 
-        new_x_abs = state.machine_x + x_increment
-        new_y_abs = state.machine_y + y_increment
+        # Legacy absolute target placeholders. Universal mode below does not
+        # derive geometry from MPos/WPos at all.
+        new_x_abs = (float(state.machine_x) + x_increment) if state.machine_x is not None else 0.0
+        new_y_abs = (float(state.machine_y) + y_increment) if state.machine_y is not None else 0.0
 
         # Use provided speed or fall back to state.speed
         actual_speed = speed if speed is not None else state.speed
@@ -579,24 +589,43 @@ class MotionControlThread:
             state.stop_requested = True
             return
 
-        # UNIVERSAL COORDINATED RELATIVE EXECUTOR.
+        # UNIVERSAL ABSOLUTE THETA-RHO EXECUTOR (V8).
         #
-        # FluidNC/GRBL G90 targets are expressed in the active work-coordinate
-        # system, while status reports can be MPos or WPos depending on $10.
-        # Mixing those two coordinate spaces caused calibrated rho to jump much
-        # farther than the THR path requested.  Universal mode therefore sends
-        # the mathematically exact THR *delta* directly as one coordinated G91
-        # move.  It never retries a relative move blindly: if acknowledgement is
-        # uncertain we stop the pattern, because replaying a delta can double it.
+        # The previous relative executor could accumulate a wrong rho move if
+        # host/controller acknowledgements became uncertain, and per-segment
+        # completion waits caused visible step/start jerking.  The earlier
+        # absolute attempt mixed MPos status reports with G90 work coordinates.
+        #
+        # V8 fixes both problems by creating an explicit GRBL work-coordinate
+        # frame (G92) from the *logical calibrated* Theta/Rho position.  Pattern
+        # targets are then absolute normalized Theta/Rho coordinates:
+        #   X = theta/(2*pi) * learned_units_per_revolution
+        #   Y = rho * learned_full_radial_units * learned_direction
+        # No raw MPos/WPos value participates in the geometry.  Retrying an
+        # absolute target is safe because it cannot double the radial travel.
         if universal_geometry:
+            theta_units = float(state.theta_revolution_units)
+            rho_units = float(state.rho_travel_units)
+            rho_dir = float(getattr(state, 'rho_direction', 1.0) or 1.0)
+            target_x = (float(theta) / (2.0 * pi)) * theta_units
+            target_y = float(rho) * rho_units * rho_dir
+
+            if not getattr(state, '_universal_work_frame_ready', False):
+                if not self._set_universal_work_frame_sync():
+                    logger.error("Could not establish calibrated Theta-Rho work frame")
+                    state.stop_requested = True
+                    return
+
+            # Speed planning still uses the physical delta between logical THR
+            # points, while the controller receives an absolute G90 target.
             planned_feed = self._plan_universal_feed(x_increment, y_increment, actual_speed)
-            ok = self._send_grbl_delta_sync(x_increment, y_increment, planned_feed)
+            ok = self._send_grbl_absolute_universal_sync(target_x, target_y, planned_feed)
             if not ok:
-                logger.error("Universal THR move failed/uncertain; stopping to prevent duplicate relative motion")
+                logger.error("Universal absolute THR move failed; stopping pattern safely")
                 state.stop_requested = True
                 return
-            new_x_abs = float(state.machine_x) + x_increment
-            new_y_abs = float(state.machine_y) + y_increment
+            new_x_abs = target_x
+            new_y_abs = target_y
         else:
             # Preserve the original absolute path for legacy/reference profiles.
             self._send_grbl_coordinates_sync(round(new_x_abs, 2), round(new_y_abs, 2), actual_speed)
@@ -604,8 +633,12 @@ class MotionControlThread:
         # Update software position only after issuing the absolute target.
         state.current_theta = theta
         state.current_rho = rho
-        state.machine_x = new_x_abs
-        state.machine_y = new_y_abs
+        if universal_geometry:
+            state._universal_work_x = new_x_abs
+            state._universal_work_y = new_y_abs
+        else:
+            state.machine_x = new_x_abs
+            state.machine_y = new_y_abs
 
 
 
@@ -660,64 +693,239 @@ class MotionControlThread:
             max_x_units_min, max_y_units_min)
         return feed
 
-    def _send_grbl_delta_sync(self, dx: float, dy: float, speed: float = 600.0) -> bool:
-        """Send exactly one calibrated THR delta as a coordinated G91 G1 move.
+    def _set_universal_work_frame_sync(self) -> bool:
+        """Declare the current physical point as the current logical THR point.
 
-        This deliberately avoids $J (jog) mode and avoids separate X/Y moves.
-        Both axes remain synchronized in one planner segment.  The command is
-        NEVER resent after an uncertain timeout, because a relative resend would
-        duplicate physical motion.  The connection lock is held across send and
-        acknowledgement so status/terminal reads cannot steal the response.
+        This is the key to a universal absolute executor: G90 targets live in a
+        work-coordinate frame that we explicitly own, so MPos/WPos offsets are
+        irrelevant.  The frame is recreated at every pattern start.
         """
-        if state.stop_requested:
-            return False
-        if abs(dx) < 1e-12 and abs(dy) < 1e-12:
-            return True
-        gcode = f"G91 G21 G1 X{dx:.6f} Y{dy:.6f} F{float(speed):.3f}"
         conn = state.conn
         if not conn or not conn.is_connected():
-            logger.error("Universal delta move rejected: controller disconnected")
             return False
+        theta_units = float(getattr(state, 'theta_revolution_units', 0.0) or 0.0)
+        rho_units = float(getattr(state, 'rho_travel_units', 0.0) or 0.0)
+        if theta_units <= 0 or rho_units <= 0:
+            return False
+        rho_dir = float(getattr(state, 'rho_direction', 1.0) or 1.0)
+        current_x = (float(state.current_theta) / (2.0 * pi)) * theta_units
+        current_y = float(state.current_rho) * rho_units * rho_dir
+        cmd = f"G90 G21\nG92 X{current_x:.6f} Y{current_y:.6f}"
         lock = getattr(conn, 'lock', None)
         try:
-            # SerialConnection/WebSocketConnection both expose an RLock.
             from contextlib import nullcontext
             context = lock if lock is not None else nullcontext()
             with context:
-                if hasattr(conn, 'reset_input_buffer'):
-                    try:
-                        conn.reset_input_buffer()
-                    except Exception:
-                        pass
-                logger.debug("Universal coordinated delta: %s", gcode)
-                conn.send(gcode + "\n")
-                started = time.time()
-                # When the FluidNC planner buffer fills, "ok" is delayed until
-                # room is available.  Slow normalized Theta-Rho segments can be
-                # longer than the old fixed 5 s timeout, which made clearing
-                # stop after roughly one revolution.  Derive the acknowledgement
-                # window from the segment's planned duration and NEVER resend a
-                # relative move.
-                vector_len = (dx * dx + dy * dy) ** 0.5
-                expected_segment_s = (60.0 * vector_len / max(float(speed), 1e-6))
-                ack_timeout = max(15.0, min(120.0, expected_segment_s * 3.0 + 10.0))
-                while time.time() - started < ack_timeout:
-                    if state.stop_requested:
-                        return False
+                # Drain only already-present stale lines before changing frame.
+                try:
+                    while hasattr(conn, 'in_waiting') and conn.in_waiting() > 0:
+                        conn.readline()
+                except Exception:
+                    pass
+                for line_cmd in cmd.splitlines():
+                    conn.send(line_cmd + "\n")
+                    deadline = time.time() + 2.0
+                    got_ok = False
+                    while time.time() < deadline:
+                        try:
+                            if hasattr(conn, 'in_waiting') and conn.in_waiting() <= 0:
+                                time.sleep(0.005)
+                                continue
+                        except Exception:
+                            pass
+                        line = conn.readline()
+                        if not line:
+                            continue
+                        low = str(line).strip().lower()
+                        if low == 'ok':
+                            got_ok = True
+                            break
+                        if low.startswith('error') or low.startswith('alarm'):
+                            logger.error("Universal work-frame controller response: %s", line)
+                            return False
+                    # Some FluidNC serial paths do not expose the command 'ok'
+                    # reliably to this reader. G92/G90 are modal, non-motion
+                    # commands; verify controller liveness instead of failing.
+                    if not got_ok:
+                        try:
+                            conn.send('?')
+                            live_deadline = time.time() + 1.0
+                            while time.time() < live_deadline:
+                                if hasattr(conn, 'in_waiting') and conn.in_waiting() <= 0:
+                                    time.sleep(0.005)
+                                    continue
+                                resp = conn.readline()
+                                if resp and '<' in str(resp):
+                                    break
+                        except Exception:
+                            pass
+            state._universal_work_frame_ready = True
+            state._universal_work_x = current_x
+            state._universal_work_y = current_y
+            state._universal_no_ack_mode = False
+            state._universal_stream_counter = 0
+            logger.info(
+                "Universal V8 work frame established from logical THR: "
+                "theta=%.6f rho=%.6f -> WPos X=%.6f Y=%.6f",
+                float(state.current_theta), float(state.current_rho), current_x, current_y)
+            return True
+        except Exception as exc:
+            logger.error("Failed to establish universal work frame: %s", exc)
+            return False
+
+    def _send_grbl_absolute_universal_sync(self, x: float, y: float, speed: float) -> bool:
+        """Stream one absolute calibrated THR target safely and smoothly.
+
+        Normal mode consumes an immediate GRBL `ok` (planner acceptance).  Some
+        FluidNC serial paths used by ORYN do not expose that `ok` to this reader.
+        On the first confirmed live-status fallback we switch to paced streaming:
+        commands remain ABSOLUTE, stale replies are drained before every send,
+        and the next segment is queued before the current one finishes.  This
+        avoids both the old false-stop timeout and the stop/start motor jerking.
+        """
+        if state.stop_requested:
+            return False
+        conn = state.conn
+        if not conn or not conn.is_connected():
+            logger.error("Universal absolute move rejected: controller disconnected")
+            return False
+
+        prev_x = float(getattr(state, '_universal_work_x', x) or x)
+        prev_y = float(getattr(state, '_universal_work_y', y) or y)
+        dx = float(x) - prev_x
+        dy = float(y) - prev_y
+        vector_len = (dx * dx + dy * dy) ** 0.5
+        expected_s = 60.0 * vector_len / max(float(speed), 1e-6)
+        gcode = f"G90 G21 G1 X{float(x):.6f} Y{float(y):.6f} F{float(speed):.3f}"
+        lock = getattr(conn, 'lock', None)
+
+        def drain_available() -> bool:
+            """Drain already-buffered replies; False only on a real error/alarm."""
+            try:
+                while hasattr(conn, 'in_waiting') and conn.in_waiting() > 0:
                     line = conn.readline()
                     if not line:
-                        time.sleep(0.002)
+                        continue
+                    low = str(line).strip().lower()
+                    if low.startswith('error') or low.startswith('alarm') or 'alarm:' in low:
+                        logger.error("Universal controller response: %s", line)
+                        return False
+            except Exception as exc:
+                logger.debug("Universal reply drain warning: %s", exc)
+            return True
+
+        try:
+            from contextlib import nullcontext
+            context = lock if lock is not None else nullcontext()
+            with context:
+                if not drain_available():
+                    return False
+                conn.send(gcode + "\n")
+
+                # After one proven lost-ok case, keep a small planner lead rather
+                # than blocking on each point.  Absolute coordinates make this
+                # safe against cumulative rho drift.
+                if getattr(state, '_universal_no_ack_mode', False):
+                    # Queue the next point before this one finishes, but pace the
+                    # host so FluidNC's planner/RX buffers are not flooded.
+                    pace = max(0.008, min(0.20, expected_s * 0.72))
+                    time.sleep(pace)
+                    state._universal_stream_counter = int(getattr(state, '_universal_stream_counter', 0) or 0) + 1
+                    if not drain_available():
+                        return False
+                    # Periodic real-time liveness check; never wait for Idle.
+                    if state._universal_stream_counter % 20 == 0:
+                        conn.send('?')
+                        deadline = time.time() + 0.30
+                        saw_status = False
+                        while time.time() < deadline:
+                            try:
+                                if hasattr(conn, 'in_waiting') and conn.in_waiting() <= 0:
+                                    time.sleep(0.003)
+                                    continue
+                            except Exception:
+                                pass
+                            line = conn.readline()
+                            if not line:
+                                continue
+                            low = str(line).strip().lower()
+                            if low.startswith('error') or low.startswith('alarm') or 'alarm:' in low:
+                                logger.error("Universal streaming status/error: %s", line)
+                                return False
+                            if '<' in str(line):
+                                saw_status = True
+                                break
+                        if not saw_status:
+                            logger.debug("Universal streaming status query had no visible reply; continuing because connection remains open")
+                    state._universal_work_x = float(x)
+                    state._universal_work_y = float(y)
+                    return True
+
+                # Normal planner-acceptance path. `ok` should be immediate.
+                deadline = time.time() + 0.35
+                while time.time() < deadline:
+                    if state.stop_requested:
+                        return False
+                    try:
+                        if hasattr(conn, 'in_waiting') and conn.in_waiting() <= 0:
+                            time.sleep(0.002)
+                            continue
+                    except Exception:
+                        pass
+                    line = conn.readline()
+                    if not line:
                         continue
                     low = str(line).strip().lower()
                     if low == 'ok':
+                        state._universal_work_x = float(x)
+                        state._universal_work_y = float(y)
                         return True
-                    if low.startswith('error') or low.startswith('alarm'):
-                        logger.error("Universal delta controller response: %s", line)
+                    if low.startswith('error') or low.startswith('alarm') or 'alarm:' in low:
+                        logger.error("Universal absolute controller response: %s", line)
                         return False
-                logger.error("Universal delta acknowledgement timeout %.1fs (NOT resent): %s", ack_timeout, gcode)
+                    if '<' in str(line) and any(k in str(line) for k in ('Idle', 'Run', 'Jog', 'Hold')):
+                        state._universal_no_ack_mode = True
+                        logger.info("Universal V8 switching to paced state-ack streaming (controller ok not visible)")
+                        state._universal_work_x = float(x)
+                        state._universal_work_y = float(y)
+                        return True
+
+                # `ok` was not visible. Query live status once; a normal state
+                # confirms the command channel is alive and activates smooth
+                # paced streaming for subsequent points.
+                conn.send('?')
+                status_deadline = time.time() + 0.60
+                while time.time() < status_deadline:
+                    if state.stop_requested:
+                        return False
+                    try:
+                        if hasattr(conn, 'in_waiting') and conn.in_waiting() <= 0:
+                            time.sleep(0.003)
+                            continue
+                    except Exception:
+                        pass
+                    line = conn.readline()
+                    if not line:
+                        continue
+                    low = str(line).strip().lower()
+                    if low == 'ok':
+                        state._universal_work_x = float(x)
+                        state._universal_work_y = float(y)
+                        return True
+                    if low.startswith('error') or low.startswith('alarm') or 'alarm:' in low:
+                        logger.error("Universal absolute status/error: %s", line)
+                        return False
+                    if '<' in str(line) and any(k in str(line) for k in ('Idle', 'Run', 'Jog', 'Hold')):
+                        state._universal_no_ack_mode = True
+                        logger.info("Universal V8 switching to paced state-ack streaming (status=%s)", str(line).strip())
+                        state._universal_work_x = float(x)
+                        state._universal_work_y = float(y)
+                        return True
+
+                logger.error("Universal absolute target got no acknowledgement or live status: %s", gcode)
                 return False
         except Exception as exc:
-            logger.error("Universal delta move failed: %s", exc)
+            logger.error("Universal absolute move failed: %s", exc)
             return False
 
     def _send_grbl_coordinates_sync(self, x: float, y: float, speed: int = 600, timeout: int = 2, home: bool = False):
@@ -1408,28 +1616,17 @@ async def _execute_pattern_internal(file_path):
     logger.info(f"t: {state.current_theta}, r: {state.current_rho}")
     await reset_theta()
 
-    # Universal profile patterns are anchored to the REAL controller position
-    # at the first THR coordinate.  Every later point is an absolute target
-    # from this fixed origin, so theta and rho cannot accumulate incorrectly.
+    # Universal V8 owns an explicit work-coordinate frame.  Do not use raw
+    # MPos/WPos as pattern geometry; reset the frame flag so the motion thread
+    # declares the current physical point from logical current_theta/current_rho
+    # before the first target is sent.
     if (getattr(state, 'theta_calibrated', False) and getattr(state, 'theta_revolution_units', None)
             and getattr(state, 'rho_calibrated', False) and getattr(state, 'rho_travel_units', None)):
-        try:
-            await connection_manager.update_machine_position()
-        except Exception as exc:
-            logger.warning(f"Could not refresh controller position before universal pattern: {exc}")
-        if state.machine_x is None or state.machine_y is None:
-            logger.error("Universal pattern cannot start: controller position is unknown")
-            state.stop_requested = True
-            return False
-        state._pattern_origin_x = float(state.machine_x)
-        state._pattern_origin_y = float(state.machine_y)
-        state._pattern_origin_theta = float(coordinates[0][0])
-        state._pattern_origin_rho = float(coordinates[0][1])
+        state._universal_work_frame_ready = False
         logger.info(
-            "Universal pattern origin: MPos=(%.5f, %.5f), THR=(%.5f, %.5f), "
+            "Universal V8 pattern geometry: logical THR start=(%.5f, %.5f), "
             "theta/rev=%.5f, rho/full=%.5f, rho_dir=%.1f",
-            state._pattern_origin_x, state._pattern_origin_y,
-            state._pattern_origin_theta, state._pattern_origin_rho,
+            float(state.current_theta), float(state.current_rho),
             float(state.theta_revolution_units), float(state.rho_travel_units),
             float(getattr(state, 'rho_direction', 1.0) or 1.0))
 
