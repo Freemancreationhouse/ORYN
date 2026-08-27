@@ -365,11 +365,11 @@ EOF
     print_success "Native deployment complete!"
 }
 
-# Install ORYN CLI command
+# Install dw CLI command
 install_cli() {
     print_step "Installing 'oryn' command..."
 
-    # Copy ORYN script to /usr/local/bin
+    # Copy dw script to /usr/local/bin
     sudo cp "$INSTALL_DIR/oryn" /usr/local/bin/oryn
     sudo chmod +x /usr/local/bin/oryn
 

@@ -1,16 +1,2 @@
-Pattern Forge Build: PF-PRO-V10.3-20260828-1
+Pattern Forge Build: PF-PRO-V10.4-20260828-1
 Motion Baseline: UC-DUNE-MOTION-V9-20260827-1 (LOCKED / unchanged)
-Release: ORYN Pi — Pattern Forge Pro Final Route/Preview Fix V10.3
-
-Corrections over V10.2:
-- source artwork preview uses CSS background contain so the complete image is always visible
-- improved high-contrast raster auto-detection so graphic/line art does not fall into swollen photo-edge tracing
-- invert polarity is sanity-checked automatically to prevent white-page inversion from corrupting the trace
-- lighter corner-preserving de-jagging plus closed-loop-safe RDP simplification
-- new Artwork-safe connector mode is the default and routes through free sand without crossing existing artwork
-- Shortest / Auto / Perimeter connector modes remain available
-- all release/update repository references now point to Freemancreationhouse/ORYN
-- updater help uses the ORYN installer command
-
-All V10.2 async generation, 504 handling, SVG/DXF/G-code/THR parsing and Settings/playback serial-safety protections are retained.
-Locked V9 motion/calibration/HOME/controller playback mathematics are not modified.

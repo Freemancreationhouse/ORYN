@@ -20,7 +20,10 @@ async function req(path,opts={}){
   const r=await fetch(apiBase()+path,opts);
   const text=await r.text();
   let data={};
-  try{data=text?JSON.parse(text):{}}catch(_){data={detail:text}}
+  try{data=text?JSON.parse(text):{}}catch(_){
+    const html=/^\s*</.test(text||'')||/<html|gateway time-?out/i.test(text||'');
+    data={detail:html?`Server request failed (HTTP ${r.status}). Your artwork is still loaded; retry Generate.`:(text||`HTTP ${r.status}`)};
+  }
   if(!r.ok)throw new Error(data.detail||`HTTP ${r.status}`);
   return data;
 }
@@ -83,7 +86,7 @@ function openForge(){
       <div class="oryn-ff-head">
         <div>
           <div class="oryn-ff-title">Pattern Forge</div>
-          <div class="oryn-ff-sub">PNG · JPG · JPEG · WEBP · BMP · SVG · DXF · THR → exact sand-table route</div>
+          <div class="oryn-ff-sub">PHOTO / PAINTING · LINE ART · PNG/JPG · SVG · DXF · G-CODE · THR → clean machine-ready route</div>
         </div>
         <button class="oryn-ff-close" type="button">×</button>
       </div>
@@ -91,13 +94,27 @@ function openForge(){
       <div class="oryn-ff-grid">
         <div class="oryn-ff-left">
           <label class="oryn-ff-drop">
-            <input id="oryn-ff-file" type="file" hidden accept=".png,.jpg,.jpeg,.webp,.bmp,.svg,.dxf,.thr">
+            <input id="oryn-ff-file" type="file" hidden accept=".png,.jpg,.jpeg,.webp,.bmp,.svg,.dxf,.gcode,.nc,.ngc,.tap,.thr">
             <b>Choose artwork</b>
-            <small>Image, vector geometry, DXF or an existing THR</small>
+            <small>Photo, painting, line art, vector/CAD, G-code or existing THR</small>
             <div id="oryn-ff-file-name" class="oryn-ff-file">No file selected</div>
           </label>
 
           <div class="oryn-ff-field"><label>Pattern name</label><input id="oryn-ff-name" type="text" placeholder="My ORYN pattern"></div>
+
+          <div class="oryn-ff-field">
+            <label>Raster interpretation</label>
+            <select id="oryn-ff-raster_mode">
+              <option value="auto">Auto — detect artwork type</option>
+              <option value="line">Line art / sketch / logo</option>
+              <option value="photo">Photo / painting → contour lines</option>
+            </select>
+          </div>
+
+          <div class="oryn-ff-field">
+            <label>Raster detail <span id="oryn-ff-val-detail">3</span></label>
+            <input id="oryn-ff-detail" type="range" min="1" max="5" step="1" value="3">
+          </div>
 
           ${[
             ['fit','Fit inside table','.55','.98','.01','.94','94%'],
@@ -123,14 +140,29 @@ function openForge(){
             </select>
           </div>
 
+
+          <div class="oryn-ff-field">
+            <label>Disconnected-detail travel</label>
+            <select id="oryn-ff-connector_mode">
+              <option value="artwork">Artwork-safe local bridges — recommended</option>
+              <option value="shortest">Shortest direct connector</option>
+              <option value="auto">Auto — short direct / long perimeter</option>
+              <option value="perimeter">Perimeter travel lane</option>
+            </select>
+          </div>
+
+          <label class="oryn-ff-toggle">
+            <input id="oryn-ff-preserve_all" type="checkbox" checked>
+            <div><b>Keep disconnected details</b><small>Uses local bridges/retrace instead of long crossing travel where possible</small></div>
+          </label>
+
           <label class="oryn-ff-toggle">
             <input id="oryn-ff-invert" type="checkbox">
             <div><b>Invert raster artwork</b><small>Use when the artwork is light on a dark background</small></div>
           </label>
 
           <div class="oryn-ff-note">
-            Long disconnected islands are not joined with a large straight crossing line.
-            Generate first, inspect the full exact ball path on the right, then Save to Library.
+            Pattern Forge uses dedicated raster/vector/G-code/THR pipelines. Artwork-safe mode enters each disconnected detail at its nearest point and retraces existing artwork when needed, reducing passing lines across the design. Preview = saved THR = table path.
           </div>
 
           <div class="oryn-ff-actions">
@@ -174,6 +206,7 @@ function openForge(){
     forge.file=e.target.files?.[0]||null;forge.preview=null;
     q('#oryn-ff-file-name').textContent=forge.file?.name||'No file selected';
     q('#oryn-ff-source-name').textContent=forge.file?.name||'Nothing selected';
+    const sourceBox=q('#oryn-ff-source-box');if(sourceBox){sourceBox.style.backgroundImage='';sourceBox.classList.remove('has-source');sourceBox.removeAttribute('role');sourceBox.removeAttribute('aria-label');}
     q('#oryn-ff-save').disabled=true;
     q('#oryn-ff-svg').style.display='none';
     q('#oryn-ff-stats').innerHTML='';
@@ -189,9 +222,12 @@ function openForge(){
     const previewable=forge.file.type.startsWith('image/')||['png','jpg','jpeg','webp','bmp','svg'].includes(ext);
     if(previewable){
       forge.sourceUrl=URL.createObjectURL(forge.file);
-      const img=document.createElement('img');
-      img.src=forge.sourceUrl;img.alt='Original uploaded artwork';
-      q('#oryn-ff-source-box').replaceChildren(img);
+      const box=q('#oryn-ff-source-box');
+      box.replaceChildren();
+      box.classList.add('has-source');
+      box.style.backgroundImage=`url(${JSON.stringify(forge.sourceUrl)})`;
+      box.setAttribute('role','img');
+      box.setAttribute('aria-label','Complete uploaded source artwork');
     }else{
       q('#oryn-ff-source-box').innerHTML=`<div class="oryn-ff-source-placeholder"><b>${forge.file.name}</b><br><br>${ext.toUpperCase()} geometry will appear below after Generate.</div>`;
     }
@@ -219,13 +255,27 @@ async function generateForge(){
   try{
     const fd=new FormData();
     fd.append('file',forge.file);
-    ['fit','threshold','smoothing','simplify','rotation_deg','offset_x','offset_y','max_bridge'].forEach(k=>{
+    ['fit','threshold','detail','smoothing','simplify','rotation_deg','offset_x','offset_y','max_bridge'].forEach(k=>{
       fd.append(k,q('#oryn-ff-'+k).value);
     });
     fd.append('invert',String(q('#oryn-ff-invert').checked));
     fd.append('start_mode',q('#oryn-ff-start_mode').value);
+    fd.append('preserve_all',String(q('#oryn-ff-preserve_all')?.checked ?? true));
+    fd.append('raster_mode',q('#oryn-ff-raster_mode')?.value||'auto');
+    fd.append('connector_mode',q('#oryn-ff-connector_mode')?.value||'artwork');
 
-    forge.preview=await req('/api/v2/pattern-generator/preview',{method:'POST',body:fd});
+    const started=await req('/api/v2/pattern-generator/preview-start',{method:'POST',body:fd});
+    if(!started.job_id)throw new Error('Pattern Forge could not start generation.');
+    forgeStatus('Processing artwork…');
+    const deadline=Date.now()+5*60*1000;
+    while(true){
+      if(Date.now()>deadline)throw new Error('Generation exceeded 5 minutes. Lower Raster detail or use a cleaner source.');
+      await new Promise(resolve=>setTimeout(resolve,650));
+      const job=await req('/api/v2/pattern-generator/preview-job/'+encodeURIComponent(started.job_id));
+      if(job.status==='error')throw new Error(job.error||'Pattern generation failed.');
+      if(job.status==='done'){forge.preview=job;break;}
+      forgeStatus(job.status==='queued'?'Queued…':'Processing artwork…');
+    }
     const coords=forge.preview.coordinates||[];
     if(!coords.length)throw new Error('No route points were generated.');
 
@@ -238,6 +288,8 @@ async function generateForge(){
     q('#oryn-ff-stats').innerHTML=[
       `${forge.preview.points||0} pts`,
       `${s.input_paths??'—'} source paths`,
+      s.raster_mode?`${s.raster_mode} mode`:null,
+      s.connector_mode?`${s.connector_mode} travel`:null,
       `${s.skipped_islands??0} long islands skipped`,
       `${s.clipped_points??0} clipped`,
       s.trace_mode?`${s.trace_mode} trace`:null,

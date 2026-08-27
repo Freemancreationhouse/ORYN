@@ -2180,7 +2180,7 @@ async def pattern_generator_preview_start(
     rotation_deg: float = Form(0.0), offset_x: float = Form(0.0), offset_y: float = Form(0.0),
     max_bridge: float = Form(0.055), start_mode: str = Form("auto"), preserve_all: bool = Form(True),
     machine_step: float = Form(0.012), raster_mode: str = Form("auto"), detail: int = Form(3),
-    connector_mode: str = Form("safe"),
+    connector_mode: str = Form("artwork"),
 ):
     """Start Pattern Forge conversion and return immediately (504-safe)."""
     return await _create_pattern_generator_job(file,threshold,invert,fit,smoothing,simplify,rotation_deg,
@@ -2209,7 +2209,7 @@ async def pattern_generator_preview(
     rotation_deg: float = Form(0.0), offset_x: float = Form(0.0), offset_y: float = Form(0.0),
     max_bridge: float = Form(0.055), start_mode: str = Form("auto"), preserve_all: bool = Form(True),
     machine_step: float = Form(0.012), raster_mode: str = Form("auto"), detail: int = Form(3),
-    connector_mode: str = Form("safe"),
+    connector_mode: str = Form("artwork"),
 ):
     """Legacy synchronous Pattern Forge endpoint retained for compatibility."""
     from modules.pattern_generator.converter import convert_upload_to_thr, thr_text
