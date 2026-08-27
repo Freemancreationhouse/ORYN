@@ -1,1 +1,0 @@
-# KinetiQ Motion Backend Tests
