@@ -36,8 +36,14 @@
       const d=box.querySelector('.umdriver'),m=box.querySelector('.ummicro');
       d.onchange=()=>{const arr=(data.supported_drivers||DRIVER_STEPS)[d.value]||[1];m.innerHTML=arr.map(n=>`<option value="${n}">${microLabel(n)}</option>`).join('');};
     });
-    root.querySelector('.umread').onclick=()=>load(root,true);
-    root.querySelector('.umapply').onclick=async()=>{
+    const readBtn=root.querySelector('.umread');
+    const applyBtn=root.querySelector('.umapply');
+    if(readBtn) readBtn.onclick=()=>load(root,true);
+    if(data.read_only){
+      if(applyBtn) applyBtn.disabled=true;
+      root.querySelectorAll('select').forEach(el=>el.disabled=true);
+    }
+    if(applyBtn) applyBtn.onclick=async()=>{
       const btn=root.querySelector('.umapply');btn.disabled=true;btn.textContent='Applying…';
       try{
         const axes={};root.querySelectorAll('.umaxis').forEach(box=>{axes[box.dataset.axis]={driver:box.querySelector('.umdriver').value,microsteps:Number(box.querySelector('.ummicro').value)}});
@@ -53,8 +59,9 @@
       if(statusEl) statusEl.textContent='Reading controller…';
       const d=await json('/api/machine-hardware-profile');
       const p=d.profile||{},c=d.controller?.axes||{},g=d.geometry||{};
-      root.innerHTML=`<div class="umh"><div><div class="umtitle">Universal Machine Profile</div><div class="umsub">Driver + microstepping → FluidNC scale → physical 360° / radius calibration</div></div><div><button class="secondary umread">Read</button> <button class="umapply">Apply Driver / Microstep</button></div></div>
-      <div class="umstatus umsub">Build ${esc(d.build||'V7')} · ${p.initialized?'<span class="umok">PROFILE SAVED</span>':'<span class="umwarn">FIRST SETUP</span>'}</div>
+      root.innerHTML=`<div class="umh"><div><div class="umtitle">Universal Machine Profile</div><div class="umsub">Driver + microstepping → FluidNC scale → physical 360° / radius calibration</div></div><div><button class="secondary umread">${d.read_only?'Refresh cached view':'Read'}</button> <button class="umapply" ${d.read_only?'disabled':''}>Apply Driver / Microstep</button></div></div>
+      <div class="umstatus umsub">Build ${esc(d.build||'V7')} · ${p.initialized?'<span class="umok">PROFILE SAVED</span>':'<span class="umwarn">FIRST SETUP</span>'} · ${d.read_only?'<span class="umwarn">READ-ONLY WHILE PATTERN RUNS</span>':esc(d.controller_source||'controller')}</div>
+      ${d.read_only?'<div class="umnote"><b>Pattern running:</b> this page is safely displaying cached machine values. ORYN will not send <code>$CD</code>, <code>$$</code>, flush serial input, jog calibration, or alter hardware until playback stops.</div>':''}
       <div class="umgrid">${axisHtml('x',p.x,c.x,d.supported_drivers)}${axisHtml('y',p.y,c.y,d.supported_drivers)}</div>
       <div class="umgeo">360°: <b>${g.theta_calibrated?Number(g.theta_revolution_units).toFixed(4)+' units':'Not calibrated'}</b> &nbsp; · &nbsp; Centre→Perimeter: <b>${g.rho_calibrated?Number(g.rho_travel_units).toFixed(4)+' units':'Not calibrated'}</b></div>
       ${!p.initialized?'<div class="umnote"><b>Current A4988 situation:</b> ORYN legacy reference is A4988 at 1/16 microstep. If all three A4988 jumpers are now removed, choose <b>Full step</b> on X and Y and press Apply. With your previous FluidNC values this scales X 410 → 25.625 and Y 287 → 17.9375, keeping the same physical controller-unit scale instead of making both motors run about 16× farther.</div>':''}

@@ -112,74 +112,87 @@ def _arc_connector(a: Point, b: Point, lane_radius: float=.985, step: float=.012
     return _dedupe(out)
 
 
-def _route_order(paths: List[List[Point]], start_mode: str="auto") -> List[List[Point]]:
-    """
-    Endpoint-aware route ordering.
+def _path_is_closed(path: List[Point]) -> bool:
+    return len(path)>3 and _dist(path[0],path[-1]) <= 0.02
 
-    Tests several plausible first islands, then greedily selects the nearest
-    next endpoint while freely reversing open paths. This gives materially
-    shorter travel than a fixed source-file ordering without changing artwork.
+
+def _orient_path_for_entry(path: List[Point], entry: Point) -> Tuple[List[Point], float]:
+    """Choose the cheapest physically drawable entry point for a path.
+
+    Raster/vector closed loops have an arbitrary source-file start vertex. The
+    old forge treated that arbitrary vertex as mandatory, creating huge radial
+    connector strokes. Closed loops can safely start at any point on the same
+    loop, so rotate them to the vertex nearest the previous route endpoint.
+    Open strokes may only be reversed.
     """
+    p=path[:]
+    if not p:
+        return p,1e99
+    closed=_path_is_closed(p)
+    if closed:
+        core=p[:-1] if _dist(p[0],p[-1])<0.02 else p[:]
+        if not core:
+            return p,1e99
+        i=min(range(len(core)),key=lambda j:_dist(entry,core[j]))
+        q=core[i:]+core[:i]
+        q.append(q[0])
+        return q,_dist(entry,q[0])
+    d0=_dist(entry,p[0]); d1=_dist(entry,p[-1])
+    if d1<d0:
+        p.reverse(); return p,d1
+    return p,d0
+
+
+def _route_order(paths: List[List[Point]], start_mode: str="auto") -> List[List[Point]]:
+    """Endpoint/closed-loop-aware route ordering with minimal connector cost."""
     paths=[p[:] for p in paths if len(p)>1]
     if len(paths)<2:
         return paths
-
     mode=(start_mode or "auto").lower()
 
-    def center_score(p):
-        return min(math.hypot(*p[0]),math.hypot(*p[-1]))
-
-    def perimeter_score(p):
-        return -max(math.hypot(*p[0]),math.hypot(*p[-1]))
-
+    def radial_min(p): return min(math.hypot(x,y) for x,y in p)
+    def radial_max(p): return max(math.hypot(x,y) for x,y in p)
     indices=list(range(len(paths)))
     if mode=="center":
-        seeds=sorted(indices,key=lambda i:center_score(paths[i]))[:min(6,len(paths))]
+        seeds=sorted(indices,key=lambda i:radial_min(paths[i]))[:min(7,len(paths))]
     elif mode=="perimeter":
-        seeds=sorted(indices,key=lambda i:perimeter_score(paths[i]))[:min(6,len(paths))]
+        seeds=sorted(indices,key=lambda i:-radial_max(paths[i]))[:min(7,len(paths))]
     else:
-        seeds=set()
-        seeds.update(sorted(indices,key=lambda i:center_score(paths[i]))[:3])
-        seeds.update(sorted(indices,key=lambda i:perimeter_score(paths[i]))[:3])
-        # Also include longest paths because starting on dominant artwork often
-        # reduces tiny-island connector churn.
+        seeds=set(sorted(indices,key=lambda i:radial_min(paths[i]))[:3])
+        seeds.update(sorted(indices,key=lambda i:-radial_max(paths[i]))[:3])
         seeds.update(sorted(indices,key=lambda i:-len(paths[i]))[:3])
         seeds=list(seeds)
 
-    best_order=None
-    best_cost=None
+    best_order=None; best_cost=None
+    origin=(0.0,0.0)
     for seed in seeds:
         pending=[p[:] for i,p in enumerate(paths) if i!=seed]
         first=paths[seed][:]
-        # choose orientation based on requested start preference
-        if mode=="center" and math.hypot(*first[-1])<math.hypot(*first[0]):
+        if _path_is_closed(first):
+            target=origin if mode=="center" else max(first,key=lambda z:math.hypot(*z)) if mode=="perimeter" else first[0]
+            first,_=_orient_path_for_entry(first,target)
+        elif mode=="center" and math.hypot(*first[-1])<math.hypot(*first[0]):
             first.reverse()
         elif mode=="perimeter" and math.hypot(*first[-1])>math.hypot(*first[0]):
             first.reverse()
-        ordered=[first]
-        cost=0.0
+        ordered=[first]; cost=0.0
         while pending:
-            end=ordered[-1][-1]
+            endp=ordered[-1][-1]
             best=None
-            for i,q in enumerate(pending):
-                d0=_dist(end,q[0]); d1=_dist(end,q[-1])
-                cand=(min(d0,d1),i,d1<d0)
-                if best is None or cand<best:
+            for i,q0 in enumerate(pending):
+                q,d=_orient_path_for_entry(q0,endp)
+                cand=(d,i,q)
+                if best is None or d<best[0]:
                     best=cand
-            d,i,rev=best
-            q=pending.pop(i)
-            if rev:q.reverse()
-            cost+=d
-            ordered.append(q)
+            d,i,q=best
+            pending.pop(i); cost+=d; ordered.append(q)
         if best_cost is None or cost<best_cost:
-            best_cost=cost
-            best_order=ordered
+            best_cost=cost; best_order=ordered
     return best_order or paths
-
 
 def _join_clean(paths: List[List[Point]], max_bridge: float=.065,
                 start_mode: str="auto", preserve_all: bool=True,
-                lane_radius: float=.985) -> Tuple[List[Point],dict]:
+                lane_radius: float=.985, connector_mode: str="shortest") -> Tuple[List[Point],dict]:
     """
     Produce one physically executable continuous XY route.
 
@@ -198,17 +211,19 @@ def _join_clean(paths: List[List[Point]], max_bridge: float=.065,
         if not path: continue
         gap=_dist(route[-1],path[0])
         connector_distance+=gap
-        if gap<=max_bridge:
+        mode=(connector_mode or "shortest").lower()
+        use_direct = (mode=="shortest") or (mode=="auto" and gap<=max_bridge)
+        if use_direct:
             bridge=_resample_line(route[-1],path[0],.010)
-            route.extend(bridge[1:])
-            direct+=1
-        elif preserve_all:
+            route.extend(bridge[1:]); direct+=1
+        elif preserve_all and mode in {"auto","perimeter"}:
             bridge=_arc_connector(route[-1],path[0],lane_radius=lane_radius,step=.010)
-            route.extend(bridge[1:])
-            perimeter+=1
+            route.extend(bridge[1:]); perimeter+=1
+        elif preserve_all:
+            bridge=_resample_line(route[-1],path[0],.010)
+            route.extend(bridge[1:]); direct+=1
         else:
-            skipped+=1
-            continue
+            skipped+=1; continue
         route.extend(path[1:])
 
     return _dedupe(route),{
@@ -349,47 +364,66 @@ def _dxf_paths(path: Path) -> List[List[Point]]:
 
 
 def _components(mask):
+    """Return 8-connected foreground components, scanning only ink pixels.
+
+    The original implementation scanned every image pixel in Python.  On a
+    Raspberry Pi that cost a large fraction of Pattern Forge runtime for big
+    photos.  This version stores only foreground coordinates and therefore
+    scales with artwork complexity rather than canvas area.
+    """
     import numpy as np
-    h,w=mask.shape; seen=np.zeros_like(mask,dtype=bool); comps=[]
-    for y in range(h):
-        for x in range(w):
-            if not mask[y,x] or seen[y,x]: continue
-            stack=[(y,x)]; seen[y,x]=1; c=[]
-            while stack:
-                yy,xx=stack.pop(); c.append((yy,xx))
-                for dy in (-1,0,1):
-                    for dx in (-1,0,1):
-                        if not(dx or dy): continue
-                        ny,nx=yy+dy,xx+dx
-                        if 0<=ny<h and 0<=nx<w and mask[ny,nx] and not seen[ny,nx]:
-                            seen[ny,nx]=1; stack.append((ny,nx))
-            comps.append(c)
+    foreground={tuple(map(int,p)) for p in np.argwhere(mask)}
+    comps=[]
+    while foreground:
+        seed=foreground.pop()
+        stack=[seed]; comp=[seed]
+        while stack:
+            y,x=stack.pop()
+            for dy in (-1,0,1):
+                for dx in (-1,0,1):
+                    if not (dx or dy):
+                        continue
+                    q=(y+dy,x+dx)
+                    if q in foreground:
+                        foreground.remove(q)
+                        stack.append(q); comp.append(q)
+        comps.append(comp)
     return comps
 
+def _zhang_suen(mask, max_iterations: int = 96):
+    """Fast NumPy-vectorized Zhang-Suen thinning.
 
-def _zhang_suen(mask):
+    V10.1 scanned every pixel in Python for every thinning pass. On a Pi Zero
+    that could take long enough for the reverse proxy to return a 504. This
+    implementation performs the same topology-preserving thinning conditions
+    with array operations and normally completes in a fraction of that time.
+    """
     import numpy as np
-    im=mask.astype(np.uint8).copy(); h,w=im.shape; changed=True
-    while changed:
+    im=np.asarray(mask,dtype=np.uint8).copy()
+    if im.ndim!=2 or min(im.shape)<3:
+        return im.astype(bool)
+    im[[0,-1],:]=0; im[:,[0,-1]]=0
+    for _ in range(max(1,int(max_iterations))):
         changed=False
         for phase in (0,1):
-            rem=[]
-            for y in range(1,h-1):
-                for x in range(1,w-1):
-                    if im[y,x]!=1: continue
-                    p2,p3,p4,p5,p6,p7,p8,p9=im[y-1,x],im[y-1,x+1],im[y,x+1],im[y+1,x+1],im[y+1,x],im[y+1,x-1],im[y,x-1],im[y-1,x-1]
-                    ns=[p2,p3,p4,p5,p6,p7,p8,p9]; n=sum(ns)
-                    if n<2 or n>6: continue
-                    trans=sum(1 for a,b in zip(ns,ns[1:]+ns[:1]) if a==0 and b==1)
-                    if trans!=1: continue
-                    if phase==0 and (p2*p4*p6 or p4*p6*p8): continue
-                    if phase==1 and (p2*p4*p8 or p2*p6*p8): continue
-                    rem.append((y,x))
-            if rem:
+            c=im[1:-1,1:-1]
+            p2=im[:-2,1:-1]; p3=im[:-2,2:]; p4=im[1:-1,2:]; p5=im[2:,2:]
+            p6=im[2:,1:-1]; p7=im[2:,:-2]; p8=im[1:-1,:-2]; p9=im[:-2,:-2]
+            n=p2+p3+p4+p5+p6+p7+p8+p9
+            trans=((p2==0)&(p3==1)).astype(np.uint8)
+            trans+=((p3==0)&(p4==1)); trans+=((p4==0)&(p5==1)); trans+=((p5==0)&(p6==1))
+            trans+=((p6==0)&(p7==1)); trans+=((p7==0)&(p8==1)); trans+=((p8==0)&(p9==1)); trans+=((p9==0)&(p2==1))
+            cond=(c==1)&(n>=2)&(n<=6)&(trans==1)
+            if phase==0:
+                cond &= ~((p2*p4*p6).astype(bool)) & ~((p4*p6*p8).astype(bool))
+            else:
+                cond &= ~((p2*p4*p8).astype(bool)) & ~((p2*p6*p8).astype(bool))
+            if np.any(cond):
+                c[cond]=0
                 changed=True
-                for p in rem: im[p]=0
+        if not changed:
+            break
     return im.astype(bool)
-
 
 def _skeleton_adjacency(pixels):
     """Build a clean pixel graph from a thinned skeleton.
@@ -473,6 +507,75 @@ def _bfs_path(adj, start, targets):
         out.append(cur); cur=prev[cur]
     out.reverse()
     return out
+
+
+def _trace_component_paths(comp, shape):
+    """Decompose one skeleton component into smooth edge-disjoint trails.
+
+    Every skeleton edge is emitted once.  At crossings/junctions the tracer
+    prefers the straightest unused continuation, preserving geometric strokes
+    instead of Eulerising the graph by duplicating large sections.  This is
+    both much faster and much cleaner for logos, knot drawings and line art.
+    """
+    pixels,spur_removed=_prune_short_spurs(comp,max_len=4,passes=2)
+    adj=_skeleton_adjacency(pixels)
+    adj={v:[n for n in ns if n in adj] for v,ns in adj.items() if ns}
+    if not adj:
+        return [],{"skeleton_edges":0,"spur_pixels_removed":spur_removed,"trail_count":0}
+
+    def ek(a,b): return (a,b) if a<=b else (b,a)
+    unvisited={ek(a,b) for a,ns in adj.items() for b in ns}
+    if not unvisited:
+        return [],{"skeleton_edges":0,"spur_pixels_removed":spur_removed,"trail_count":0}
+    edge_count=len(unvisited)
+
+    # Start at real endpoints first, then junctions, then any residual cycle.
+    priority=[v for v,ns in adj.items() if len(ns)==1]
+    priority += [v for v,ns in adj.items() if len(ns)!=2 and len(ns)>1]
+    priority += list(adj.keys())
+    trails=[]
+
+    def available(v):
+        return [n for n in adj.get(v,()) if ek(v,n) in unvisited]
+
+    def straightest(prev,cur,cands):
+        if prev is None or len(cands)==1:
+            return cands[0]
+        py,px=prev; cy,cx=cur
+        iv=(cx-px,cy-py); il=math.hypot(*iv) or 1.0
+        def score(n):
+            ny,nx=n; ov=(nx-cx,ny-cy); ol=math.hypot(*ov) or 1.0
+            # larger cosine = straighter continuation
+            return (iv[0]*ov[0]+iv[1]*ov[1])/(il*ol)
+        return max(cands,key=score)
+
+    for seed in priority:
+        while available(seed):
+            trail=[seed]; prev=None; cur=seed
+            while True:
+                cands=available(cur)
+                if not cands: break
+                nxt=straightest(prev,cur,cands)
+                unvisited.discard(ek(cur,nxt))
+                trail.append(nxt); prev,cur=cur,nxt
+            if len(trail)>1:
+                trails.append([(float(x),float(y)) for y,x in trail])
+        if not unvisited:
+            break
+
+    while unvisited:
+        a,b=next(iter(unvisited)); seed=a
+        trail=[seed]; prev=None; cur=seed
+        while True:
+            cands=available(cur)
+            if not cands: break
+            nxt=straightest(prev,cur,cands)
+            unvisited.discard(ek(cur,nxt)); trail.append(nxt); prev,cur=cur,nxt
+            if cur==seed: break
+        if len(trail)>1:
+            trails.append([(float(x),float(y)) for y,x in trail])
+
+    return trails,{"skeleton_edges":edge_count,"spur_pixels_removed":spur_removed,"trail_count":len(trails),"retrace_edges":0,"retrace_ratio":0.0}
 
 
 def _walk_component(comp, shape):
@@ -731,13 +834,35 @@ def _mask_quality(mask):
     return coverage_score*1.8 + largest*0.9 + coherent*0.8 - clutter*0.45
 
 
-def _prepare_raster_mask(path: Path, threshold=128, invert=False):
-    """Photo-aware free-hand line extraction.
+def _sobel_edges(arr):
+    """Return a normalized Sobel-like edge magnitude using NumPy only."""
+    import numpy as np
+    a=np.asarray(arr,dtype=np.float32)
+    p=np.pad(a,1,mode="edge")
+    gx=(p[:-2,2:]+2*p[1:-1,2:]+p[2:,2:])-(p[:-2,:-2]+2*p[1:-1,:-2]+p[2:,:-2])
+    gy=(p[2:,:-2]+2*p[2:,1:-1]+p[2:,2:])-(p[:-2,:-2]+2*p[:-2,1:-1]+p[:-2,2:])
+    return np.hypot(gx,gy)
 
-    Handles phone photographs of pencil/pen drawings under uneven lighting by
-    comparing every pixel with a locally blurred paper/background estimate.
-    It also evaluates the classic global threshold and automatically chooses
-    whichever candidate looks most like coherent line artwork.
+
+def _looks_like_line_art(arr):
+    """Heuristic separating scans/sketches/logos from tonal photos/paintings."""
+    import numpy as np
+    a=np.asarray(arr,dtype=np.uint8)
+    white=float((a>220).mean())
+    dark=float((a<90).mean())
+    mid=float(((a>=90)&(a<=220)).mean())
+    return (white>0.54 and dark<0.30 and mid<0.43), {"white_fraction":round(white,4),"dark_fraction":round(dark,4),"midtone_fraction":round(mid,4)}
+
+
+def _prepare_raster_mask(path: Path, threshold=128, invert=False, raster_mode="auto", detail=3):
+    """Production raster artwork extraction for sketches, line art and photos.
+
+    - line/sketch mode: centerline-oriented adaptive ink extraction
+    - photo/painting mode: tonal image -> important edge/contour network
+    - auto mode: selects between the two from image statistics
+
+    The input is upscaled when tiny so low-resolution JPEGs do not become
+    angular/saggy after skeletonization, and capped for Raspberry Pi memory.
     """
     import numpy as np
     from PIL import Image, ImageOps, ImageFilter
@@ -745,91 +870,126 @@ def _prepare_raster_mask(path: Path, threshold=128, invert=False):
     im=Image.open(path)
     im=ImageOps.exif_transpose(im).convert("L")
     im=_auto_crop_gray(im)
-    im.thumbnail((720,720),Image.Resampling.LANCZOS)
-    im=ImageOps.autocontrast(im,cutoff=0.5)
-    arr=np.asarray(im,dtype=np.uint8)
 
-    # Global candidate preserves already-clean scans/screenshots.
-    manual=max(20,min(240,int(threshold)))
-    raw = arr>manual if invert else arr<manual
-
-    # Local-background candidate removes page shadows and gentle gradients.
-    radius=max(7.0,min(im.size)/28.0)
-    bg=np.asarray(im.filter(ImageFilter.GaussianBlur(radius=radius)),dtype=np.float32)
-    a=arr.astype(np.float32)
-    signal=(a-bg) if invert else (bg-a)
-    ink=np.clip(signal,0,255).astype(np.uint8)
-    ot=_otsu_threshold(ink)
-    # Slider remains useful: higher threshold = more sensitive / more ink.
-    sensitivity=1.38-(manual/255.0)*0.78
-    local_cut=max(3,int(max(ot,6)*sensitivity))
-    adaptive=ink>=local_cut
-
-    # A third candidate catches faint pencil strokes where local Otsu can be a
-    # little conservative.  Percentile is computed only from positive detail.
-    pos=ink[ink>2]
-    if pos.size:
-        q=max(4,int(np.percentile(pos,58)))
-        faint=ink>=max(3,min(local_cut,q))
+    # Small web images benefit strongly from vectorization at a larger raster.
+    w,h=im.size
+    mx=max(w,h)
+    if mx<560 and mx>0:
+        scale=560.0/mx
+        im=im.resize((max(24,int(round(w*scale))),max(24,int(round(h*scale)))),Image.Resampling.LANCZOS)
     else:
-        faint=adaptive
+        im.thumbnail((700,700),Image.Resampling.LANCZOS)
 
-    candidates=[("photo-adaptive",adaptive),("photo-faint",faint),("global",raw)]
-    mode,mask=max(candidates,key=lambda item:_mask_quality(item[1]))
-    coverage=float(mask.mean())
+    im=ImageOps.autocontrast(im,cutoff=0.35)
+    arr=np.asarray(im,dtype=np.uint8)
+    manual=max(20,min(240,int(threshold)))
+    detail=max(1,min(5,int(detail)))
+    requested=(raster_mode or "auto").strip().lower()
+    is_line,tones=_looks_like_line_art(arr)
+    mode=("line" if is_line else "photo") if requested=="auto" else requested
+    if mode not in {"line","photo"}:
+        mode="line" if is_line else "photo"
 
-    # Filled artwork/logos should become their outline, not a dense scribble.
-    if coverage>0.26:
-        er=_binary_erode(mask)
-        mask=mask & ~er
-        mode += "-outline"
+    if mode=="line":
+        raw = arr>manual if invert else arr<manual
+        radius=max(7.0,min(im.size)/30.0)
+        bg=np.asarray(im.filter(ImageFilter.GaussianBlur(radius=radius)),dtype=np.float32)
+        a=arr.astype(np.float32)
+        signal=(a-bg) if invert else (bg-a)
+        ink=np.clip(signal,0,255).astype(np.uint8)
+        ot=_otsu_threshold(ink)
+        sensitivity=1.42-(manual/255.0)*0.82
+        local_cut=max(3,int(max(ot,6)*sensitivity))
+        adaptive=ink>=local_cut
+        pos=ink[ink>2]
+        faint=ink>=max(3,min(local_cut,int(np.percentile(pos,56)))) if pos.size else adaptive
+        candidates=[("line-adaptive",adaptive),("line-faint",faint),("line-global",raw)]
+        trace_mode,mask=max(candidates,key=lambda item:_mask_quality(item[1]))
+        source_coverage=float(mask.mean())
+        if source_coverage>0.28:
+            er=_binary_erode(mask)
+            mask=mask & ~er
+            trace_mode += "-outline"
+        # Close only one-pixel antialias breaks; do not fatten artwork heavily.
+        mask=_binary_dilate(mask)
+        mask=_binary_erode(mask)
+        extra={"local_threshold":local_cut,"otsu_detail":ot}
+    else:
+        # Photo/painting -> line interpretation using meaningful tonal edges.
+        # A light blur removes JPEG grain before gradient extraction.
+        smooth=np.asarray(im.filter(ImageFilter.GaussianBlur(radius=0.8)),dtype=np.uint8)
+        mag=_sobel_edges(smooth)
+        nonzero=mag[mag>0.5]
+        if nonzero.size<20:
+            raise ValueError("This image has too little visual contrast to create a line pattern.")
+        # Higher sensitivity and higher detail retain more contours.
+        sensitivity=(manual-20)/220.0
+        percentile=95.0 - sensitivity*18.0 - (detail-3)*2.5
+        percentile=max(66.0,min(97.0,percentile))
+        cut=float(np.percentile(nonzero,percentile))
+        mask=mag>=max(3.0,cut)
+        # Keep contour strokes connected enough to skeletonize, but thin again
+        # later. One close pass is much cheaper and cleaner than tracing every
+        # shaded pixel.
+        mask=_binary_dilate(mask)
+        mask=_binary_erode(mask)
+        trace_mode="photo-painting-edges"
+        source_coverage=float(mask.mean())
+        extra={"edge_percentile":round(percentile,2),"edge_threshold":round(cut,2)}
 
-    # Suppress image-frame artefacts and gently repair one-pixel breaks.
-    if mask.shape[0]>6 and mask.shape[1]>6:
-        mask[:3,:]=0; mask[-3:,:]=0; mask[:,:3]=0; mask[:,-3:]=0
-    mask=_binary_dilate(mask)
-    mask=_binary_erode(mask)
+    if mask.shape[0]>8 and mask.shape[1]>8:
+        mask[:4,:]=0; mask[-4:,:]=0; mask[:,:4]=0; mask[:,-4:]=0
 
     _prepare_raster_mask.last_stats={
-        "trace_mode":mode,
-        "source_coverage":round(coverage,4),
-        "local_threshold":local_cut,
-        "otsu_detail":ot,
+        "trace_mode":trace_mode,
+        "raster_mode":mode,
+        "requested_raster_mode":requested,
+        "source_coverage":round(source_coverage,4),
+        "processing_width":int(mask.shape[1]),
+        "processing_height":int(mask.shape[0]),
+        "detail":detail,
         "photo_cleanup":1,
+        **tones,
+        **extra,
     }
-    return mask,mode,coverage
+    return mask,trace_mode,source_coverage
 
 
-def _raster_paths(path: Path, threshold=128, invert=False) -> List[List[Point]]:
-    """Turn a photographed/free-hand drawing into clean continuous strokes."""
-    import numpy as np
-
-    mask,trace_mode,coverage=_prepare_raster_mask(path,threshold,invert)
+def _raster_paths(path: Path, threshold=128, invert=False, raster_mode="auto", detail=3) -> List[List[Point]]:
+    """Turn raster artwork into clean drawable stroke/contour paths."""
+    mask,trace_mode,coverage=_prepare_raster_mask(path,threshold,invert,raster_mode,detail)
+    detail=max(1,min(5,int(detail)))
     comps=_components(mask)
     if not comps:
-        raise ValueError("No artwork lines detected. Try Invert or adjust Image threshold.")
+        raise ValueError("No artwork lines were detected. Try Photo/Painting mode, Invert, or adjust sensitivity.")
     comps.sort(key=len,reverse=True)
     largest=len(comps[0])
 
-    # Remove specks/dust but retain small intentional details.
-    min_pixels=max(6,min(28,int(largest*.0035)))
+    # Noise filtering scales with detail. Higher detail preserves smaller motifs.
+    frac={1:.010,2:.006,3:.0035,4:.0022,5:.0013}[detail]
+    min_pixels=max(8,min(80,int(largest*frac)))
     clean,kept=_remove_small_components(mask,min_pixels)
     if not kept:
-        raise ValueError("No clean line geometry detected. Try Invert or adjust Image threshold.")
+        raise ValueError("No clean drawable geometry remained after noise removal.")
 
-    clean,joined=_bridge_short_gaps(clean,max_gap_px=6)
-    skel=_zhang_suen(clean)
-    comps=[c for c in _components(skel) if len(c)>=5]
+    gap_px={1:4,2:5,3:7,4:9,5:12}[detail]
+    clean,joined=_bridge_short_gaps(clean,max_gap_px=gap_px)
+    skel=_zhang_suen(clean,max_iterations=80)
+    comps=[c for c in _components(skel) if len(c)>=6]
     comps.sort(key=len,reverse=True)
     if not comps:
-        raise ValueError("Artwork could not be converted into a clean centerline.")
+        raise ValueError("Artwork could not be converted into a clean line network.")
 
     largest=len(comps[0])
-    min_keep=max(5,int(largest*.0025))
-    selected=[c for c in comps if len(c)>=min_keep][:256]
+    min_keep=max(6,int(largest*({1:.010,2:.006,3:.003,4:.0018,5:.001}[detail])))
+    max_components={1:70,2:110,3:180,4:260,5:360}[detail]
+    selected=[c for c in comps if len(c)>=min_keep][:max_components]
 
     paths=[]; retrace_edges=0; skeleton_edges=0; spurs=0; odd_vertices=0
     for comp in selected:
+        # One continuous route per truly connected artwork component.  The
+        # Euler route retraces only existing ink when graph topology requires
+        # it, so connected drawings never acquire artificial perimeter spokes.
         route=_walk_component(comp,skel.shape)
         st=getattr(_walk_component,"last_stats",{}) or {}
         retrace_edges+=int(st.get("retrace_edges",0))
@@ -838,27 +998,18 @@ def _raster_paths(path: Path, threshold=128, invert=False) -> List[List[Point]]:
         odd_vertices+=int(st.get("odd_vertices",0))
         if len(route)>=4:
             paths.append(route)
-
     if not paths:
         raise ValueError("Generated route is empty.")
 
     prep=getattr(_prepare_raster_mask,"last_stats",{}) or {}
     _raster_paths.last_stats={
-        **prep,
-        "trace_mode":trace_mode,
-        "source_coverage":round(coverage,4),
-        "components_detected":len(comps),
-        "components_retained":len(paths),
-        "small_gaps_repaired":joined,
-        "skeleton_edges":skeleton_edges,
-        "retrace_edges":retrace_edges,
-        "retrace_ratio":round(retrace_edges/max(1,skeleton_edges),4),
-        "odd_vertices":odd_vertices,
-        "spur_pixels_removed":spurs,
+        **prep,"trace_mode":trace_mode,"source_coverage":round(coverage,4),
+        "components_detected":len(comps),"components_retained":len(paths),
+        "small_gaps_repaired":joined,"skeleton_edges":skeleton_edges,
+        "retrace_edges":retrace_edges,"retrace_ratio":round(retrace_edges/max(1,skeleton_edges),4),
+        "odd_vertices":odd_vertices,"spur_pixels_removed":spurs,
     }
     return paths
-
-
 
 def _gcode_paths(path: Path) -> List[List[Point]]:
     """Extract drawable XY geometry from common G-code.
@@ -976,21 +1127,31 @@ def _gcode_paths(path: Path) -> List[List[Point]]:
     return paths
 
 def _moving_average_path(path: List[Point], passes: int=0) -> List[Point]:
-    """Gentle geometry smoothing without changing endpoints."""
+    """Corner-preserving jitter smoothing.
+
+    Pixel centerlines need de-jagging, but averaging sharp turns makes geometric
+    artwork look saggy. Only near-straight/noisy vertices are smoothed; strong
+    corners are preserved.
+    """
     pts=list(path)
-    passes=max(0,min(int(passes),6))
+    passes=max(0,min(int(passes),5))
     for _ in range(passes):
-        if len(pts)<3:
-            break
+        if len(pts)<3: break
         nxt=[pts[0]]
         for i in range(1,len(pts)-1):
-            x=(pts[i-1][0]+2*pts[i][0]+pts[i+1][0])/4.0
-            y=(pts[i-1][1]+2*pts[i][1]+pts[i+1][1])/4.0
-            nxt.append((x,y))
-        nxt.append(pts[-1])
-        pts=nxt
+            a,b,c=pts[i-1],pts[i],pts[i+1]
+            v1=(b[0]-a[0],b[1]-a[1]); v2=(c[0]-b[0],c[1]-b[1])
+            l1=math.hypot(*v1); l2=math.hypot(*v2)
+            if l1<1e-9 or l2<1e-9:
+                nxt.append(b); continue
+            cosang=max(-1.0,min(1.0,(v1[0]*v2[0]+v1[1]*v2[1])/(l1*l2)))
+            # Smooth only if direction changes less than about 38 degrees.
+            if cosang>0.79:
+                nxt.append(((a[0]+2*b[0]+c[0])/4.0,(a[1]+2*b[1]+c[1])/4.0))
+            else:
+                nxt.append(b)
+        nxt.append(pts[-1]); pts=nxt
     return pts
-
 
 def _transform_paths(paths: List[List[Point]], rotation_deg: float=0.0,
                      offset_x: float=0.0, offset_y: float=0.0) -> List[List[Point]]:
@@ -1079,7 +1240,8 @@ def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fi
                           smoothing: int=1, simplify: float=0.0025,
                           rotation_deg: float=0.0, offset_x: float=0.0, offset_y: float=0.0,
                           max_bridge: float=0.055, start_mode: str="auto",
-                          preserve_all: bool=True, machine_step: float=0.012):
+                          preserve_all: bool=True, machine_step: float=0.012,
+                          raster_mode: str="auto", detail: int=3, connector_mode: str="shortest"):
     """
     Professional machine-oriented artwork -> THR pipeline.
 
@@ -1111,7 +1273,7 @@ def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fi
     elif ext==".dxf":
         paths=_dxf_paths(path)
     elif ext in {".png",".jpg",".jpeg",".webp",".bmp"}:
-        paths=_raster_paths(path,threshold,invert)
+        paths=_raster_paths(path,threshold,invert,raster_mode,detail)
     elif ext in {".gcode",".nc",".ngc",".tap"}:
         paths=_gcode_paths(path)
     else:
@@ -1158,6 +1320,7 @@ def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fi
         start_mode=start_mode,
         preserve_all=bool(preserve_all),
         lane_radius=.985,
+        connector_mode=connector_mode,
     )
     if len(route)<2:
         raise ValueError("Could not create a continuous machine route")
@@ -1182,6 +1345,9 @@ def convert_upload_to_thr(path: Path, threshold: int=128, invert: bool=False, fi
         "requested_fit":round(requested_fit,3),
         "effective_fit":round(effective_fit,3),
         "machine_step":round(max(.003,min(.035,float(machine_step))),4),
+        "connector_mode":connector_mode,
+        "raster_mode":raster_mode if ext in {".png",".jpg",".jpeg",".webp",".bmp"} else None,
+        "detail":int(max(1,min(5,int(detail)))) if ext in {".png",".jpg",".jpeg",".webp",".bmp"} else None,
     }
     stats.update(join_stats)
     stats.update(validation)

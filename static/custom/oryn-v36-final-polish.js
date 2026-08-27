@@ -20,10 +20,14 @@ async function jsonReq(path,opts={}){
   const r=await fetch(apiBase()+path,opts);
   const raw=await r.text();
   let d={};
-  try{d=raw?JSON.parse(raw):{}}catch(_){d={detail:raw}}
+  try{d=raw?JSON.parse(raw):{}}catch(_){
+    const html=/^\s*</.test(raw||'') || /<html|gateway time-?out/i.test(raw||'');
+    d={detail:html?`Server request failed (HTTP ${r.status}). Pattern Forge kept your artwork; retry generation.`:(raw||`HTTP ${r.status}`)};
+  }
   if(!r.ok)throw new Error(d.detail||`HTTP ${r.status}`);
   return d;
 }
+const forgeSleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 /* ---------------- Theme ---------------- */
 function syncTheme(){
@@ -87,7 +91,7 @@ function forgeHtml(){
       <div class="oryn-forge-head">
         <div>
           <div class="oryn-forge-title">Pattern Forge</div>
-          <div class="oryn-forge-sub">FREE-HAND PHOTO · PNG · JPG · SVG · DXF · G-CODE · THR → clean machine-ready route</div>
+          <div class="oryn-forge-sub">PHOTO / PAINTING · LINE ART · PNG/JPG · SVG · DXF · G-CODE · THR → clean machine-ready route</div>
         </div>
         <button class="oryn-forge-close" type="button">×</button>
       </div>
@@ -98,7 +102,7 @@ function forgeHtml(){
             <input id="oryn-forge-file" type="file" hidden
               accept=".svg,.dxf,.png,.jpg,.jpeg,.webp,.bmp,.gcode,.nc,.ngc,.tap,.thr">
             <b>Choose artwork</b>
-            <small>Photograph a pen/pencil sketch, or import vector/CNC artwork</small>
+            <small>Import a photo, painting, line drawing, vector/CAD file or CNC toolpath</small>
             <div id="oryn-forge-file-name" class="oryn-forge-file">No file selected</div>
           </label>
 
@@ -107,21 +111,42 @@ function forgeHtml(){
             <input id="oryn-forge-name" type="text" placeholder="My ORYN pattern">
           </div>
 
+          <div class="oryn-forge-field">
+            <label>Raster interpretation</label>
+            <select id="oryn-forge-raster_mode" class="oryn-forge-select">
+              <option value="auto">Auto — detect artwork type</option>
+              <option value="line">Line art / sketch / logo</option>
+              <option value="photo">Photo / painting → contour lines</option>
+            </select>
+            <small class="oryn-forge-help">SVG, DXF, G-code and THR use their own direct parsers and ignore this setting.</small>
+          </div>
+
           ${[
             ['fit','Fit inside table','.55','.98','.01','.94'],
-            ['threshold','Photo line sensitivity','30','235','1','150'],
-            ['smoothing','Path smoothing','0','5','1','2'],
+            ['threshold','Line / edge sensitivity','30','235','1','150'],
+            ['detail','Raster detail','1','5','1','3'],
+            ['smoothing','Path smoothing','0','5','1','1'],
             ['simplify','Geometry simplify','0','.015','.0005','.0015'],
             ['rotation_deg','Rotation','-180','180','1','0'],
             ['offset_x','Horizontal offset','-.5','.5','.01','0'],
             ['offset_y','Vertical offset','-.5','.5','.01','0'],
-            ['max_bridge','Direct connector limit','0','.14','.005','.035']
+            ['max_bridge','Direct connector limit','0','.20','.005','.080']
           ].map(a=>`
             <div class="oryn-forge-field">
               <label>${a[1]} <span id="oryn-val-${a[0]}">${a[5]}</span></label>
               <input id="oryn-forge-${a[0]}" type="range"
                 min="${a[2]}" max="${a[3]}" step="${a[4]}" value="${a[5]}">
             </div>`).join('')}
+
+          <div class="oryn-forge-field">
+            <label>Disconnected-detail travel</label>
+            <select id="oryn-forge-connector_mode" class="oryn-forge-select">
+              <option value="shortest">Shortest clean connector — recommended</option>
+              <option value="auto">Auto — short direct / long perimeter</option>
+              <option value="perimeter">Perimeter travel lane</option>
+            </select>
+            <small class="oryn-forge-help">A sand ball cannot lift. For disconnected shapes, Shortest adds the least unavoidable travel; Perimeter keeps long travel away from the artwork but may add radial entry/exit lines.</small>
+          </div>
 
           <div class="oryn-forge-field">
             <label>Preferred route start</label>
@@ -150,9 +175,10 @@ function forgeHtml(){
           </label>
 
           <div class="oryn-forge-note">
-            <b>Free-hand Photo Clean</b> automatically removes paper shadows, camera gradients and tiny specks,
-            traces the centre of your stroke, minimizes unavoidable retracing, and generates the same route
-            shown in the preview. Generate first, inspect the exact ball path, then save.
+            <b>Production conversion</b> uses separate pipelines: line/sketch raster centerlines, photo/painting edge contours,
+            native SVG/DXF vectors, modal G-code geometry and existing THR. Disconnected artwork cannot physically be
+            drawn without travel; short gaps are connected directly and longer unavoidable travel uses the outer quiet lane.
+            The route preview is exactly what is saved to the library.
           </div>
 
           <div class="oryn-forge-actions">
@@ -175,7 +201,7 @@ function forgeHtml(){
             </div>
             <div class="oryn-forge-source-box" id="oryn-forge-source-box">
               <div class="oryn-forge-source-placeholder">
-                Select an image or SVG to preview the original artwork here.
+                Select raster or SVG artwork to preview the complete original here.
               </div>
             </div>
           </div>
@@ -218,7 +244,7 @@ function showSourcePreview(file){
   }
 
   if(!file){
-    box.innerHTML='<div class="oryn-forge-source-placeholder">Select an image or SVG to preview the original artwork here.</div>';
+    box.innerHTML='<div class="oryn-forge-source-placeholder">Select raster or SVG artwork to preview the complete original here.</div>';
     return;
   }
 
@@ -229,7 +255,10 @@ function showSourcePreview(file){
     forge.sourceUrl=URL.createObjectURL(file);
     const img=document.createElement('img');
     img.alt='Uploaded source artwork';
+    img.className='oryn-forge-source-image';
     img.src=forge.sourceUrl;
+    img.onload=()=>{box.classList.add('has-image')};
+    img.onerror=()=>{box.innerHTML='<div class="oryn-forge-source-placeholder">Source preview could not be displayed, but the file can still be generated.</div>'};
     box.replaceChildren(img);
   }else{
     box.innerHTML=`<div class="oryn-forge-source-placeholder">
@@ -288,7 +317,7 @@ function openForge(){
 }
 
 async function generateForge(){
-  if(!forge.file)return forgeStatus('Choose a free-hand photo, SVG, DXF, G-code or THR first.',true);
+  if(!forge.file)return forgeStatus('Choose a photo, painting, line-art image, SVG, DXF, G-code or THR first.',true);
 
   forgeBusy(true);
   forgeStatus('');
@@ -297,17 +326,27 @@ async function generateForge(){
     const fd=new FormData();
     fd.append('file',forge.file);
 
-    ['fit','threshold','smoothing','simplify','rotation_deg','offset_x','offset_y','max_bridge']
+    ['fit','threshold','detail','smoothing','simplify','rotation_deg','offset_x','offset_y','max_bridge']
       .forEach(k=>fd.append(k,q('#oryn-forge-'+k).value));
 
     fd.append('invert',String(q('#oryn-forge-invert').checked));
     fd.append('start_mode',q('#oryn-forge-start_mode').value);
     fd.append('preserve_all',String(q('#oryn-forge-preserve_all')?.checked ?? true));
+    fd.append('raster_mode',q('#oryn-forge-raster_mode')?.value||'auto');
+    fd.append('connector_mode',q('#oryn-forge-connector_mode')?.value||'shortest');
 
-    forge.preview=await jsonReq(
-      '/api/v2/pattern-generator/preview',
-      {method:'POST',body:fd}
-    );
+    const started=await jsonReq('/api/v2/pattern-generator/preview-start',{method:'POST',body:fd});
+    if(!started.job_id)throw new Error('Pattern Forge could not start the generation job.');
+    forgeStatus('Processing artwork… the app remains responsive while the route is built.');
+    const deadline=Date.now()+5*60*1000;
+    while(true){
+      if(Date.now()>deadline)throw new Error('Generation exceeded 5 minutes. Reduce Raster detail or use a cleaner/lower-resolution source.');
+      await forgeSleep(650);
+      const job=await jsonReq('/api/v2/pattern-generator/preview-job/'+encodeURIComponent(started.job_id));
+      if(job.status==='error')throw new Error(job.error||'Pattern generation failed.');
+      if(job.status==='done'){forge.preview=job;break;}
+      forgeStatus(job.status==='queued'?'Queued…':'Processing artwork…');
+    }
 
     const coords=forge.preview.coordinates||[];
     if(!coords.length)throw new Error('Generator returned an empty route.');
@@ -325,7 +364,9 @@ async function generateForge(){
     const s=forge.preview.stats||{};
     q('#oryn-forge-stats').innerHTML=[
       `${forge.preview.points||0} route pts`,
-      `${s.input_paths??'—'} input paths`,
+      `${s.input_paths??'—'} source paths`,
+      s.raster_mode?`${s.raster_mode} raster mode`:null,
+      s.connector_mode?`${s.connector_mode} travel`:null,
       `${s.skipped_islands??0} long islands skipped`,
       `${s.clipped_points??0} clipped outside`,
       s.trace_mode?`${s.trace_mode} trace`:null,

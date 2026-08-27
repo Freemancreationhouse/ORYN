@@ -62,6 +62,78 @@ logger = logging.getLogger(__name__)
 _PATTERN_GENERATOR_TMP = os.path.join(tempfile.gettempdir(), "kinetiq_pattern_generator")
 os.makedirs(_PATTERN_GENERATOR_TMP, exist_ok=True)
 
+# Pattern Forge V10.2 jobs are intentionally in-memory. The uploaded source and
+# generated THR live in the existing temporary directory; jobs are purged after
+# 30 minutes. This keeps the upload HTTP request short so nginx/browser proxies
+# cannot turn legitimate image processing into a 504 Gateway Timeout.
+_PATTERN_GENERATOR_JOBS: dict[str, dict] = {}
+_PATTERN_GENERATOR_JOB_TTL = 30 * 60
+
+# Last successful controller profile read. During pattern playback the Setup UI
+# is allowed to open, but it must not touch the FluidNC serial stream.
+_MACHINE_PROFILE_CONTROLLER_CACHE = None
+_FLUIDNC_CONFIG_CACHE = None
+
+
+def _motion_stream_active() -> bool:
+    return bool((state.current_playing_file and not state.stop_requested) or getattr(state, "is_clearing", False))
+
+
+def _purge_pattern_generator_jobs() -> None:
+    now=time.time()
+    dead=[]
+    for job_id,job in list(_PATTERN_GENERATOR_JOBS.items()):
+        if now-float(job.get("created_at",now)) > _PATTERN_GENERATOR_JOB_TTL:
+            dead.append(job_id)
+    for job_id in dead:
+        job=_PATTERN_GENERATOR_JOBS.pop(job_id,{})
+        for key in ("source","preview"):
+            fp=job.get(key)
+            if fp:
+                try: os.remove(fp)
+                except OSError: pass
+
+
+def _cached_machine_controller(profile: dict) -> dict:
+    """Build a safe read-only controller snapshot without serial I/O."""
+    global _MACHINE_PROFILE_CONTROLLER_CACHE
+    if isinstance(_MACHINE_PROFILE_CONTROLLER_CACHE,dict):
+        return _MACHINE_PROFILE_CONTROLLER_CACHE
+    axes={}
+    for axis in ("x","y"):
+        src=(profile.get(axis) or {}) if isinstance(profile,dict) else {}
+        steps=src.get("steps_per_mm")
+        rate=src.get("max_rate_mm_per_min")
+        accel=src.get("acceleration_mm_per_sec2")
+        if axis=="x":
+            steps=steps if steps is not None else getattr(state,"x_steps_per_mm",None)
+            rate=rate if rate is not None else getattr(state,"x_max_rate_mm_per_min",None)
+        else:
+            steps=steps if steps is not None else getattr(state,"y_steps_per_mm",None)
+            rate=rate if rate is not None else getattr(state,"y_max_rate_mm_per_min",None)
+        axes[axis]={"steps_per_mm":steps,"max_rate_mm_per_min":rate,"acceleration_mm_per_sec2":accel}
+    return {"axes":axes,"start":{}}
+
+
+def _safe_fluidnc_config_snapshot() -> dict:
+    """Return the last live config, or a structurally complete read-only snapshot."""
+    global _FLUIDNC_CONFIG_CACHE
+    if isinstance(_FLUIDNC_CONFIG_CACHE,dict):
+        return _FLUIDNC_CONFIG_CACHE
+    profile=_load_hardware_profile() if '_load_hardware_profile' in globals() else {}
+    base=_cached_machine_controller(profile)
+    fields={
+        "steps_per_mm":None,"max_rate_mm_per_min":None,"acceleration_mm_per_sec2":None,
+        "direction_pin":None,"direction_inverted":None,"homing_cycle":None,
+        "homing_positive_direction":None,"homing_mpos_mm":None,"homing_feed_mm_per_min":None,
+        "homing_seek_mm_per_min":None,"homing_settle_ms":None,"homing_seek_scaler":None,
+        "homing_feed_scaler":None,"pulloff_mm":None,
+    }
+    axes={}
+    for axis in ("x","y"):
+        row=fields.copy(); row.update((base.get("axes") or {}).get(axis) or {}); axes[axis]=row
+    return {"axes":axes,"start":{"must_home":None}}
+
 
 async def _check_table_is_idle() -> bool:
     """Helper function to check if table is idle."""
@@ -2026,57 +2098,141 @@ class PatternGeneratorSaveRequest(BaseModel):
     token: str
     name: str
 
-@app.post("/api/v2/pattern-generator/preview")
-async def pattern_generator_preview(
-    file: UploadFile = File(...),
-    threshold: int = Form(128),
-    invert: bool = Form(False),
-    fit: float = Form(0.94),
-    smoothing: int = Form(1),
-    simplify: float = Form(0.0025),
-    rotation_deg: float = Form(0.0),
-    offset_x: float = Form(0.0),
-    offset_y: float = Form(0.0),
-    max_bridge: float = Form(0.055),
-    start_mode: str = Form("auto"),
-    preserve_all: bool = Form(True),
-    machine_step: float = Form(0.012),
-):
-    """Convert artwork to normalized THR preview without touching motion state."""
+async def _run_pattern_generator_job(job_id: str, source: str, preview: str, params: dict):
+    """Worker for Pattern Forge conversion. Never touches machine motion state."""
     from modules.pattern_generator.converter import convert_upload_to_thr, thr_text
-    ext=os.path.splitext(file.filename or "")[1].lower()
-    if ext not in {".svg",".dxf",".png",".jpg",".jpeg",".webp",".bmp",".gcode",".nc",".ngc",".tap",".thr"}:
-        raise HTTPException(status_code=400,detail="Supported formats: PNG/JPG, SVG, DXF, GCODE/NC/NGC/TAP, THR")
-    token=uuid.uuid4().hex
-    source=os.path.join(_PATTERN_GENERATOR_TMP, token+ext)
-    preview=os.path.join(_PATTERN_GENERATOR_TMP, token+".thr")
+    job=_PATTERN_GENERATOR_JOBS.get(job_id)
+    if not job:
+        return
     try:
-        with open(source,"wb") as fh: fh.write(await file.read())
-        points,stats=await asyncio.to_thread(
-            convert_upload_to_thr,
-            Path(source),
-            threshold,
-            invert,
-            fit,
-            smoothing,
-            simplify,
-            rotation_deg,
-            offset_x,
-            offset_y,
-            max_bridge,
-            start_mode,
-            preserve_all,
-            machine_step,
-        )
-        with open(preview,"w",encoding="utf-8") as fh: fh.write(thr_text(points))
+        job["status"]="processing"
+        points,stats=await asyncio.to_thread(convert_upload_to_thr, Path(source), **params)
+        with open(preview,"w",encoding="utf-8") as fh:
+            fh.write(thr_text(points))
         step=max(1,len(points)//6000)
         coords=[[float(t),float(r)] for t,r in points[::step]]
-        if points and (not coords or coords[-1] != [float(points[-1][0]),float(points[-1][1])]):
-            coords.append([float(points[-1][0]),float(points[-1][1])])
+        last=[float(points[-1][0]),float(points[-1][1])] if points else None
+        if last and (not coords or coords[-1]!=last):
+            coords.append(last)
+        job.update({"status":"done","coordinates":coords,"points":len(points),"stats":stats,"finished_at":time.time()})
+    except Exception as exc:
+        logger.exception("Pattern Forge V10.2 generation job failed")
+        msg=str(exc).strip() or exc.__class__.__name__
+        if len(msg)>500: msg=msg[:500]+"…"
+        job.update({"status":"error","error":msg,"finished_at":time.time()})
+        try: os.remove(preview)
+        except OSError: pass
+    finally:
+        try: os.remove(source)
+        except OSError: pass
+
+
+async def _create_pattern_generator_job(
+    file: UploadFile,
+    threshold: int,
+    invert: bool,
+    fit: float,
+    smoothing: int,
+    simplify: float,
+    rotation_deg: float,
+    offset_x: float,
+    offset_y: float,
+    max_bridge: float,
+    start_mode: str,
+    preserve_all: bool,
+    machine_step: float,
+    raster_mode: str,
+    detail: int,
+    connector_mode: str,
+):
+    _purge_pattern_generator_jobs()
+    ext=os.path.splitext(file.filename or "")[1].lower()
+    allowed={".svg",".dxf",".png",".jpg",".jpeg",".webp",".bmp",".gcode",".nc",".ngc",".tap",".thr"}
+    if ext not in allowed:
+        raise HTTPException(status_code=400,detail="Supported formats: PNG/JPG/WEBP/BMP, SVG, DXF, GCODE/NC/NGC/TAP, THR")
+    job_id=uuid.uuid4().hex
+    source=os.path.join(_PATTERN_GENERATOR_TMP,job_id+ext)
+    preview=os.path.join(_PATTERN_GENERATOR_TMP,job_id+".thr")
+    data=await file.read()
+    if not data:
+        raise HTTPException(status_code=400,detail="The selected file is empty")
+    if len(data)>25*1024*1024:
+        raise HTTPException(status_code=413,detail="Artwork is larger than 25 MB. Resize it before importing.")
+    with open(source,"wb") as fh: fh.write(data)
+    params={
+        "threshold":threshold,"invert":invert,"fit":fit,"smoothing":smoothing,"simplify":simplify,
+        "rotation_deg":rotation_deg,"offset_x":offset_x,"offset_y":offset_y,"max_bridge":max_bridge,
+        "start_mode":start_mode,"preserve_all":preserve_all,"machine_step":machine_step,
+        "raster_mode":raster_mode,"detail":detail,"connector_mode":connector_mode,
+    }
+    _PATTERN_GENERATOR_JOBS[job_id]={
+        "status":"queued","created_at":time.time(),"source":source,"preview":preview,
+        "filename":file.filename or ("artwork"+ext),
+    }
+    asyncio.create_task(_run_pattern_generator_job(job_id,source,preview,params))
+    return {"success":True,"job_id":job_id,"status":"queued"}
+
+
+@app.post("/api/v2/pattern-generator/preview-start")
+async def pattern_generator_preview_start(
+    file: UploadFile = File(...), threshold: int = Form(128), invert: bool = Form(False),
+    fit: float = Form(0.94), smoothing: int = Form(1), simplify: float = Form(0.0025),
+    rotation_deg: float = Form(0.0), offset_x: float = Form(0.0), offset_y: float = Form(0.0),
+    max_bridge: float = Form(0.055), start_mode: str = Form("auto"), preserve_all: bool = Form(True),
+    machine_step: float = Form(0.012), raster_mode: str = Form("auto"), detail: int = Form(3),
+    connector_mode: str = Form("shortest"),
+):
+    """Start Pattern Forge conversion and return immediately (504-safe)."""
+    return await _create_pattern_generator_job(file,threshold,invert,fit,smoothing,simplify,rotation_deg,
+        offset_x,offset_y,max_bridge,start_mode,preserve_all,machine_step,raster_mode,detail,connector_mode)
+
+
+@app.get("/api/v2/pattern-generator/preview-job/{job_id}")
+async def pattern_generator_preview_job(job_id: str):
+    _purge_pattern_generator_jobs()
+    job_id=re.sub(r"[^a-fA-F0-9]","",job_id)
+    job=_PATTERN_GENERATOR_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404,detail="Pattern Forge job expired. Generate the route again.")
+    if job.get("status")=="error":
+        return {"success":False,"status":"error","error":job.get("error","Generation failed")}
+    if job.get("status")!="done":
+        return {"success":True,"status":job.get("status","processing")}
+    return {"success":True,"status":"done","token":job_id,"coordinates":job.get("coordinates",[]),
+            "points":job.get("points",0),"stats":job.get("stats",{})}
+
+
+@app.post("/api/v2/pattern-generator/preview")
+async def pattern_generator_preview(
+    file: UploadFile = File(...), threshold: int = Form(128), invert: bool = Form(False),
+    fit: float = Form(0.94), smoothing: int = Form(1), simplify: float = Form(0.0025),
+    rotation_deg: float = Form(0.0), offset_x: float = Form(0.0), offset_y: float = Form(0.0),
+    max_bridge: float = Form(0.055), start_mode: str = Form("auto"), preserve_all: bool = Form(True),
+    machine_step: float = Form(0.012), raster_mode: str = Form("auto"), detail: int = Form(3),
+    connector_mode: str = Form("shortest"),
+):
+    """Legacy synchronous Pattern Forge endpoint retained for compatibility."""
+    from modules.pattern_generator.converter import convert_upload_to_thr, thr_text
+    ext=os.path.splitext(file.filename or "")[1].lower()
+    allowed={".svg",".dxf",".png",".jpg",".jpeg",".webp",".bmp",".gcode",".nc",".ngc",".tap",".thr"}
+    if ext not in allowed:
+        raise HTTPException(status_code=400,detail="Unsupported artwork format")
+    token=uuid.uuid4().hex; source=os.path.join(_PATTERN_GENERATOR_TMP,token+ext); preview=os.path.join(_PATTERN_GENERATOR_TMP,token+".thr")
+    try:
+        with open(source,"wb") as fh: fh.write(await file.read())
+        points,stats=await asyncio.to_thread(convert_upload_to_thr,Path(source),threshold=threshold,invert=invert,fit=fit,
+            smoothing=smoothing,simplify=simplify,rotation_deg=rotation_deg,offset_x=offset_x,offset_y=offset_y,
+            max_bridge=max_bridge,start_mode=start_mode,preserve_all=preserve_all,machine_step=machine_step,
+            raster_mode=raster_mode,detail=detail,connector_mode=connector_mode)
+        with open(preview,"w",encoding="utf-8") as fh: fh.write(thr_text(points))
+        step=max(1,len(points)//6000); coords=[[float(t),float(r)] for t,r in points[::step]]
+        if points:
+            last=[float(points[-1][0]),float(points[-1][1])]
+            if not coords or coords[-1]!=last: coords.append(last)
         return {"success":True,"token":token,"coordinates":coords,"points":len(points),"stats":stats}
-    except Exception as e:
+    except Exception as exc:
         logger.exception("Pattern generator preview failed")
-        raise HTTPException(status_code=400,detail=str(e))
+        raise HTTPException(status_code=400,detail=str(exc)[:500])
     finally:
         try: os.remove(source)
         except OSError: pass
@@ -2100,6 +2256,7 @@ async def pattern_generator_save(request: PatternGeneratorSaveRequest):
     except Exception as e: logger.warning(f"Generated pattern saved but preview generation failed: {e}")
     try: os.remove(temp_thr)
     except OSError: pass
+    _PATTERN_GENERATOR_JOBS.pop(token,None)
     return {"success":True,"path":rel,"name":safe_name}
 
 @app.get("/api/v2/capabilities")
@@ -4735,30 +4892,39 @@ class HardwareProfileApplyRequest(BaseModel):
 
 @app.get("/api/machine-hardware-profile", tags=["machine-setup"])
 async def get_machine_hardware_profile():
-    profile = _load_hardware_profile()
-    controller = None
-    if state.conn and state.conn.is_connected():
+    """Return machine profile without ever disturbing active pattern serial I/O."""
+    global _MACHINE_PROFILE_CONTROLLER_CACHE
+    profile=_load_hardware_profile()
+    playing=_motion_stream_active()
+    controller=None; source="none"
+    if playing:
+        controller=_cached_machine_controller(profile)
+        source="cached-during-playback"
+    elif state.conn and state.conn.is_connected():
         try:
             from modules.connection import fluidnc_config
-            controller = await asyncio.to_thread(fluidnc_config.read_all_settings)
+            controller=await asyncio.to_thread(fluidnc_config.read_all_settings)
+            _MACHINE_PROFILE_CONTROLLER_CACHE=controller
+            globals()["_FLUIDNC_CONFIG_CACHE"]=controller
+            source="controller"
             try:
-                state.x_max_rate_mm_per_min = float(controller.get("axes", {}).get("x", {}).get("max_rate_mm_per_min") or 0.0)
-                state.y_max_rate_mm_per_min = float(controller.get("axes", {}).get("y", {}).get("max_rate_mm_per_min") or 0.0)
-            except Exception:
-                pass
+                state.x_max_rate_mm_per_min=float(controller.get("axes",{}).get("x",{}).get("max_rate_mm_per_min") or 0.0)
+                state.y_max_rate_mm_per_min=float(controller.get("axes",{}).get("y",{}).get("max_rate_mm_per_min") or 0.0)
+            except Exception: pass
         except Exception as exc:
-            logger.warning("Hardware profile controller read failed: %s", exc)
+            logger.warning("Hardware profile controller read failed: %s",exc)
+            controller=_cached_machine_controller(profile); source="cached-after-read-failure"
+    else:
+        controller=_cached_machine_controller(profile); source="cached-disconnected"
     return {
-        "build": "UC-DUNE-MOTION-V9-20260827-1",
-        "profile": profile,
-        "controller": controller,
-        "supported_drivers": _DRIVER_MICROSTEPS,
-        "geometry": {
-            "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
-            "theta_revolution_units": state.theta_revolution_units,
-            "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
-            "rho_travel_units": state.rho_travel_units,
-        },
+        "build":"UC-DUNE-MOTION-V9-20260827-1","profile":profile,"controller":controller,
+        "controller_source":source,"read_only":playing,
+        "read_only_reason":"Pattern running — hardware settings are displayed from cache and controller I/O is blocked." if playing else None,
+        "supported_drivers":_DRIVER_MICROSTEPS,
+        "geometry":{"theta_calibrated":bool(state.theta_calibrated and state.theta_revolution_units),
+                    "theta_revolution_units":state.theta_revolution_units,
+                    "rho_calibrated":bool(state.rho_calibrated and state.rho_travel_units),
+                    "rho_travel_units":state.rho_travel_units},
     }
 
 
@@ -4774,8 +4940,8 @@ async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
     """
     if not state.conn or not state.conn.is_connected():
         raise HTTPException(status_code=400, detail="Connect to the FluidNC controller first")
-    if state.current_playing_file and not state.pause_requested:
-        raise HTTPException(status_code=409, detail="Stop the current pattern before changing hardware profile")
+    if _motion_stream_active():
+        raise HTTPException(status_code=409, detail="Pattern running — stop playback before changing hardware profile")
 
     for axis_name, axis_req in (("x", request.x), ("y", request.y)):
         drv = axis_req.driver.upper()
@@ -4854,8 +5020,8 @@ async def fluidnc_command(request: FluidNCCommandRequest):
     """Send a raw command to FluidNC and return the response lines."""
     if not state.conn or not state.conn.is_connected():
         raise HTTPException(status_code=400, detail="Not connected to controller")
-    if state.current_playing_file and not state.pause_requested:
-        raise HTTPException(status_code=409, detail="Cannot send commands while a pattern is running")
+    if _motion_stream_active():
+        raise HTTPException(status_code=409, detail="Pattern running — controller commands are read-only until playback stops")
 
     from modules.connection import fluidnc_config
 
@@ -4873,15 +5039,24 @@ async def fluidnc_command(request: FluidNCCommandRequest):
 
 @app.get("/api/fluidnc/config")
 async def fluidnc_config_read():
-    """Read all curated FluidNC settings from the controller."""
+    """Read FluidNC settings, or return cached values safely during playback."""
+    global _FLUIDNC_CONFIG_CACHE
+    if _motion_stream_active():
+        return {
+            "success": True,
+            "settings": _safe_fluidnc_config_snapshot(),
+            "read_only": True,
+            "source": "cached-during-playback",
+            "message": "Pattern running — cached settings shown; no $CD/$$ or serial buffer read was performed.",
+        }
     if not state.conn or not state.conn.is_connected():
         raise HTTPException(status_code=400, detail="Not connected to controller")
 
     from modules.connection import fluidnc_config
-
     try:
         settings = await asyncio.to_thread(fluidnc_config.read_all_settings)
-        return {"success": True, "settings": settings}
+        _FLUIDNC_CONFIG_CACHE=settings
+        return {"success": True, "settings": settings, "read_only": False, "source": "controller"}
     except ConnectionError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -4912,8 +5087,8 @@ async def fluidnc_config_write(update: FluidNCConfigUpdate):
     """Write changed FluidNC settings and persist to flash."""
     if not state.conn or not state.conn.is_connected():
         raise HTTPException(status_code=400, detail="Not connected to controller")
-    if state.current_playing_file and not state.pause_requested:
-        raise HTTPException(status_code=409, detail="Cannot modify config while a pattern is running")
+    if _motion_stream_active():
+        raise HTTPException(status_code=409, detail="Pattern running — stop playback before modifying FluidNC configuration")
 
     from modules.connection import fluidnc_config
 

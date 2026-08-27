@@ -2,7 +2,7 @@
 #
 # ORYN CLI
 #
-# Usage: dw <command>
+# Usage: oryn <command>
 #
 # Commands:
 #   install     Run initial setup
@@ -28,18 +28,35 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Find oryn directory
+# Find ORYN directory. Prefer the actual systemd WorkingDirectory so the CLI
+# continues to work even when the install user/path differs from the shell HOME.
 find_install_dir() {
-    # Check common locations
-    if [[ -f "$HOME/oryn/main.py" ]]; then
-        echo "$HOME/oryn"
-    elif [[ -f "/home/pi/oryn/main.py" ]]; then
-        echo "/home/pi/oryn"
-    elif [[ -f "./main.py" ]]; then
-        pwd
-    else
-        echo ""
+    local candidate service_dir
+
+    # 1) The running service is the authoritative installation path.
+    if command -v systemctl >/dev/null 2>&1; then
+        service_dir=$(systemctl show -p WorkingDirectory --value oryn 2>/dev/null || true)
+        if [[ -n "$service_dir" && -f "$service_dir/main.py" ]]; then
+            echo "$service_dir"
+            return
+        fi
     fi
+
+    # 2) Known native ORYN locations.
+    for candidate in "$HOME/oryn" "/home/oryn/oryn" "/home/pi/oryn"; do
+        if [[ -f "$candidate/main.py" ]]; then
+            echo "$candidate"
+            return
+        fi
+    done
+
+    # 3) Allow running the CLI from inside a checked-out ORYN repo.
+    if [[ -f "./main.py" ]]; then
+        pwd
+        return
+    fi
+
+    echo ""
 }
 
 INSTALL_DIR=$(find_install_dir)
@@ -67,9 +84,9 @@ check_installed() {
         echo -e "${RED}Error: ORYN not found${NC}"
         echo ""
         echo "Please install first:"
-        echo "  git clone https://github.com/tuanchris/oryn --single-branch"
+        echo "  git clone https://github.com/Freemancreationhouse/ORYN.git --single-branch"
         echo "  cd oryn"
-        echo "  dw install"
+        echo "  oryn install"
         exit 1
     fi
 }
@@ -83,9 +100,9 @@ cmd_install() {
         else
             echo -e "${RED}Error: Run this from the oryn directory${NC}"
             echo ""
-            echo "  git clone https://github.com/tuanchris/oryn --single-branch"
+            echo "  git clone https://github.com/Freemancreationhouse/ORYN.git --single-branch"
             echo "  cd oryn"
-            echo "  dw install"
+            echo "  oryn install"
             exit 1
         fi
     fi

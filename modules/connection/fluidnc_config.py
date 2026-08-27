@@ -14,6 +14,18 @@ from modules.core.state import state
 
 logger = logging.getLogger(__name__)
 
+
+def _motion_stream_active() -> bool:
+    return bool((getattr(state, "current_playing_file", None) and not getattr(state, "stop_requested", False)) or getattr(state, "is_clearing", False))
+
+
+def _is_configuration_command(command: str) -> bool:
+    c=(command or "").strip().upper()
+    if c=="$$" or c.startswith("$CD") or c.startswith("$/") or c.startswith("$CONFIG/"):
+        return True
+    # GRBL settings ($100, $101, $110...) are also configuration traffic.
+    return bool(__import__("re").match(r"^\$\d+(?:=|$)",c))
+
 # Curated settings exposed in the Setup UI.
 # Keys are FluidNC config tree paths queried via $/path.
 
@@ -137,6 +149,10 @@ def send_command(command: str, timeout: float = 3.0, silence: float = 1.0) -> li
     """
     if not state.conn or not state.conn.is_connected():
         raise ConnectionError("Not connected to controller")
+    if _motion_stream_active() and _is_configuration_command(command):
+        # Critical V10.2 rule: settings pages/config helpers may never flush or
+        # consume the live pattern response stream.
+        raise RuntimeError("Pattern running — FluidNC configuration I/O is blocked until playback stops")
 
     # Clear input buffer
     try:
