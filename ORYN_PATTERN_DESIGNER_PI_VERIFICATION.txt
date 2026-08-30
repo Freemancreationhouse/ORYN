@@ -1,0 +1,48 @@
+ORYN Pattern Designer Pi Integration Verification
+Integration: PD-PI-V1-20260831-1
+
+BASE
+Git commit: 96426e91bcedf454662db936b20684094c826fee
+Commit message: ORYN V10.4.1 - fix queued pattern continuation after clearing
+Pattern Forge: PF-PRO-V10.4.1-20260828-1
+Motion baseline: UC-DUNE-MOTION-V9-20260827-1
+
+INTEGRATION
+- Pattern Designer: V2.0 Pro
+- Generator definitions: 77
+- Reference-set types represented: 37
+- ORYN original generators: 40
+- Cartesian / XY retained
+- Theta-Rho / Polar retained
+- Direct THR save bridge: /api/pattern-designer/save
+- Full-screen Pi route: /pattern-designer
+- Existing Browse Patterns toolbar receives an additive Pattern Designer launcher
+
+PRESERVATION
+The following locked files were verified byte-for-byte unchanged from the supplied baseline:
+- modules/core/pattern_manager.py
+- modules/core/process_thr.py
+- modules/connection/connection_manager.py
+- modules/connection/fluidnc_config.py
+- modules/pattern_generator/converter.py
+- machine_profile.json
+- settings.json
+- state.json
+- frontend React source
+- static/dist compiled ORYN frontend
+
+Only one existing source file is modified: main.py.
+All other integration files are new additive files.
+
+CHECKS COMPLETED
+- Python syntax compile: PASS
+- Pattern Designer JavaScript syntax: PASS
+- Launcher JavaScript syntax: PASS
+- Generator catalog static count: PASS (77 = 37 reference + 40 ORYN)
+- Pattern Designer page/base routing check: PASS
+- Frontend launcher injection check: PASS
+- Library bridge valid THR save behavior: PASS (isolated backend function test)
+- Library bridge out-of-radius rejection: PASS
+- Locked core SHA-256 preservation check: PASS
+
+The library bridge never invokes motion, homing, calibration, clearing, serial, queue execution, or Pattern Forge conversion.
