@@ -25,7 +25,7 @@
 `;document.head.appendChild(s);}
   async function json(url,opt){const r=await fetch(url,opt);let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));return d;}
   function axisHtml(axis, a, cfg, supported){
-    const drivers=Object.keys(supported||DRIVER_STEPS);const drv=(a&&a.driver)||'A4988';const ms=Number((a&&a.microsteps)||16);const allowed=(supported&&supported[drv])||DRIVER_STEPS[drv]||[1];
+    const drivers=Object.keys(supported||DRIVER_STEPS);const drv=(a&&a.driver)||'A4988';const ms=Number((a&&a.microsteps)||1);const allowed=(supported&&supported[drv])||DRIVER_STEPS[drv]||[1];
     return `<div class="umaxis" data-axis="${axis}"><b>${axis.toUpperCase()} — ${axis==='x'?'Theta / Rotation':'Rho / Radial'}</b><div class="umsub">STEP/DIR hardware profile</div>
     <label>Driver</label><select class="umdriver">${drivers.map(d=>`<option value="${esc(d)}" ${d===drv?'selected':''}>${d==='CUSTOM_STEP_DIR'?'Custom STEP/DIR':d}</option>`).join('')}</select>
     <label>Physical microstep (standalone DIP/jumper setting)</label><select class="ummicro">${allowed.map(n=>`<option value="${n}" ${Number(n)===ms?'selected':''}>${microLabel(n)}</option>`).join('')}</select>
@@ -48,7 +48,7 @@
       try{
         const axes={};root.querySelectorAll('.umaxis').forEach(box=>{axes[box.dataset.axis]={driver:box.querySelector('.umdriver').value,microsteps:Number(box.querySelector('.ummicro').value)}});
         const res=await json('/api/machine-hardware-profile/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({x:axes.x,y:axes.y})});
-        alert('Machine profile saved. FluidNC steps/unit adjusted for the selected physical microstep.\n\n'+(res.message||''));
+        alert('Machine profile saved. GRBL/FluidNC steps/unit adjusted for the selected physical microstep.\n\n'+(res.message||''));
         await load(root,false);
       }catch(e){alert('Machine profile error: '+e.message);}finally{btn.disabled=false;btn.textContent='Apply Driver / Microstep';}
     };
@@ -59,16 +59,16 @@
       if(statusEl) statusEl.textContent='Reading controller…';
       const d=await json('/api/machine-hardware-profile');
       const p=d.profile||{},c=d.controller?.axes||{},g=d.geometry||{};
-      root.innerHTML=`<div class="umh"><div><div class="umtitle">Universal Machine Profile</div><div class="umsub">Driver + microstepping → FluidNC scale → physical 360° / radius calibration</div></div><div><button class="secondary umread">${d.read_only?'Refresh cached view':'Read'}</button> <button class="umapply" ${d.read_only?'disabled':''}>Apply Driver / Microstep</button></div></div>
+      root.innerHTML=`<div class="umh"><div><div class="umtitle">Universal Machine Profile</div><div class="umsub">Driver + microstepping → GRBL/FluidNC scale → physical 360° / radius calibration</div></div><div><button class="secondary umread">${d.read_only?'Refresh cached view':'Read'}</button> <button class="umapply" ${d.read_only?'disabled':''}>Apply Driver / Microstep</button></div></div>
       <div class="umstatus umsub">Build ${esc(d.build||'V7')} · ${p.initialized?'<span class="umok">PROFILE SAVED</span>':'<span class="umwarn">FIRST SETUP</span>'} · ${d.read_only?'<span class="umwarn">READ-ONLY WHILE PATTERN RUNS</span>':esc(d.controller_source||'controller')}</div>
       ${d.read_only?'<div class="umnote"><b>Pattern running:</b> this page is safely displaying cached machine values. ORYN will not send <code>$CD</code>, <code>$$</code>, flush serial input, jog calibration, or alter hardware until playback stops.</div>':''}
       <div class="umgrid">${axisHtml('x',p.x,c.x,d.supported_drivers)}${axisHtml('y',p.y,c.y,d.supported_drivers)}</div>
       <div class="umgeo">360°: <b>${g.theta_calibrated?Number(g.theta_revolution_units).toFixed(4)+' units':'Not calibrated'}</b> &nbsp; · &nbsp; Centre→Perimeter: <b>${g.rho_calibrated?Number(g.rho_travel_units).toFixed(4)+' units':'Not calibrated'}</b></div>
-      ${!p.initialized?'<div class="umnote"><b>A4988 → TMC2208 migration:</b> ORYN legacy reference is A4988 at 1/16. On a standalone TMC2208, <b>MS1=LOW + MS2=LOW (no MS jumpers) = 1/8</b>, not full-step. Select the actual TMC2208 setting (1/2, 1/4, 1/8 or 1/16) and Apply once; ORYN will rescale FluidNC steps/unit from the saved/legacy profile.</div>':''}
+      ${!p.initialized?'<div class="umnote"><b>Uno + CNC Shield A4988 → TMC2208 migration:</b> previous no-jumper A4988 = <b>full-step (1/1)</b>. TMC2208 with no MS jumpers = <b>1/8</b>. Select TMC2208 1/8 and Apply once; ORYN will rescale GRBL $100/$101 by 8×.</div>':''}
       ${(p.x?.driver==='TMC2208'||p.y?.driver==='TMC2208')?'<div class="umnote"><b>TMC2208 standalone rule:</b> valid external STEP-input resolutions are <b>1/2, 1/4, 1/8, 1/16</b>. Internal interpolation to 256 microsteps is performed inside the driver and must <b>not</b> be entered as 1/256 steps/unit scaling. TMC2208 uses MS1/MS2; do not assume the A4988 MS3 jumper has the same function on your carrier.</div>':''}
-      <div class="umnote"><b>Important:</b> ORYN cannot electrically detect standalone DIP/jumper positions. After any physical driver/microstep change, select the matching setting here once. Max rate and acceleration remain FluidNC safety limits; 360° and Perimeter calibration remain the final geometry.</div>`;
+      <div class="umnote"><b>Important:</b> ORYN cannot electrically detect standalone DIP/jumper positions. After any physical driver/microstep change, select the matching setting here once. Max rate and acceleration remain controller safety limits; 360° and Perimeter calibration remain the final geometry.</div>`;
       wire(root,d);if(notify) console.info('ORYN machine profile loaded',d);
-    }catch(e){root.innerHTML=`<div class="umtitle">Universal Machine Profile</div><div class="umnote">Connect the FluidNC controller, then press Read. ${esc(e.message)}</div><button class="secondary umread" style="margin-top:8px">Read</button>`;root.querySelector('.umread').onclick=()=>load(root,true);}
+    }catch(e){root.innerHTML=`<div class="umtitle">Universal Machine Profile</div><div class="umnote">Connect the GRBL/FluidNC controller, then press Read. ${esc(e.message)}</div><button class="secondary umread" style="margin-top:8px">Read</button>`;root.querySelector('.umread').onclick=()=>load(root,true);}
   }
   function mount(){
     if(!/setup/i.test(location.pathname) && ![...document.querySelectorAll('h1,h2')].some(x=>/Hardware Setup/i.test(x.textContent||''))) return;

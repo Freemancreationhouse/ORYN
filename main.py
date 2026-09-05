@@ -5004,17 +5004,19 @@ def _load_hardware_profile():
                 return data
     except Exception as exc:
         logger.warning("Could not read hardware profile: %s", exc)
-    # Legacy ORYN tables were normally operated with all three A4988
-    # microstep jumpers fitted (1/16).  This is only a *profile reference* used
-    # to scale FluidNC steps/unit if the user selects a different physical
-    # microstep. It never enters THR geometry directly.
+    # This hotfix targets the user's proven Arduino Uno + CNC Shield migration:
+    # A4988 with NO shield microstep jumpers (full-step) -> TMC2208 standalone
+    # with NO shield microstep jumpers (1/8 STEP-input resolution).  The profile
+    # reference is therefore A4988 @ 1/1.  It is used only to rescale controller
+    # steps/unit once; it never enters the locked THR geometry or motion math.
     return {
-        "schema": 2,
+        "schema": 3,
         "initialized": False,
         "kinematics": "dune_weaver_coupled",
-        "x": {"driver": "A4988", "microsteps": 16},
-        "y": {"driver": "A4988", "microsteps": 16},
-        "notes": "Coupled Theta-Rho mechanism. Driver/microstep can change; physical calibration remains authoritative.",
+        "controller_family": "grbl_uno_cncshield",
+        "x": {"driver": "A4988", "microsteps": 1},
+        "y": {"driver": "A4988", "microsteps": 1},
+        "notes": "Uno+CNC Shield no-jumper migration baseline: A4988 full-step -> TMC2208 1/8. Physical calibration remains authoritative.",
     }
 
 
@@ -5051,10 +5053,17 @@ async def get_machine_hardware_profile():
     elif state.conn and state.conn.is_connected():
         try:
             from modules.connection import fluidnc_config
-            controller=await asyncio.to_thread(fluidnc_config.read_all_settings)
+            firmware=(getattr(state,"firmware_type",None) or "").lower()
+            # $100/$101/$110/$111/$120/$121 are the common GRBL-compatible
+            # core settings needed here. Read those first so Arduino Uno never
+            # receives unsupported FluidNC $/ config-tree traffic.
+            controller=await asyncio.to_thread(fluidnc_config.read_grbl_core_settings)
+            if (controller.get("axes",{}).get("x",{}).get("steps_per_mm") is None or
+                controller.get("axes",{}).get("y",{}).get("steps_per_mm") is None) and firmware == "fluidnc":
+                controller=await asyncio.to_thread(fluidnc_config.read_all_settings)
+            source="grbl-controller" if firmware == "grbl" else ("fluidnc-controller" if firmware == "fluidnc" else "controller")
             _MACHINE_PROFILE_CONTROLLER_CACHE=controller
             globals()["_FLUIDNC_CONFIG_CACHE"]=controller
-            source="controller"
             try:
                 state.x_max_rate_mm_per_min=float(controller.get("axes",{}).get("x",{}).get("max_rate_mm_per_min") or 0.0)
                 state.y_max_rate_mm_per_min=float(controller.get("axes",{}).get("y",{}).get("max_rate_mm_per_min") or 0.0)
@@ -5065,7 +5074,7 @@ async def get_machine_hardware_profile():
     else:
         controller=_cached_machine_controller(profile); source="cached-disconnected"
     return {
-        "build":"UC-DUNE-MOTION-V9-TMC2208-HOTFIX-20260905-1","profile":profile,"controller":controller,
+        "build":"UC-DUNE-MOTION-V9-TMC2208-UNO-GRBL-HOTFIX-20260905-2","profile":profile,"controller":controller,
         "controller_source":source,"read_only":playing,
         "read_only_reason":"Pattern running — hardware settings are displayed from cache and controller I/O is blocked." if playing else None,
         "supported_drivers":_DRIVER_MICROSTEPS,
@@ -5081,14 +5090,14 @@ async def get_machine_hardware_profile():
 async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
     """Adopt a new STEP/DIR driver/microstep setup without changing ORYN math.
 
-    FluidNC steps/unit are scaled by new_microsteps / old_microsteps, keeping
-    one controller unit approximately the same physical movement after a DIP or
-    driver change.  Max rate and acceleration remain in the same controller
-    units and are therefore preserved.  Exact 360° and radius calibration stays
-    the final physical authority.
+    Works with both Arduino Uno/GRBL ($100/$101) and FluidNC.  Controller
+    steps/unit are scaled by new_microsteps / old_microsteps, keeping one ORYN
+    controller unit approximately the same physical movement after a physical
+    driver/jumper change.  Max rate and acceleration remain unchanged.  Exact
+    360° and radius calibration stays the final physical authority.
     """
     if not state.conn or not state.conn.is_connected():
-        raise HTTPException(status_code=400, detail="Connect to the FluidNC controller first")
+        raise HTTPException(status_code=400, detail="Connect to the GRBL/FluidNC controller first")
     if _motion_stream_active():
         raise HTTPException(status_code=409, detail="Pattern running — stop playback before changing hardware profile")
 
@@ -5100,13 +5109,18 @@ async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
             raise HTTPException(status_code=400, detail=f"{drv} does not support selected {axis_req.microsteps} microstep profile")
 
     from modules.connection import fluidnc_config
-    current_cfg = await asyncio.to_thread(fluidnc_config.read_all_settings)
+    firmware=(getattr(state,"firmware_type",None) or "").lower()
+    current_cfg = await asyncio.to_thread(fluidnc_config.read_grbl_core_settings)
+    if (current_cfg.get("axes",{}).get("x",{}).get("steps_per_mm") is None or
+        current_cfg.get("axes",{}).get("y",{}).get("steps_per_mm") is None) and firmware == "fluidnc":
+        current_cfg = await asyncio.to_thread(fluidnc_config.read_all_settings)
     old = _load_hardware_profile()
 
     changes = {}
     new_profile = {
-        "schema": 2, "initialized": True,
+        "schema": 3, "initialized": True,
         "kinematics": old.get("kinematics", "dune_weaver_coupled"),
+        "controller_family": "grbl_uno_cncshield" if firmware == "grbl" else "fluidnc",
         "x": {}, "y": {}, "last_applied": datetime.now().isoformat()
     }
     for axis_name, axis_req in (("x", request.x), ("y", request.y)):
@@ -5135,9 +5149,13 @@ async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
         }
 
     if changes:
-        saved = await asyncio.to_thread(fluidnc_config.save_config)
-        if not saved:
-            logger.warning("FluidNC settings changed but save_config did not confirm persistence")
+        if firmware == "grbl":
+            # GRBL $100/$101 writes are persisted to EEPROM immediately.
+            saved = True
+        else:
+            saved = await asyncio.to_thread(fluidnc_config.save_config)
+            if not saved:
+                logger.warning("FluidNC settings changed but save_config did not confirm persistence")
     else:
         saved = True
 
@@ -5153,7 +5171,7 @@ async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
         "profile": new_profile,
         "changes": changes,
         "message": (
-            "Hardware profile applied. Exact 360° and perimeter calibration remain the physical geometry authority. "
+            "Hardware profile applied to GRBL/FluidNC. Exact 360° and perimeter calibration remain the physical geometry authority. "
             + ("TMC2208 standalone uses the selected external STEP-input resolution; internal 256-microstep interpolation does not change steps/unit."
                if request.x.driver.upper() == "TMC2208" or request.y.driver.upper() == "TMC2208" else "")
         ),

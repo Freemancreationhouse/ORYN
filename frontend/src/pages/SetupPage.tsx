@@ -577,8 +577,8 @@ interface HardwareProfileResponse {
 function UniversalHardwareProfile() {
   const isConnected = useStatusStore((s) => s.status?.connection_status ?? false)
   const [data, setData] = useState<HardwareProfileResponse | null>(null)
-  const [x, setX] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 16 })
-  const [y, setY] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 16 })
+  const [x, setX] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 1 })
+  const [y, setY] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 1 })
   const [loading, setLoading] = useState(false)
   const [applying, setApplying] = useState(false)
 
@@ -604,7 +604,7 @@ function UniversalHardwareProfile() {
         '/api/machine-hardware-profile/apply', { x, y }
       )
       if (res.success) {
-        toast.success('Hardware profile applied and saved to FluidNC')
+        toast.success('Hardware profile applied and saved to the controller')
         await load()
       }
     } catch (err) {
@@ -673,7 +673,7 @@ function UniversalHardwareProfile() {
       <Alert>
         <span className="material-icons-outlined text-base mr-2 shrink-0">precision_manufacturing</span>
         <AlertDescription>
-          Select the driver and <strong>physical DIP/jumper microstep</strong> actually fitted on each axis. ORYN scales FluidNC steps/unit when microstepping changes, so changing A4988 → TMC/DRV8825 does not require code changes. Max rate and acceleration stay as firmware safety limits. Exact 360° and Centre→Perimeter calibration remains the physical geometry authority.
+          Select the driver and <strong>physical DIP/jumper microstep</strong> actually fitted on each axis. ORYN scales Arduino GRBL $100/$101 or FluidNC steps/unit when microstepping changes. Max rate and acceleration stay as firmware safety limits. Exact 360° and Centre→Perimeter calibration remains the physical geometry authority.
         </AlertDescription>
       </Alert>
       {!isConnected ? (
@@ -696,7 +696,7 @@ function UniversalHardwareProfile() {
               <span className="material-icons-outlined text-base mr-2 shrink-0">info</span>
               <AlertDescription>
                 <strong>TMC2208 standalone STEP/DIR:</strong> no MS jumpers (MS1=LOW, MS2=LOW) is <strong>1/8</strong>, not full-step.
-                The valid external STEP-input settings are 1/2, 1/4, 1/8 and 1/16. Internal MicroPlyer interpolation to 256 does not change ORYN/FluidNC steps-per-unit.
+                The valid external STEP-input settings are 1/2, 1/4, 1/8 and 1/16. Internal MicroPlyer interpolation to 256 does not change ORYN/GRBL/FluidNC steps-per-unit.
               </AlertDescription>
             </Alert>
           )}
@@ -708,7 +708,7 @@ function UniversalHardwareProfile() {
             <Alert>
               <span className="material-icons-outlined text-base mr-2 shrink-0">warning</span>
               <AlertDescription>
-                First setup uses ORYN's legacy reference of A4988 at 1/16 microstep. If you have now removed all three A4988 jumpers, select <strong>Full step</strong> for X and Y and Apply. ORYN will scale the current FluidNC steps/unit by 1/16, preserving the same physical controller-unit scale instead of making both motors run ~16× farther.
+                For this Uno + CNC Shield migration, the previous working baseline is A4988 with no jumpers = <strong>Full step (1/1)</strong>. TMC2208 with no jumpers = <strong>1/8</strong>. Selecting TMC2208 1/8 and Apply scales GRBL $100/$101 by 8× exactly once.
               </AlertDescription>
             </Alert>
           )}
