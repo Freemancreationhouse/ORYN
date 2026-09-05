@@ -4967,10 +4967,30 @@ HARDWARE_PROFILE_FILE = os.path.expanduser("~/.oryn-machine-hardware.json")
 _DRIVER_MICROSTEPS = {
     "A4988": [1, 2, 4, 8, 16],
     "DRV8825": [1, 2, 4, 8, 16, 32],
-    "TMC2208": [1, 2, 4, 8, 16, 32, 64, 128, 256],
+    # TMC2208 in ORYN is used as a standalone STEP/DIR StepStick.  Its
+    # MS1/MS2 pins select 1/2, 1/4, 1/8 or 1/16 STEP-input resolution.
+    # The chip can internally interpolate to 256 microsteps, but that must NOT
+    # be used as the external STEP pulse scaling value.
+    "TMC2208": [2, 4, 8, 16],
     "TMC2209": [1, 2, 4, 8, 16, 32, 64, 128, 256],
     "TMC5160": [1, 2, 4, 8, 16, 32, 64, 128, 256],
     "CUSTOM_STEP_DIR": [1, 2, 4, 8, 16, 32, 64, 128, 256],
+}
+
+_DRIVER_GUIDANCE = {
+    "TMC2208": {
+        "interface": "standalone_step_dir",
+        "description": "TMC2208 standalone STEP/DIR (legacy/drop-in mode)",
+        "microstep_pin_map": {
+            "MS1=LOW, MS2=LOW": 8,
+            "MS1=HIGH, MS2=LOW": 2,
+            "MS1=LOW, MS2=HIGH": 4,
+            "MS1=HIGH, MS2=HIGH": 16,
+        },
+        "no_jumpers_microsteps": 8,
+        "interpolation": "The driver may interpolate internally to 256 microsteps; controller steps/unit must use the external STEP-input resolution above.",
+        "warning": "Do not treat 1/32, 1/64, 1/128 or 1/256 as standalone TMC2208 jumper settings. TMC2208 uses MS1/MS2; verify your carrier-board pinout before reusing an A4988 MS3 jumper.",
+    }
 }
 
 
@@ -5045,10 +5065,11 @@ async def get_machine_hardware_profile():
     else:
         controller=_cached_machine_controller(profile); source="cached-disconnected"
     return {
-        "build":"UC-DUNE-MOTION-V9-20260827-1","profile":profile,"controller":controller,
+        "build":"UC-DUNE-MOTION-V9-TMC2208-HOTFIX-20260905-1","profile":profile,"controller":controller,
         "controller_source":source,"read_only":playing,
         "read_only_reason":"Pattern running — hardware settings are displayed from cache and controller I/O is blocked." if playing else None,
         "supported_drivers":_DRIVER_MICROSTEPS,
+        "driver_guidance":_DRIVER_GUIDANCE,
         "geometry":{"theta_calibrated":bool(state.theta_calibrated and state.theta_revolution_units),
                     "theta_revolution_units":state.theta_revolution_units,
                     "rho_calibrated":bool(state.rho_calibrated and state.rho_travel_units),
@@ -5131,7 +5152,11 @@ async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
         "saved": saved,
         "profile": new_profile,
         "changes": changes,
-        "message": "Hardware profile applied. Exact 360° and perimeter calibration remain the physical geometry authority.",
+        "message": (
+            "Hardware profile applied. Exact 360° and perimeter calibration remain the physical geometry authority. "
+            + ("TMC2208 standalone uses the selected external STEP-input resolution; internal 256-microstep interpolation does not change steps/unit."
+               if request.x.driver.upper() == "TMC2208" or request.y.driver.upper() == "TMC2208" else "")
+        ),
     }
 
 class FluidNCCommandRequest(BaseModel):

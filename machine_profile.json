@@ -1,5 +1,5 @@
 {
-  "profile_schema": 2,
+  "profile_schema": 3,
   "profile_name": "ORYN Universal STEP-DIR Theta-Rho",
   "controller_family": "grbl_fluidnc",
   "theta_axis": "X",
@@ -16,5 +16,13 @@
   "legacy_reference_microsteps": 16,
   "hardware_profile_file": "~/.oryn-machine-hardware.json",
   "geometry_profile_file": "~/.oryn-machine-calibration.json",
-  "notes": "Machine Setup scales FluidNC steps/unit when microstepping changes. Exact 360-degree and center-to-perimeter calibration remains authoritative."
+  "notes": "Machine Setup scales FluidNC steps/unit when physical STEP-input microstepping changes. TMC2208 standalone uses 1/2, 1/4, 1/8 or 1/16; internal 256 interpolation does not alter controller steps/unit. Exact 360-degree and center-to-perimeter calibration remains authoritative.",
+  "tmc2208_mode": "standalone_step_dir",
+  "tmc2208_external_microsteps": [
+    2,
+    4,
+    8,
+    16
+  ],
+  "tmc2208_no_jumpers_microsteps": 8
 }

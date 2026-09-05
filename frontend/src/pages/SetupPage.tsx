@@ -525,7 +525,8 @@ function CalibrationWizard() {
             <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-2">
               <li>Power off the table completely</li>
               <li>Locate the DIP switches underneath each stepper driver</li>
-              <li>Set <strong>all DIP switches to OFF</strong> (this selects full-step or the driver's default microstepping)</li>
+              <li>Set the microstep jumpers to the value required by your actual driver. <strong>Do not assume all-OFF means full-step.</strong></li>
+              <li>For a standalone TMC2208, MS1=LOW and MS2=LOW means <strong>1/8 microstep</strong>; MS1=HIGH/MS2=HIGH means <strong>1/16</strong>. TMC2208 does not use A4988-style MS3 for microstep selection.</li>
               <li>Power the table back on and re-run the calibration wizard</li>
             </ol>
           </div>
@@ -616,7 +617,7 @@ function UniversalHardwareProfile() {
   const drivers = data?.supported_drivers ?? {
     A4988: [1, 2, 4, 8, 16],
     DRV8825: [1, 2, 4, 8, 16, 32],
-    TMC2208: [1, 2, 4, 8, 16, 32, 64, 128, 256],
+    TMC2208: [2, 4, 8, 16],
     TMC2209: [1, 2, 4, 8, 16, 32, 64, 128, 256],
     TMC5160: [1, 2, 4, 8, 16, 32, 64, 128, 256],
     CUSTOM_STEP_DIR: [1, 2, 4, 8, 16, 32, 64, 128, 256],
@@ -690,6 +691,15 @@ function UniversalHardwareProfile() {
             {axisEditor('x', x, setX)}
             {axisEditor('y', y, setY)}
           </div>
+          {(x.driver === 'TMC2208' || y.driver === 'TMC2208') && (
+            <Alert>
+              <span className="material-icons-outlined text-base mr-2 shrink-0">info</span>
+              <AlertDescription>
+                <strong>TMC2208 standalone STEP/DIR:</strong> no MS jumpers (MS1=LOW, MS2=LOW) is <strong>1/8</strong>, not full-step.
+                The valid external STEP-input settings are 1/2, 1/4, 1/8 and 1/16. Internal MicroPlyer interpolation to 256 does not change ORYN/FluidNC steps-per-unit.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="rounded-lg border p-3 text-sm grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>360° geometry: <strong>{data.geometry.theta_calibrated ? `${data.geometry.theta_revolution_units?.toFixed(4)} units` : 'Not calibrated'}</strong></div>
             <div>Centre → Perimeter: <strong>{data.geometry.rho_calibrated ? `${data.geometry.rho_travel_units?.toFixed(4)} units` : 'Not calibrated'}</strong></div>
