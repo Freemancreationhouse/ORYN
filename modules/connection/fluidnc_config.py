@@ -91,11 +91,7 @@ def _read_legacy_grbl_settings() -> dict:
     return result
 
 def read_grbl_core_settings() -> dict:
-    """Read Arduino/GRBL core motion settings using only the $$ interface.
-
-    This deliberately avoids FluidNC config-tree commands so Uno + CNC Shield
-    controllers are not spammed with unsupported $/ queries.
-    """
+    """Read standard GRBL core motion settings using only the portable $$ interface."""
     return _read_legacy_grbl_settings()
 
 

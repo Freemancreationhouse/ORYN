@@ -1,29 +1,31 @@
 {
-  "profile_schema": 4,
-  "profile_name": "ORYN Universal STEP-DIR Theta-Rho",
-  "controller_family": "grbl_uno_cncshield_fluidnc",
+  "profile_schema": 5,
+  "profile_name": "ORYN Universal STEP-DIR Theta-Rho — Stable Driver-Neutral",
+  "controller_family": "standard_grbl_or_fluidnc",
   "theta_axis": "X",
   "rho_axis": "Y",
-  "driver_profile": "user_selectable",
+  "driver_profile": "metadata_only",
+  "supported_controllers": [
+    "Arduino Uno / ATmega328P GRBL",
+    "Arduino Nano / compatible GRBL",
+    "ATmega2560 GRBL-compatible",
+    "MKS DLC / ATmega328P GRBL-compatible",
+    "MKS DLC32 via USB serial",
+    "MKS DLC32 / ESP32 with FluidNC",
+    "Other standard GRBL 1.1 / FluidNC STEP-DIR controllers"
+  ],
   "supported_drivers": [
     "A4988",
     "DRV8825",
     "TMC2208",
     "TMC2209",
     "TMC5160",
+    "TB6600",
+    "DM542",
     "CUSTOM_STEP_DIR"
   ],
-  "legacy_reference_microsteps": 1,
+  "auto_scale_controller_steps": false,
   "hardware_profile_file": "~/.oryn-machine-hardware.json",
   "geometry_profile_file": "~/.oryn-machine-calibration.json",
-  "notes": "Uno+CNC Shield migration baseline: A4988 with no microstep jumpers = full-step (1/1); TMC2208 standalone with no MS jumpers = 1/8. ORYN scales GRBL $100/$101 or FluidNC steps/unit by the physical microstep ratio. Internal 256 interpolation does not alter controller steps/unit. Exact 360-degree and center-to-perimeter calibration remains authoritative.",
-  "tmc2208_mode": "standalone_step_dir",
-  "tmc2208_external_microsteps": [
-    2,
-    4,
-    8,
-    16
-  ],
-  "tmc2208_no_jumpers_microsteps": 8,
-  "uno_cnc_shield_no_jumpers_a4988_microsteps": 1
+  "notes": "Driver selection never rewrites $100/$101 or FluidNC steps_per_mm. Physical Full Circle and Centre-to-Perimeter calibration remains authoritative. TMC2208 standalone no-jumper MS1=LOW/MS2=LOW is 1/8 external STEP resolution."
 }

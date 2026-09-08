@@ -1819,14 +1819,28 @@ async def _execute_pattern_internal(file_path):
             # Add a small delay to allow other async operations
             await asyncio.sleep(0.001)
 
-    # Update progress one last time to show 100%
+    # All coordinates have been accepted by the GRBL/FluidNC planner, but the
+    # last planner blocks may still be physically moving. Keep the UI below
+    # 100% until the controller itself reports Idle so cleaning/pattern preview
+    # cannot announce completion before the table finishes the final segment.
+    elapsed_time = time.time() - start_time
+    if total_coordinates > 0 and not state.stop_requested and not state.skip_requested:
+        visible_done = max(0, total_coordinates - 1)
+        state.execution_progress = (visible_done, total_coordinates, None, elapsed_time)
+
+    if not state.conn:
+        logger.error("Device is not connected. Stopping pattern execution.")
+        return False
+
+    await connection_manager.check_idle_async()
+
     elapsed_time = time.time() - start_time
     actual_execution_time = elapsed_time - total_pause_time
     state.execution_progress = (total_coordinates, total_coordinates, 0, elapsed_time)
-    # Give WebSocket a chance to send the final update
     await asyncio.sleep(0.1)
 
-    # Log execution time (only for completed patterns, not stopped/skipped)
+    # Log execution time only after physical Idle, so recorded completion and
+    # the frontend's 100% state refer to the same real end of motion.
     was_completed = not state.stop_requested and not state.skip_requested
     pattern_name = os.path.basename(file_path)
     effective_speed = state.clear_pattern_speed if (is_clear_file and state.clear_pattern_speed is not None) else state.speed
@@ -1839,11 +1853,6 @@ async def _execute_pattern_internal(file_path):
         was_completed=was_completed
     )
 
-    if not state.conn:
-        logger.error("Device is not connected. Stopping pattern execution.")
-        return False
-
-    await connection_manager.check_idle_async()
     await asyncio.to_thread(motion_controller._restore_absolute_mode_sync)
 
     # Pattern-local universal origin must never leak into the next pattern.

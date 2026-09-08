@@ -525,8 +525,7 @@ function CalibrationWizard() {
             <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-2">
               <li>Power off the table completely</li>
               <li>Locate the DIP switches underneath each stepper driver</li>
-              <li>Set the microstep jumpers to the value required by your actual driver. <strong>Do not assume all-OFF means full-step.</strong></li>
-              <li>For a standalone TMC2208, MS1=LOW and MS2=LOW means <strong>1/8 microstep</strong>; MS1=HIGH/MS2=HIGH means <strong>1/16</strong>. TMC2208 does not use A4988-style MS3 for microstep selection.</li>
+              <li>Set <strong>all DIP switches to OFF</strong> (this selects full-step or the driver's default microstepping)</li>
               <li>Power the table back on and re-run the calibration wizard</li>
             </ol>
           </div>
@@ -559,7 +558,7 @@ function CalibrationWizard() {
 
 // ─── Universal Driver / Microstep Profile ───────────────────────────────────
 
-type DriverName = 'A4988' | 'DRV8825' | 'TMC2208' | 'TMC2209' | 'TMC5160' | 'CUSTOM_STEP_DIR'
+type DriverName = 'A4988' | 'DRV8825' | 'TMC2208' | 'TMC2209' | 'TMC5160' | 'TB6600' | 'DM542' | 'CUSTOM_STEP_DIR'
 interface HardwareAxisProfile { driver: DriverName; microsteps: number }
 interface HardwareProfileResponse {
   build: string
@@ -604,7 +603,7 @@ function UniversalHardwareProfile() {
         '/api/machine-hardware-profile/apply', { x, y }
       )
       if (res.success) {
-        toast.success('Hardware profile applied and saved to the controller')
+        toast.success('Driver profile saved — controller steps were not changed')
         await load()
       }
     } catch (err) {
@@ -620,6 +619,8 @@ function UniversalHardwareProfile() {
     TMC2208: [2, 4, 8, 16],
     TMC2209: [1, 2, 4, 8, 16, 32, 64, 128, 256],
     TMC5160: [1, 2, 4, 8, 16, 32, 64, 128, 256],
+    TB6600: [1, 2, 4, 8, 16, 32],
+    DM542: [1, 2, 4, 8, 16, 32, 64, 128],
     CUSTOM_STEP_DIR: [1, 2, 4, 8, 16, 32, 64, 128, 256],
   }
 
@@ -673,15 +674,15 @@ function UniversalHardwareProfile() {
       <Alert>
         <span className="material-icons-outlined text-base mr-2 shrink-0">precision_manufacturing</span>
         <AlertDescription>
-          Select the driver and <strong>physical DIP/jumper microstep</strong> actually fitted on each axis. ORYN scales Arduino GRBL $100/$101 or FluidNC steps/unit when microstepping changes. Max rate and acceleration stay as firmware safety limits. Exact 360° and Centre→Perimeter calibration remains the physical geometry authority.
+          Select the driver and <strong>physical DIP/jumper microstep</strong> fitted on each axis. This is hardware metadata only: ORYN will <strong>not</strong> automatically rewrite GRBL $100/$101 or FluidNC steps/unit. Exact 360° and Centre→Perimeter calibration remains the physical geometry authority.
         </AlertDescription>
       </Alert>
       {!isConnected ? (
-        <Alert><AlertDescription>Connect the controller before applying a machine profile.</AlertDescription></Alert>
+        <Alert><AlertDescription>Connect the controller to read its current settings. Driver metadata can be saved without automatic step scaling.</AlertDescription></Alert>
       ) : (
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={load} disabled={loading}>{loading ? 'Reading...' : 'Read Machine Profile'}</Button>
-          <Button onClick={apply} disabled={applying || !data}>{applying ? 'Applying...' : 'Apply Driver / Microstep'}</Button>
+          <Button onClick={apply} disabled={applying || !data}>{applying ? 'Saving...' : 'Save Driver / Microstep'}</Button>
           {data?.profile?.initialized && <Badge variant="outline">PROFILE SAVED</Badge>}
         </div>
       )}
@@ -691,24 +692,15 @@ function UniversalHardwareProfile() {
             {axisEditor('x', x, setX)}
             {axisEditor('y', y, setY)}
           </div>
-          {(x.driver === 'TMC2208' || y.driver === 'TMC2208') && (
-            <Alert>
-              <span className="material-icons-outlined text-base mr-2 shrink-0">info</span>
-              <AlertDescription>
-                <strong>TMC2208 standalone STEP/DIR:</strong> no MS jumpers (MS1=LOW, MS2=LOW) is <strong>1/8</strong>, not full-step.
-                The valid external STEP-input settings are 1/2, 1/4, 1/8 and 1/16. Internal MicroPlyer interpolation to 256 does not change ORYN/GRBL/FluidNC steps-per-unit.
-              </AlertDescription>
-            </Alert>
-          )}
           <div className="rounded-lg border p-3 text-sm grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>360° geometry: <strong>{data.geometry.theta_calibrated ? `${data.geometry.theta_revolution_units?.toFixed(4)} units` : 'Not calibrated'}</strong></div>
             <div>Centre → Perimeter: <strong>{data.geometry.rho_calibrated ? `${data.geometry.rho_travel_units?.toFixed(4)} units` : 'Not calibrated'}</strong></div>
           </div>
-          {!data.profile?.initialized && (
+          {(x.driver === 'TMC2208' || y.driver === 'TMC2208') && (
             <Alert>
-              <span className="material-icons-outlined text-base mr-2 shrink-0">warning</span>
+              <span className="material-icons-outlined text-base mr-2 shrink-0">info</span>
               <AlertDescription>
-                For this Uno + CNC Shield migration, the previous working baseline is A4988 with no jumpers = <strong>Full step (1/1)</strong>. TMC2208 with no jumpers = <strong>1/8</strong>. Selecting TMC2208 1/8 and Apply scales GRBL $100/$101 by 8× exactly once.
+                <strong>TMC2208 standalone STEP/DIR:</strong> MS1 LOW + MS2 LOW (no microstep jumpers) is <strong>1/8</strong>. Internal interpolation to 256 microsteps does not mean GRBL should be configured as 1/256.
               </AlertDescription>
             </Alert>
           )}
@@ -1016,7 +1008,7 @@ export function SetupPage() {
         <div>
           <h1 className="text-2xl font-bold">Hardware Setup</h1>
           <p className="text-sm text-muted-foreground">
-            Calibrate motors and configure FluidNC settings
+            Calibrate motors and configure GRBL / FluidNC controllers
           </p>
         </div>
       </div>
@@ -1071,7 +1063,7 @@ export function SetupPage() {
             <div className="flex items-center gap-3">
               <span className="material-icons-outlined text-muted-foreground">settings</span>
               <div className="text-left">
-                <div className="font-semibold">FluidNC Configuration</div>
+                <div className="font-semibold">Advanced FluidNC Configuration</div>
                 <div className="text-sm text-muted-foreground font-normal">
                   Read and edit curated controller settings
                 </div>

@@ -1,0 +1,12 @@
+ORYN Pi V10.4.1 — Stable TMC2208 + Universal Controller Recovery
+Build: UC-DUNE-MOTION-V9-STABLE-DRIVER-NEUTRAL-20260908-1
+Trusted base: user-uploaded ORYN_PI_PATTERN_FORGE_PRO_V10_4_1_HOTFIX(6).zip
+Pattern Forge baseline: PF-PRO-V10.4.1-20260828-1
+Motion baseline: UC-DUNE-MOTION-V9-20260827-1
+
+Rules:
+- Original coupled Theta-Rho transform preserved.
+- Driver selection never auto-writes controller steps/unit.
+- UI 100% waits for actual controller Idle.
+- USB serial supports standard GRBL/FluidNC boards.
+- Additive FluidNC WebSocket host connection supported.
