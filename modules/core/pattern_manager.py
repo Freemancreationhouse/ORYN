@@ -1435,6 +1435,42 @@ def get_first_rho_from_cache(file_path, cache_data=None):
         logger.warning(f"Error getting first rho from cache for {file_path}: {str(e)}")
         return None
 
+def _tmc2208_safe_clear_mode_active(effective_table_type=None):
+    """Return True only for the current migrated TMC2208 + unknown-table case.
+
+    The hardware profile is the primary source.  The narrow GRBL steps fallback
+    matches this machine's already-verified 1/8 TMC2208 migration values so the
+    safety fix still works if the metadata file was not re-saved after upgrade.
+    Known/overridden table profiles are never changed by this helper.
+    """
+    if effective_table_type:
+        return False
+    try:
+        import json
+        from pathlib import Path
+        hw_path = Path.home() / '.oryn-machine-hardware.json'
+        if hw_path.exists():
+            hw = json.loads(hw_path.read_text(encoding='utf-8'))
+            if isinstance(hw, dict):
+                axes = (hw.get('x') or {}, hw.get('y') or {})
+                if any(str(a.get('driver', '')).strip().upper() == 'TMC2208' for a in axes if isinstance(a, dict)):
+                    return True
+    except Exception as exc:
+        logger.debug('Could not inspect saved hardware profile for TMC2208 safe clear: %s', exc)
+
+    # Exact migration fingerprint from the user's validated Uno/CNC-Shield setup:
+    # legacy A4988 25.625/17.938 -> standalone TMC2208 1/8 = 205.000/143.504.
+    # Tight tolerances avoid changing unrelated universal controllers.
+    try:
+        xs = float(getattr(state, 'x_steps_per_mm', 0.0) or 0.0)
+        ys = float(getattr(state, 'y_steps_per_mm', 0.0) or 0.0)
+        if abs(xs - 205.000) <= 0.75 and abs(ys - 143.504) <= 0.75:
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def get_clear_pattern_file(clear_pattern_mode, path=None, cache_data=None):
     """Return a .thr file path based on pattern_name and table type.
 
@@ -1472,8 +1508,46 @@ def get_clear_pattern_file(clear_pattern_mode, path=None, cache_data=None):
         }
     }
 
-    # Get patterns for current table type, fallback to standard patterns if type not found
-    table_patterns = clear_patterns.get(state.table_type, clear_patterns['kinetiq_motion'])
+    # Resolve the effective clear family.  Driver/microstep migration can make
+    # the live GRBL $100/$101 values stop matching ORYN's historical hard-coded
+    # table fingerprints even though the physical mechanism has not changed.
+    # In that case state.table_type is None and the old code silently fell back
+    # to the long 33-turn standard clear.  With a standalone TMC2208 that long
+    # clear leaves only tiny net rho corrections after theta->rho compensation,
+    # which can make the radial carriage appear to stall while theta continues.
+    #
+    # Keep known table profiles authoritative, honour the user's table override,
+    # and only use the existing Mini clear family automatically when the table is
+    # otherwise unknown AND the saved hardware profile says TMC2208.
+    effective_table_type = getattr(state, 'table_type_override', None) or state.table_type
+
+    mini_aliases = {
+        'kinetiq_motion_mini',
+        'kinetiq_motion_mini_pro',
+        'kinetiq_motion_mini_pro_byj',
+        'kinetiq_motion_gold',
+    }
+    pro_aliases = {
+        'kinetiq_motion_pro',
+        'kinetiq_motion_pro_pulley',
+    }
+
+    clear_family = effective_table_type
+    if effective_table_type in mini_aliases:
+        clear_family = 'kinetiq_motion_mini'
+    elif effective_table_type in pro_aliases:
+        clear_family = 'kinetiq_motion_pro'
+
+    tmc2208_safe_clear = _tmc2208_safe_clear_mode_active(effective_table_type)
+    if tmc2208_safe_clear:
+        clear_family = 'kinetiq_motion_mini'
+        logger.info(
+            'TMC2208 safe-clear selection: unknown/universal table profile -> Mini clear family '
+            '(larger rho advance per revolution)'
+        )
+
+    # Fallback remains the original standard family for non-TMC unknown tables.
+    table_patterns = clear_patterns.get(clear_family, clear_patterns['kinetiq_motion'])
 
     # Check for custom patterns first
     if state.custom_clear_from_out and clear_pattern_mode in ['clear_from_out', 'adaptive']:
@@ -1510,7 +1584,7 @@ def get_clear_pattern_file(clear_pattern_mode, path=None, cache_data=None):
                 logger.debug(f"Using custom clear_from_in: {custom_path}")
                 return custom_path
 
-    logger.debug(f"Clear pattern mode: {clear_pattern_mode} for table type: {state.table_type}")
+    logger.debug(f"Clear pattern mode: {clear_pattern_mode} for table type: {state.table_type}, effective: {effective_table_type}, family: {clear_family}, tmc2208_safe={tmc2208_safe_clear}")
 
     if clear_pattern_mode == "random":
         return random.choice(list(table_patterns.values()))
@@ -1775,6 +1849,14 @@ async def _execute_pattern_internal(file_path):
                 current_speed = state.clear_pattern_speed
             else:
                 current_speed = state.speed
+
+            # TMC2208 safe clear: on this migrated unknown/universal profile,
+            # use the shorter Mini spiral and keep clearing feed conservative.
+            # This affects only clear files; selected pattern speed is untouched.
+            if (is_clear_file
+                    and _tmc2208_safe_clear_mode_active(getattr(state, 'table_type_override', None) or state.table_type)
+                    and os.path.basename(file_path) in ('clear_from_in_mini.thr', 'clear_from_out_mini.thr')):
+                current_speed = min(float(current_speed), 70.0)
 
             await move_polar(theta, rho, current_speed)
 
