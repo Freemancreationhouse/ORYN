@@ -558,7 +558,7 @@ function CalibrationWizard() {
 
 // ─── Universal Driver / Microstep Profile ───────────────────────────────────
 
-type DriverName = 'A4988' | 'DRV8825' | 'TMC2208' | 'TMC2209' | 'TMC5160' | 'TB6600' | 'DM542' | 'CUSTOM_STEP_DIR'
+type DriverName = 'A4988' | 'DRV8825' | 'TMC2208' | 'TMC2209' | 'TMC5160' | 'CUSTOM_STEP_DIR'
 interface HardwareAxisProfile { driver: DriverName; microsteps: number }
 interface HardwareProfileResponse {
   build: string
@@ -576,8 +576,8 @@ interface HardwareProfileResponse {
 function UniversalHardwareProfile() {
   const isConnected = useStatusStore((s) => s.status?.connection_status ?? false)
   const [data, setData] = useState<HardwareProfileResponse | null>(null)
-  const [x, setX] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 1 })
-  const [y, setY] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 1 })
+  const [x, setX] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 16 })
+  const [y, setY] = useState<HardwareAxisProfile>({ driver: 'A4988', microsteps: 16 })
   const [loading, setLoading] = useState(false)
   const [applying, setApplying] = useState(false)
 
@@ -603,7 +603,7 @@ function UniversalHardwareProfile() {
         '/api/machine-hardware-profile/apply', { x, y }
       )
       if (res.success) {
-        toast.success('Driver profile saved — controller steps were not changed')
+        toast.success('Hardware profile applied and saved to FluidNC')
         await load()
       }
     } catch (err) {
@@ -616,11 +616,9 @@ function UniversalHardwareProfile() {
   const drivers = data?.supported_drivers ?? {
     A4988: [1, 2, 4, 8, 16],
     DRV8825: [1, 2, 4, 8, 16, 32],
-    TMC2208: [2, 4, 8, 16],
+    TMC2208: [1, 2, 4, 8, 16, 32, 64, 128, 256],
     TMC2209: [1, 2, 4, 8, 16, 32, 64, 128, 256],
     TMC5160: [1, 2, 4, 8, 16, 32, 64, 128, 256],
-    TB6600: [1, 2, 4, 8, 16, 32],
-    DM542: [1, 2, 4, 8, 16, 32, 64, 128],
     CUSTOM_STEP_DIR: [1, 2, 4, 8, 16, 32, 64, 128, 256],
   }
 
@@ -674,15 +672,15 @@ function UniversalHardwareProfile() {
       <Alert>
         <span className="material-icons-outlined text-base mr-2 shrink-0">precision_manufacturing</span>
         <AlertDescription>
-          Select the driver and <strong>physical DIP/jumper microstep</strong> fitted on each axis. This is hardware metadata only: ORYN will <strong>not</strong> automatically rewrite GRBL $100/$101 or FluidNC steps/unit. Exact 360° and Centre→Perimeter calibration remains the physical geometry authority.
+          Select the driver and <strong>physical DIP/jumper microstep</strong> actually fitted on each axis. ORYN scales FluidNC steps/unit when microstepping changes, so changing A4988 → TMC/DRV8825 does not require code changes. Max rate and acceleration stay as firmware safety limits. Exact 360° and Centre→Perimeter calibration remains the physical geometry authority.
         </AlertDescription>
       </Alert>
       {!isConnected ? (
-        <Alert><AlertDescription>Connect the controller to read its current settings. Driver metadata can be saved without automatic step scaling.</AlertDescription></Alert>
+        <Alert><AlertDescription>Connect the controller before applying a machine profile.</AlertDescription></Alert>
       ) : (
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={load} disabled={loading}>{loading ? 'Reading...' : 'Read Machine Profile'}</Button>
-          <Button onClick={apply} disabled={applying || !data}>{applying ? 'Saving...' : 'Save Driver / Microstep'}</Button>
+          <Button onClick={apply} disabled={applying || !data}>{applying ? 'Applying...' : 'Apply Driver / Microstep'}</Button>
           {data?.profile?.initialized && <Badge variant="outline">PROFILE SAVED</Badge>}
         </div>
       )}
@@ -696,11 +694,11 @@ function UniversalHardwareProfile() {
             <div>360° geometry: <strong>{data.geometry.theta_calibrated ? `${data.geometry.theta_revolution_units?.toFixed(4)} units` : 'Not calibrated'}</strong></div>
             <div>Centre → Perimeter: <strong>{data.geometry.rho_calibrated ? `${data.geometry.rho_travel_units?.toFixed(4)} units` : 'Not calibrated'}</strong></div>
           </div>
-          {(x.driver === 'TMC2208' || y.driver === 'TMC2208') && (
+          {!data.profile?.initialized && (
             <Alert>
-              <span className="material-icons-outlined text-base mr-2 shrink-0">info</span>
+              <span className="material-icons-outlined text-base mr-2 shrink-0">warning</span>
               <AlertDescription>
-                <strong>TMC2208 standalone STEP/DIR:</strong> MS1 LOW + MS2 LOW (no microstep jumpers) is <strong>1/8</strong>. Internal interpolation to 256 microsteps does not mean GRBL should be configured as 1/256.
+                First setup uses ORYN's legacy reference of A4988 at 1/16 microstep. If you have now removed all three A4988 jumpers, select <strong>Full step</strong> for X and Y and Apply. ORYN will scale the current FluidNC steps/unit by 1/16, preserving the same physical controller-unit scale instead of making both motors run ~16× farther.
               </AlertDescription>
             </Alert>
           )}
@@ -1008,7 +1006,7 @@ export function SetupPage() {
         <div>
           <h1 className="text-2xl font-bold">Hardware Setup</h1>
           <p className="text-sm text-muted-foreground">
-            Calibrate motors and configure GRBL / FluidNC controllers
+            Calibrate motors and configure FluidNC settings
           </p>
         </div>
       </div>
@@ -1063,7 +1061,7 @@ export function SetupPage() {
             <div className="flex items-center gap-3">
               <span className="material-icons-outlined text-muted-foreground">settings</span>
               <div className="text-left">
-                <div className="font-semibold">Advanced FluidNC Configuration</div>
+                <div className="font-semibold">FluidNC Configuration</div>
                 <div className="text-sm text-muted-foreground font-normal">
                   Read and edit curated controller settings
                 </div>

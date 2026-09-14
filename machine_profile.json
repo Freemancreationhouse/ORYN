@@ -1,31 +1,20 @@
 {
-  "profile_schema": 5,
-  "profile_name": "ORYN Universal STEP-DIR Theta-Rho — Stable Driver-Neutral",
-  "controller_family": "standard_grbl_or_fluidnc",
+  "profile_schema": 2,
+  "profile_name": "ORYN Universal STEP-DIR Theta-Rho",
+  "controller_family": "grbl_fluidnc",
   "theta_axis": "X",
   "rho_axis": "Y",
-  "driver_profile": "metadata_only",
-  "supported_controllers": [
-    "Arduino Uno / ATmega328P GRBL",
-    "Arduino Nano / compatible GRBL",
-    "ATmega2560 GRBL-compatible",
-    "MKS DLC / ATmega328P GRBL-compatible",
-    "MKS DLC32 via USB serial",
-    "MKS DLC32 / ESP32 with FluidNC",
-    "Other standard GRBL 1.1 / FluidNC STEP-DIR controllers"
-  ],
+  "driver_profile": "user_selectable",
   "supported_drivers": [
     "A4988",
     "DRV8825",
     "TMC2208",
     "TMC2209",
     "TMC5160",
-    "TB6600",
-    "DM542",
     "CUSTOM_STEP_DIR"
   ],
-  "auto_scale_controller_steps": false,
+  "legacy_reference_microsteps": 16,
   "hardware_profile_file": "~/.oryn-machine-hardware.json",
   "geometry_profile_file": "~/.oryn-machine-calibration.json",
-  "notes": "Driver selection never rewrites $100/$101 or FluidNC steps_per_mm. Physical Full Circle and Centre-to-Perimeter calibration remains authoritative. TMC2208 standalone no-jumper MS1=LOW/MS2=LOW is 1/8 external STEP resolution."
+  "notes": "Machine Setup scales FluidNC steps/unit when microstepping changes. Exact 360-degree and center-to-perimeter calibration remains authoritative."
 }

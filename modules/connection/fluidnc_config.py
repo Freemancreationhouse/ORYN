@@ -90,11 +90,6 @@ def _read_legacy_grbl_settings() -> dict:
         result["axes"]["y"]["steps_per_mm"] = float(state.y_steps_per_mm)
     return result
 
-def read_grbl_core_settings() -> dict:
-    """Read standard GRBL core motion settings using only the portable $$ interface."""
-    return _read_legacy_grbl_settings()
-
-
 def _merge_core_legacy_settings(result: dict) -> dict:
     legacy = _read_legacy_grbl_settings()
     for axis in ("x", "y"):

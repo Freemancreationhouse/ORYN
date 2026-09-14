@@ -482,13 +482,6 @@ def get_preview_semaphore() -> asyncio.Semaphore:
 class ConnectRequest(BaseModel):
     port: Optional[str] = None
 
-class UniversalControllerConnectRequest(BaseModel):
-    transport: str = "serial"
-    port: Optional[str] = None
-    host: Optional[str] = None
-    websocket_port: int = 81
-    homing: bool = False
-
 class auto_playModeRequest(BaseModel):
     enabled: bool
     playlist: Optional[str] = None
@@ -1815,69 +1808,6 @@ async def connect(request: ConnectRequest):
     except Exception as e:
         logger.error(f'Failed to connect to serial port {request.port}: {str(e)}')
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/controller/capabilities", tags=["controller"])
-async def controller_capabilities():
-    """Report controller transports without touching pattern motion."""
-    connected = bool(state.conn and state.conn.is_connected())
-    return {
-        "build": "ORYN-STABLE-UNIVERSAL-CONTROLLER-20260908-1",
-        "serial_ports": await asyncio.to_thread(connection_manager.list_serial_ports),
-        "connected": connected,
-        "active_port": getattr(state, "port", None),
-        "firmware_type": getattr(state, "firmware_type", None),
-        "firmware_version": getattr(state, "firmware_version", None),
-        "transports": ["serial_grbl", "serial_fluidnc", "websocket_fluidnc"],
-        "notes": "Standard GRBL/FluidNC STEP-DIR controllers are supported. MKS DLC32 can connect directly by USB serial; FluidNC-class boards can also use WebSocket port 81.",
-    }
-
-@app.post("/api/controller/connect", tags=["controller"])
-async def universal_controller_connect(request: UniversalControllerConnectRequest):
-    """Connect to a standard GRBL/FluidNC controller without changing motion math."""
-    if _motion_stream_active():
-        raise HTTPException(status_code=409, detail="Stop playback before changing controller connection")
-    transport = (request.transport or "serial").strip().lower()
-    try:
-        if state.conn and state.conn.is_connected():
-            state.conn.close()
-    except Exception:
-        pass
-    state.conn = None
-
-    try:
-        if transport in ("serial", "serial_grbl", "serial_fluidnc"):
-            if not request.port:
-                raise HTTPException(status_code=400, detail="Select a serial port")
-            state.conn = connection_manager.SerialConnection(request.port)
-        elif transport in ("websocket", "websocket_fluidnc", "network"):
-            host = (request.host or "fluidnc.local").strip()
-            if host.startswith("ws://") or host.startswith("wss://"):
-                url = host
-            else:
-                url = f"ws://{host}:{int(request.websocket_port or 81)}"
-            state.conn = connection_manager.WebSocketConnection(url)
-        else:
-            raise HTTPException(status_code=400, detail=f"Unsupported transport: {request.transport}")
-
-        ok = await asyncio.to_thread(connection_manager.device_init, bool(request.homing))
-        if not ok:
-            try:
-                state.conn.close()
-            except Exception:
-                pass
-            state.conn = None
-            raise HTTPException(status_code=500, detail="Controller connected but GRBL/FluidNC initialization failed")
-        return {
-            "success": True,
-            "port": getattr(state, "port", None),
-            "firmware_type": getattr(state, "firmware_type", None),
-            "firmware_version": getattr(state, "firmware_version", None),
-        }
-    except HTTPException:
-        raise
-    except Exception as exc:
-        state.conn = None
-        raise HTTPException(status_code=500, detail=str(exc))
 
 @app.post("/disconnect")
 async def disconnect():
@@ -4901,36 +4831,21 @@ async def restart_system():
 
 
 # ─── ORYN Universal Hardware / Driver Profile ────────────────────────────────
-# Driver metadata is deliberately separated from controller steps/unit.
-# ORYN's physical 360° and Centre→Perimeter calibration remains the geometry
-# authority. Selecting a driver here NEVER rewrites $100/$101 or FluidNC
-# steps_per_mm automatically; this prevents double-scaling during driver swaps.
+# This layer keeps controller units stable when the user changes STEP/DIR
+# drivers or microstepping.  Geometry is still learned physically by the 360°
+# and Centre→Perimeter calibrations.  No driver-specific values are hard-coded
+# into pattern mathematics.
 HARDWARE_PROFILE_FILE = os.path.expanduser("~/.oryn-machine-hardware.json")
 
 _DRIVER_MICROSTEPS = {
     "A4988": [1, 2, 4, 8, 16],
     "DRV8825": [1, 2, 4, 8, 16, 32],
-    "TMC2208": [2, 4, 8, 16],
+    "TMC2208": [1, 2, 4, 8, 16, 32, 64, 128, 256],
     "TMC2209": [1, 2, 4, 8, 16, 32, 64, 128, 256],
     "TMC5160": [1, 2, 4, 8, 16, 32, 64, 128, 256],
-    "TB6600": [1, 2, 4, 8, 16, 32],
-    "DM542": [1, 2, 4, 8, 16, 32, 64, 128],
     "CUSTOM_STEP_DIR": [1, 2, 4, 8, 16, 32, 64, 128, 256],
 }
 
-_DRIVER_GUIDANCE = {
-    "TMC2208": {
-        "mode": "standalone_step_dir",
-        "no_jumpers_microsteps": 8,
-        "pin_map": {
-            "MS1=LOW,MS2=LOW": 8,
-            "MS1=HIGH,MS2=LOW": 2,
-            "MS1=LOW,MS2=HIGH": 4,
-            "MS1=HIGH,MS2=HIGH": 16,
-        },
-        "note": "Internal MicroPlyer interpolation does not change the external STEP-input resolution.",
-    }
-}
 
 def _load_hardware_profile():
     try:
@@ -4942,14 +4857,19 @@ def _load_hardware_profile():
                 return data
     except Exception as exc:
         logger.warning("Could not read hardware profile: %s", exc)
+    # Legacy ORYN tables were normally operated with all three A4988
+    # microstep jumpers fitted (1/16).  This is only a *profile reference* used
+    # to scale FluidNC steps/unit if the user selects a different physical
+    # microstep. It never enters THR geometry directly.
     return {
-        "schema": 5,
+        "schema": 2,
         "initialized": False,
         "kinematics": "dune_weaver_coupled",
-        "x": {"driver": "A4988", "microsteps": 1},
-        "y": {"driver": "A4988", "microsteps": 1},
-        "notes": "Driver metadata only. Controller steps/unit are never auto-scaled by ORYN.",
+        "x": {"driver": "A4988", "microsteps": 16},
+        "y": {"driver": "A4988", "microsteps": 16},
+        "notes": "Coupled Theta-Rho mechanism. Driver/microstep can change; physical calibration remains authoritative.",
     }
+
 
 def _save_hardware_profile(data):
     try:
@@ -4960,71 +4880,70 @@ def _save_hardware_profile(data):
         logger.warning("Could not save hardware profile: %s", exc)
         return False
 
+
 class HardwareAxisProfile(BaseModel):
     driver: str
     microsteps: int
+
 
 class HardwareProfileApplyRequest(BaseModel):
     x: HardwareAxisProfile
     y: HardwareAxisProfile
 
-async def _read_controller_core_settings_for_profile():
-    from modules.connection import fluidnc_config
-    firmware = (getattr(state, "firmware_type", None) or "").lower()
-    core = await asyncio.to_thread(fluidnc_config.read_grbl_core_settings)
-    x = (core.get("axes") or {}).get("x") or {}
-    y = (core.get("axes") or {}).get("y") or {}
-    if (x.get("steps_per_mm") is None or y.get("steps_per_mm") is None) and firmware == "fluidnc":
-        core = await asyncio.to_thread(fluidnc_config.read_all_settings)
-    return core
 
 @app.get("/api/machine-hardware-profile", tags=["machine-setup"])
 async def get_machine_hardware_profile():
-    """Return driver metadata and controller settings without changing either."""
+    """Return machine profile without ever disturbing active pattern serial I/O."""
     global _MACHINE_PROFILE_CONTROLLER_CACHE
-    profile = _load_hardware_profile()
-    playing = _motion_stream_active()
-    controller = None
-    source = "none"
+    profile=_load_hardware_profile()
+    playing=_motion_stream_active()
+    controller=None; source="none"
     if playing:
-        controller = _cached_machine_controller(profile)
-        source = "cached-during-playback"
+        controller=_cached_machine_controller(profile)
+        source="cached-during-playback"
     elif state.conn and state.conn.is_connected():
         try:
-            controller = await _read_controller_core_settings_for_profile()
-            _MACHINE_PROFILE_CONTROLLER_CACHE = controller
-            globals()["_FLUIDNC_CONFIG_CACHE"] = controller
-            source = f"{(getattr(state, 'firmware_type', None) or 'grbl-compatible')}-controller"
+            from modules.connection import fluidnc_config
+            controller=await asyncio.to_thread(fluidnc_config.read_all_settings)
+            _MACHINE_PROFILE_CONTROLLER_CACHE=controller
+            globals()["_FLUIDNC_CONFIG_CACHE"]=controller
+            source="controller"
+            try:
+                state.x_max_rate_mm_per_min=float(controller.get("axes",{}).get("x",{}).get("max_rate_mm_per_min") or 0.0)
+                state.y_max_rate_mm_per_min=float(controller.get("axes",{}).get("y",{}).get("max_rate_mm_per_min") or 0.0)
+            except Exception: pass
         except Exception as exc:
-            logger.warning("Hardware profile controller read failed: %s", exc)
-            controller = _cached_machine_controller(profile)
-            source = "cached-after-read-failure"
+            logger.warning("Hardware profile controller read failed: %s",exc)
+            controller=_cached_machine_controller(profile); source="cached-after-read-failure"
     else:
-        controller = _cached_machine_controller(profile)
-        source = "cached-disconnected"
+        controller=_cached_machine_controller(profile); source="cached-disconnected"
     return {
-        "build": "UC-DUNE-MOTION-V9-STABLE-DRIVER-NEUTRAL-20260908-1",
-        "profile": profile,
-        "controller": controller,
-        "controller_source": source,
-        "read_only": playing,
-        "read_only_reason": "Pattern running — hardware settings are displayed from cache and controller I/O is blocked." if playing else None,
-        "supported_drivers": _DRIVER_MICROSTEPS,
-        "driver_guidance": _DRIVER_GUIDANCE,
-        "auto_scale_controller_steps": False,
-        "geometry": {
-            "theta_calibrated": bool(state.theta_calibrated and state.theta_revolution_units),
-            "theta_revolution_units": state.theta_revolution_units,
-            "rho_calibrated": bool(state.rho_calibrated and state.rho_travel_units),
-            "rho_travel_units": state.rho_travel_units,
-        },
+        "build":"UC-DUNE-MOTION-V9-20260827-1","profile":profile,"controller":controller,
+        "controller_source":source,"read_only":playing,
+        "read_only_reason":"Pattern running — hardware settings are displayed from cache and controller I/O is blocked." if playing else None,
+        "supported_drivers":_DRIVER_MICROSTEPS,
+        "geometry":{"theta_calibrated":bool(state.theta_calibrated and state.theta_revolution_units),
+                    "theta_revolution_units":state.theta_revolution_units,
+                    "rho_calibrated":bool(state.rho_calibrated and state.rho_travel_units),
+                    "rho_travel_units":state.rho_travel_units},
     }
+
 
 @app.post("/api/machine-hardware-profile/apply", tags=["machine-setup"])
 async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
-    """Save driver/microstep metadata only; never alter controller step scaling."""
+    """Adopt a new STEP/DIR driver/microstep setup without changing ORYN math.
+
+    FluidNC steps/unit are scaled by new_microsteps / old_microsteps, keeping
+    one controller unit approximately the same physical movement after a DIP or
+    driver change.  Max rate and acceleration remain in the same controller
+    units and are therefore preserved.  Exact 360° and radius calibration stays
+    the final physical authority.
+    """
+    if not state.conn or not state.conn.is_connected():
+        raise HTTPException(status_code=400, detail="Connect to the FluidNC controller first")
     if _motion_stream_active():
-        raise HTTPException(status_code=409, detail="Pattern running — stop playback before changing hardware metadata")
+        raise HTTPException(status_code=409, detail="Pattern running — stop playback before changing hardware profile")
+
     for axis_name, axis_req in (("x", request.x), ("y", request.y)):
         drv = axis_req.driver.upper()
         if drv not in _DRIVER_MICROSTEPS:
@@ -5032,38 +4951,60 @@ async def apply_machine_hardware_profile(request: HardwareProfileApplyRequest):
         if int(axis_req.microsteps) not in _DRIVER_MICROSTEPS[drv]:
             raise HTTPException(status_code=400, detail=f"{drv} does not support selected {axis_req.microsteps} microstep profile")
 
-    controller = None
-    if state.conn and state.conn.is_connected():
-        try:
-            controller = await _read_controller_core_settings_for_profile()
-        except Exception as exc:
-            logger.warning("Could not read controller while saving driver metadata: %s", exc)
-
+    from modules.connection import fluidnc_config
+    current_cfg = await asyncio.to_thread(fluidnc_config.read_all_settings)
     old = _load_hardware_profile()
+
+    changes = {}
     new_profile = {
-        "schema": 5,
-        "initialized": True,
+        "schema": 2, "initialized": True,
         "kinematics": old.get("kinematics", "dune_weaver_coupled"),
-        "controller_family": (getattr(state, "firmware_type", None) or "grbl-compatible"),
-        "x": {"driver": request.x.driver.upper(), "microsteps": int(request.x.microsteps)},
-        "y": {"driver": request.y.driver.upper(), "microsteps": int(request.y.microsteps)},
-        "last_applied": datetime.now().isoformat(),
-        "notes": "Metadata only; ORYN did not change $100/$101 or FluidNC steps_per_mm.",
+        "x": {}, "y": {}, "last_applied": datetime.now().isoformat()
     }
-    if controller:
-        for axis_name in ("x", "y"):
-            cfg = ((controller.get("axes") or {}).get(axis_name) or {})
-            new_profile[axis_name]["steps_per_mm"] = cfg.get("steps_per_mm")
-            new_profile[axis_name]["max_rate_mm_per_min"] = cfg.get("max_rate_mm_per_min")
-            new_profile[axis_name]["acceleration_mm_per_sec2"] = cfg.get("acceleration_mm_per_sec2")
-    saved = _save_hardware_profile(new_profile)
+    for axis_name, axis_req in (("x", request.x), ("y", request.y)):
+        axis_cfg = (current_cfg.get("axes") or {}).get(axis_name) or {}
+        current_steps = axis_cfg.get("steps_per_mm")
+        if current_steps is None:
+            raise HTTPException(status_code=500, detail=f"Could not read {axis_name.upper()} steps_per_mm from FluidNC")
+        old_axis = (old.get(axis_name) or {})
+        old_micro = int(old_axis.get("microsteps", 16) or 16)
+        new_micro = int(axis_req.microsteps)
+        # Preserve controller-unit physical scale when the physical microstep
+        # changes: steps/unit follows microstep ratio.
+        new_steps = float(current_steps) * (float(new_micro) / float(old_micro))
+        if abs(new_steps - float(current_steps)) > 1e-9:
+            path = f"axes/{axis_name}/steps_per_mm"
+            ok = await asyncio.to_thread(fluidnc_config.write_setting, path, f"{new_steps:.6f}")
+            if not ok:
+                raise HTTPException(status_code=500, detail=f"FluidNC rejected {axis_name.upper()} steps_per_mm update")
+            changes[path] = {"from": float(current_steps), "to": new_steps}
+        new_profile[axis_name] = {
+            "driver": axis_req.driver.upper(),
+            "microsteps": new_micro,
+            "steps_per_mm": new_steps,
+            "max_rate_mm_per_min": axis_cfg.get("max_rate_mm_per_min"),
+            "acceleration_mm_per_sec2": axis_cfg.get("acceleration_mm_per_sec2"),
+        }
+
+    if changes:
+        saved = await asyncio.to_thread(fluidnc_config.save_config)
+        if not saved:
+            logger.warning("FluidNC settings changed but save_config did not confirm persistence")
+    else:
+        saved = True
+
+    _save_hardware_profile(new_profile)
+    state.x_steps_per_mm = float(new_profile["x"]["steps_per_mm"])
+    state.y_steps_per_mm = float(new_profile["y"]["steps_per_mm"])
+    state.x_max_rate_mm_per_min = float(new_profile["x"].get("max_rate_mm_per_min") or 0.0)
+    state.y_max_rate_mm_per_min = float(new_profile["y"].get("max_rate_mm_per_min") or 0.0)
+    state.save()
     return {
         "success": True,
         "saved": saved,
         "profile": new_profile,
-        "changes": {},
-        "controller_steps_changed": False,
-        "message": "Driver profile saved. ORYN did not alter controller steps/unit. Re-check Full Circle and Centre→Perimeter after physical hardware changes.",
+        "changes": changes,
+        "message": "Hardware profile applied. Exact 360° and perimeter calibration remain the physical geometry authority.",
     }
 
 class FluidNCCommandRequest(BaseModel):

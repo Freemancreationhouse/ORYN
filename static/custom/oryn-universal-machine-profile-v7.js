@@ -3,8 +3,8 @@
   const ID='oryn-universal-machine-profile-v7';
   const DRIVER_STEPS={
     A4988:[1,2,4,8,16], DRV8825:[1,2,4,8,16,32],
-    TMC2208:[2,4,8,16], TMC2209:[1,2,4,8,16,32,64,128,256],
-    TMC5160:[1,2,4,8,16,32,64,128,256], TB6600:[1,2,4,8,16,32], DM542:[1,2,4,8,16,32,64,128], CUSTOM_STEP_DIR:[1,2,4,8,16,32,64,128,256]
+    TMC2208:[1,2,4,8,16,32,64,128,256], TMC2209:[1,2,4,8,16,32,64,128,256],
+    TMC5160:[1,2,4,8,16,32,64,128,256], CUSTOM_STEP_DIR:[1,2,4,8,16,32,64,128,256]
   };
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function microLabel(n){return Number(n)===1?'Full step':'1/'+n;}
@@ -25,10 +25,10 @@
 `;document.head.appendChild(s);}
   async function json(url,opt){const r=await fetch(url,opt);let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));return d;}
   function axisHtml(axis, a, cfg, supported){
-    const drivers=Object.keys(supported||DRIVER_STEPS);const drv=(a&&a.driver)||'A4988';const ms=Number((a&&a.microsteps)||1);const allowed=(supported&&supported[drv])||DRIVER_STEPS[drv]||[1];
+    const drivers=Object.keys(supported||DRIVER_STEPS);const drv=(a&&a.driver)||'A4988';const ms=Number((a&&a.microsteps)||16);const allowed=(supported&&supported[drv])||DRIVER_STEPS[drv]||[1];
     return `<div class="umaxis" data-axis="${axis}"><b>${axis.toUpperCase()} — ${axis==='x'?'Theta / Rotation':'Rho / Radial'}</b><div class="umsub">STEP/DIR hardware profile</div>
     <label>Driver</label><select class="umdriver">${drivers.map(d=>`<option value="${esc(d)}" ${d===drv?'selected':''}>${d==='CUSTOM_STEP_DIR'?'Custom STEP/DIR':d}</option>`).join('')}</select>
-    <label>Physical microstep (DIP/jumper/driver setting)</label><select class="ummicro">${allowed.map(n=>`<option value="${n}" ${Number(n)===ms?'selected':''}>${microLabel(n)}</option>`).join('')}</select>
+    <label>Physical microstep (DIP/jumper/UART setting)</label><select class="ummicro">${allowed.map(n=>`<option value="${n}" ${Number(n)===ms?'selected':''}>${microLabel(n)}</option>`).join('')}</select>
     <div class="umstats"><div class="umstat">Steps/unit<b>${esc(cfg?.steps_per_mm??'—')}</b></div><div class="umstat">Max rate<b>${esc(cfg?.max_rate_mm_per_min??'—')}</b></div><div class="umstat">Acceleration<b>${esc(cfg?.acceleration_mm_per_sec2??'—')}</b></div></div></div>`;
   }
   function wire(root,data){
@@ -48,9 +48,9 @@
       try{
         const axes={};root.querySelectorAll('.umaxis').forEach(box=>{axes[box.dataset.axis]={driver:box.querySelector('.umdriver').value,microsteps:Number(box.querySelector('.ummicro').value)}});
         const res=await json('/api/machine-hardware-profile/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({x:axes.x,y:axes.y})});
-        alert('Driver profile saved. Controller steps/unit were NOT changed.\n\n'+(res.message||''));
+        alert('Machine profile saved. FluidNC steps/unit adjusted for the selected physical microstep.\n\n'+(res.message||''));
         await load(root,false);
-      }catch(e){alert('Machine profile error: '+e.message);}finally{btn.disabled=false;btn.textContent='Save Driver / Microstep';}
+      }catch(e){alert('Machine profile error: '+e.message);}finally{btn.disabled=false;btn.textContent='Apply Driver / Microstep';}
     };
   }
   async function load(root,notify){
@@ -59,15 +59,15 @@
       if(statusEl) statusEl.textContent='Reading controller…';
       const d=await json('/api/machine-hardware-profile');
       const p=d.profile||{},c=d.controller?.axes||{},g=d.geometry||{};
-      root.innerHTML=`<div class="umh"><div><div class="umtitle">Universal Machine Profile</div><div class="umsub">Driver metadata → controller settings stay untouched → physical 360° / radius calibration</div></div><div><button class="secondary umread">${d.read_only?'Refresh cached view':'Read'}</button> <button class="umapply" ${d.read_only?'disabled':''}>Save Driver / Microstep</button></div></div>
+      root.innerHTML=`<div class="umh"><div><div class="umtitle">Universal Machine Profile</div><div class="umsub">Driver + microstepping → FluidNC scale → physical 360° / radius calibration</div></div><div><button class="secondary umread">${d.read_only?'Refresh cached view':'Read'}</button> <button class="umapply" ${d.read_only?'disabled':''}>Apply Driver / Microstep</button></div></div>
       <div class="umstatus umsub">Build ${esc(d.build||'V7')} · ${p.initialized?'<span class="umok">PROFILE SAVED</span>':'<span class="umwarn">FIRST SETUP</span>'} · ${d.read_only?'<span class="umwarn">READ-ONLY WHILE PATTERN RUNS</span>':esc(d.controller_source||'controller')}</div>
       ${d.read_only?'<div class="umnote"><b>Pattern running:</b> this page is safely displaying cached machine values. ORYN will not send <code>$CD</code>, <code>$$</code>, flush serial input, jog calibration, or alter hardware until playback stops.</div>':''}
       <div class="umgrid">${axisHtml('x',p.x,c.x,d.supported_drivers)}${axisHtml('y',p.y,c.y,d.supported_drivers)}</div>
       <div class="umgeo">360°: <b>${g.theta_calibrated?Number(g.theta_revolution_units).toFixed(4)+' units':'Not calibrated'}</b> &nbsp; · &nbsp; Centre→Perimeter: <b>${g.rho_calibrated?Number(g.rho_travel_units).toFixed(4)+' units':'Not calibrated'}</b></div>
-      ${(p.x?.driver==='TMC2208'||p.y?.driver==='TMC2208')?'<div class="umnote"><b>TMC2208 standalone:</b> no MS jumpers means <b>1/8 external STEP resolution</b>. Internal 256 interpolation is not the controller microstep value.</div>':''}
-      <div class="umnote"><b>Safe driver-neutral mode:</b> ORYN saves the driver selection but does <b>not</b> automatically rewrite $100/$101 or FluidNC steps/unit. Re-check Full Circle and Centre→Perimeter after a physical hardware change.</div>`;
+      ${!p.initialized?'<div class="umnote"><b>Current A4988 situation:</b> ORYN legacy reference is A4988 at 1/16 microstep. If all three A4988 jumpers are now removed, choose <b>Full step</b> on X and Y and press Apply. With your previous FluidNC values this scales X 410 → 25.625 and Y 287 → 17.9375, keeping the same physical controller-unit scale instead of making both motors run about 16× farther.</div>':''}
+      <div class="umnote"><b>Important:</b> ORYN cannot electrically detect standalone DIP/jumper positions. After any physical driver/microstep change, select the matching setting here once. You do not edit code or terminal values. Max rate and acceleration remain FluidNC safety limits; 360° and Perimeter calibration remain the final geometry.</div>`;
       wire(root,d);if(notify) console.info('ORYN machine profile loaded',d);
-    }catch(e){root.innerHTML=`<div class="umtitle">Universal Machine Profile</div><div class="umnote">Connect a GRBL/FluidNC controller, then press Read. ${esc(e.message)}</div><button class="secondary umread" style="margin-top:8px">Read</button>`;root.querySelector('.umread').onclick=()=>load(root,true);}
+    }catch(e){root.innerHTML=`<div class="umtitle">Universal Machine Profile</div><div class="umnote">Connect the FluidNC controller, then press Read. ${esc(e.message)}</div><button class="secondary umread" style="margin-top:8px">Read</button>`;root.querySelector('.umread').onclick=()=>load(root,true);}
   }
   function mount(){
     if(!/setup/i.test(location.pathname) && ![...document.querySelectorAll('h1,h2')].some(x=>/Hardware Setup/i.test(x.textContent||''))) return;
